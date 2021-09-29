@@ -1,10 +1,10 @@
 # Code recording NU
-#####by Jacky Guo @ [Northwestern University](https://www.northwestern.edu/)
+###by Jacky Guo @ [Northwestern University](https://www.northwestern.edu/)
 
 <font size=1><jacky_guojj@outlook.com></font>
 
 <div  align="center">  
-<img src=https://www.insightintodiversity.com/wp-content/uploads/2021/05/northwestern-696x392.png width = "75%">
+<img src=https://www.insightintodiversity.com/wp-content/uploads/2021/05/northwestern-696x392.png width = "100%">
 </div>
 
 >All course assignments and project codes will be uploaded here as proof of study at Northwestern University
