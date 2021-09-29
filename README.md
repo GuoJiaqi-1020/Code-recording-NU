@@ -9,7 +9,7 @@
 
 >**All course assignments and project codes will be uploaded here as proof of study at Northwestern University**
 
-<font size=4>2021 Fall Semester</font>
+<font size=6>**2021 Fall Semester**</font>
 <font size=2>
 
 **1. COMP\_SCI 351-1: Intro to Computer Graphics**
@@ -19,7 +19,8 @@
 **3. ELEC_ENG 475-0-1: Machine Learning: FAA**
 </font>
 
-<font size=4>2021 Winter Semester</font>
+<font size=5>**2021 Winter Semester**</font>
+
 <font size=2>
 Wait for update**
 </font>
