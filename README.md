@@ -9,7 +9,7 @@
 
 >**All course assignments and project codes will be uploaded here as proof of study at Northwestern University**
 
-<font size=8>**2021 Fall Semester**</font>
+## 2021 Fall Semester
 
 <font size=2>
 
@@ -21,7 +21,7 @@
 
 </font>
 
-<font size=8>**2021 Winter Semester**</font>
+## 2021 Winter Semester
 
 <font size=2>
 Wait for update**
