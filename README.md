@@ -1,5 +1,6 @@
-# Code Recording NU
-<font size=2>by Jacky Guo @ [Northwestern University](https://www.northwestern.edu/)</font>
+# Code recording NU
+###by Jacky Guo @ [Northwestern University](https://www.northwestern.edu/)
+
 <font size=1><jacky_guojj@outlook.com></font>
 
 <div  align="center">  
@@ -9,9 +10,9 @@
 >All course assignments and project codes will be uploaded here as proof of study at Northwestern University
 
 ####2021 Fall Semester
-<font size=2>**1. COMP\_SCI 351-1: Intro to Computer Graphics**\\
-**2. ELEC_ENG  359-0: Dig Sig Process**\\
-**3. ELEC_ENG 475-0-1: Machine Learning: FAA**\\
+<font size=2>**1. COMP\_SCI 351-1: Intro to Computer Graphics**
+**2. ELEC_ENG  359-0: Dig Sig Process**
+**3. ELEC_ENG 475-0-1: Machine Learning: FAA**
 
 </font>
 
