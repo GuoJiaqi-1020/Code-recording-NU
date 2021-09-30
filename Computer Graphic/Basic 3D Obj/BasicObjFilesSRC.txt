@@ -1,0 +1,20 @@
+Basic OBJ files:
+Explained Here: https://en.wikipedia.org/wiki/Wavefront_.obj_file
+and here: https://www.marxentlabs.com/obj-files/
+
+Two were copied from https://groups.csail.mit.edu/graphics/classes/6.837/F03/models/:
+Teapot2.obj
+TeddyBear2.obj
+
+Others were copied from: https://people.sc.fsu.edu/~jburkardt/data/obj/obj.html
+where you’ll find MANY more.
+
+Try them in this online file viewer: https://3dviewer.net/
+
+
+What OTHER good collections of 3D OBJ files can you find?  
+What OTHER good OBJ file viewers can you find?
+Can you find ones that run natively on your computer?
+HINT:  in Windows 10, just double-click the OBJ file...
+HINT:  you can find something similar for Apple machines...
+
