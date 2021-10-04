@@ -1,0 +1,6 @@
+Jack Tumblin made these programs by modifying 
+some of the code supplied with our textbook:
+"WebGL Programming Guide" Matsuda,Lea
+
+I kept the textbook's directory organization,
+and numbered them to follow the book.
