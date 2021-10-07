@@ -13,11 +13,11 @@
 
 <font size=2>
 
-**1. COMP\_SCI 351-1: Intro to Computer Graphics**
+**1. [COMP\_SCI 351-1: Intro to Computer Graphics](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Computer%20Graphic)**
 
-**2. ELEC_ENG  359-0: Dig Sig Process**
+**2. [ELEC_ENG  359-0: Dig Sig Process](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Digital%20Signal%20Processing)**
 
-**3. ELEC_ENG 475-0-1: Machine Learning: FAA**
+**3. [ELEC_ENG 475-0-1: Machine Learning: FAA](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Machine%20Learning%20FFA)**
 
 </font>
 
