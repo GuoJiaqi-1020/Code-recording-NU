@@ -32,6 +32,11 @@ def Single_function_plot(G_n, observe_region):
 
 
 def plot_3D_functions_contour(g_n):
+    """
+    Draw the 3D function surface
+    :param g_n: The functions that you want to plot, it should have three dimensions, X,Y,Z.
+    :return: None
+    """
     plt.figure()
     Z = []
     ax3 = plt.axes(projection='3d')
@@ -50,8 +55,8 @@ def plot_3D_functions_contour(g_n):
 
 if __name__ == '__main__':
     # Question a
-    # G_a = lambda w: w*math.log(w)+(1-w)*math.log(1-w)
-    # Single_function_plot(G_a, [0.1, 0.99])
+    G_a = lambda w: w*math.log(w)+(1-w)*math.log(1-w)
+    Single_function_plot(G_a, [0.1, 0.99])
 
     # Question b
     # G_b = lambda w: math.log(1 + pow(math.e, w))
