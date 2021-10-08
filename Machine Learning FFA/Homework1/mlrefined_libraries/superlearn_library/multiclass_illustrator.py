@@ -162,7 +162,7 @@ class Visualizer:
         
         # plot contour
         C = len(np.unique(self.y))
-        ax2.contour(w1_vals,w2_vals,g_vals,colors = 'k',levels = range(0,C+1),linewidths = 2.75,zorder = 4)
+        ax2.contour(w1_vals,w2_vals,g_vals+0.5,colors = 'k',levels = range(0,C+1),linewidths = 2.75,zorder = 4)
         ax2.contourf(w1_vals,w2_vals,g_vals+1,colors = self.colors[:],alpha = 0.2,levels = range(0,C+1))
         ax.contourf(w1_vals,w2_vals,g_vals+1,colors = self.colors[:],alpha = 0.2,levels = range(0,C+1))
         

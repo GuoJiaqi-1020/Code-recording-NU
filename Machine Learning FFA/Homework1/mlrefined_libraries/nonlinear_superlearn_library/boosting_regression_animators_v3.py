@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib import gridspec
 from matplotlib.ticker import FormatStrFormatter
 import matplotlib.animation as animation
+from mlrefined_libraries.JSAnimation_slider_only import IPython_display_slider_only
 from mpl_toolkits.mplot3d import Axes3D
 from IPython.display import clear_output
 
@@ -36,7 +37,7 @@ class Visualizer:
             
 
     ########## show boosting results on 1d regression, with fit to residual ##########
-    def animate_boosting(self,savepath,runs,frames,**kwargs):
+    def animate_boosting(self,runs,frames,**kwargs):
         # select subset of runs
         inds = np.arange(0,len(runs),int(len(runs)/float(frames)))
             
@@ -85,13 +86,8 @@ class Visualizer:
 
         anim = animation.FuncAnimation(fig, animate ,frames=num_frames, interval=num_frames, blit=True)
         
-        # produce animation and save
-        fps = 50
-        if 'fps' in kwargs:
-            fps = kwargs['fps']
-        anim.save(savepath, fps=fps, extra_args=['-vcodec', 'libx264'])
-        clear_output()   
-        
+        return(anim)
+
     # 1d regression demo
     def draw_fit(self,ax,ax1,runs,ind):
         # set plotting limits

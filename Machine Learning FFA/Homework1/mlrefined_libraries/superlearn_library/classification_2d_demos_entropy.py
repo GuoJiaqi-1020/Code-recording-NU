@@ -1,3 +1,6 @@
+# import custom JS animator
+from mlrefined_libraries.JSAnimation_slider_only import IPython_display_slider_only
+
 # import standard plotting and animation
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -42,7 +45,7 @@ class Visualizer:
     
     ######## 2d functions ########
     # animate gradient descent or newton's method
-    def animate_run(self,savepath,w_hist,**kwargs):     
+    def animate_run(self,w_hist,**kwargs):     
         self.w_hist = w_hist
         
         ##### setup figure to plot #####
@@ -126,13 +129,8 @@ class Visualizer:
 
         anim = animation.FuncAnimation(fig, animate ,frames=num_frames, interval=num_frames, blit=True)
         
-        # produce animation and save
-        fps = 50
-        if 'fps' in kwargs:
-            fps = kwargs['fps']
-        anim.save(savepath, fps=fps, extra_args=['-vcodec', 'libx264'])
-        clear_output()
-            
+        return(anim)
+    
     def sigmoid(self,t):
         return 1/(1 + np.exp(-t))
     

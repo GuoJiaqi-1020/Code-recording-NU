@@ -4,6 +4,9 @@ from IPython.display import display, HTML
 import copy
 import math
  
+# import custom JS animator
+from mlrefined_libraries.JSAnimation_slider_only import IPython_display_slider_only
+ 
 # import standard plotting and animation
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -13,7 +16,7 @@ from matplotlib import gridspec
 import copy
  
 # func,
-def perfect_visualize(savepath,C,**kwargs):
+def perfect_visualize(C,**kwargs):
     vec1 = C[:,0]
     vec2 = C[:,1]
     
@@ -114,15 +117,10 @@ def perfect_visualize(savepath,C,**kwargs):
      
     anim = animation.FuncAnimation(fig, animate,frames=num_frames, interval=num_frames, blit=True)
          
-    # produce animation and save
-    fps = 50
-    if 'fps' in kwargs:
-        fps = kwargs['fps']
-    anim.save(savepath, fps=fps, extra_args=['-vcodec', 'libx264'])
-    clear_output()
+    return(anim)    
 
  # func,
-def perfect_visualize_transform(savepath,C,**kwargs):
+def perfect_visualize_transform(C,**kwargs):
     # extract 
     vec1 = C[:,0]
     vec2 = C[:,1]
@@ -274,12 +272,7 @@ def perfect_visualize_transform(savepath,C,**kwargs):
      
     anim = animation.FuncAnimation(fig, animate,frames=num_frames, interval=num_frames, blit=True)
          
-    # produce animation and save
-    fps = 50
-    if 'fps' in kwargs:
-        fps = kwargs['fps']
-    anim.save(savepath, fps=fps, extra_args=['-vcodec', 'libx264'])
-    clear_output()
+    return(anim)    
 
 # func,
 def sphereing_visualizer(pts,pcs,eigs):
@@ -482,7 +475,7 @@ def perfect_visualize_transform_static(C,**kwargs):
         
       
 # func,
-def imperfect_visualize(savepath,vec1,**kwargs):
+def imperfect_visualize(vec1,**kwargs):
     # size up vecs
     vec1 = np.asarray(vec1)
     vec1copy = copy.deepcopy(vec1)
@@ -573,13 +566,8 @@ def imperfect_visualize(savepath,vec1,**kwargs):
      
     anim = animation.FuncAnimation(fig, animate,frames=num_frames, interval=num_frames, blit=True)
          
-    # produce animation and save
-    fps = 50
-    if 'fps' in kwargs:
-        fps = kwargs['fps']
-    anim.save(savepath, fps=fps, extra_args=['-vcodec', 'libx264'])
-    clear_output()
-
+    return(anim)    
+ 
 # draw a vector
 def vector_draw(vec,ax,**kwargs):
     color = 'k'

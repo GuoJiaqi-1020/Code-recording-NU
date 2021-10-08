@@ -4,7 +4,14 @@ import matplotlib.pyplot as plt
 from autograd import numpy as np
     
 # plot multi-output regression dataset where output dimension C = 2
-def plot_data(x,y,view1,view2):    
+def plot_data(x,y,**kwargs):
+    view1 = [25,45]
+    view2 = [25,45]
+    if 'view1' in kwargs:
+        view1 = kwargs['view1']
+    if 'view2' in kwargs:
+        view2 = kwargs['view2']
+    
     # construct panels
     fig = plt.figure(figsize = (9,4))
     ax0 = plt.subplot(121,projection='3d')
@@ -21,7 +28,14 @@ def plot_data(x,y,view1,view2):
     plt.show()
    
 # plot multi-output regression dataset with fits provided by 'predictor'
-def plot_regressions(x,y,predictor,view1,view2):        
+def plot_regressions(x,y,predictor,**kwargs):
+    view1 = [25,45]
+    view2 = [25,45]
+    if 'view1' in kwargs:
+        view1 = kwargs['view1']
+    if 'view2' in kwargs:
+        view2 = kwargs['view2']
+        
     # import all the requisite libs
     # construct panels
     fig = plt.figure(figsize = (9,4))
@@ -38,7 +52,7 @@ def plot_regressions(x,y,predictor,view1,view2):
     ax1.scatter(x[0,:],x[1,:],y[1,:],c='k',edgecolor = 'w',linewidth = 1,s=60)
 
     # construct input for each model fit
-    a_ = np.linspace(0,1,15)
+    a_ = np.linspace(0,1,10)
     a,b = np.meshgrid(a_,a_)
     a = a.flatten()[np.newaxis,:]
     b = b.flatten()[np.newaxis,:]
@@ -55,7 +69,7 @@ def plot_regressions(x,y,predictor,view1,view2):
     m1.shape = (a_.size,a_.size)
     m2.shape = (a_.size,a_.size)
 
-    ax0.plot_surface(a,b,m1,alpha = 0.25,color = 'lime',cstride = 2,rstride = 2,linewidth = 1,edgecolor ='k')
-    ax1.plot_surface(a,b,m2,alpha = 0.25,color = 'lime',cstride = 2,rstride = 2,linewidth = 1,edgecolor ='k')
+    ax0.plot_surface(a,b,m1,alpha = 0.1,color = 'lime',cstride = 2,rstride = 2,linewidth = 1,edgecolor ='k')
+    ax1.plot_surface(a,b,m2,alpha = 0.1,color = 'lime',cstride = 2,rstride = 2,linewidth = 1,edgecolor ='k')
 
     plt.show()

@@ -52,7 +52,7 @@ if __name__ == '__main__':
     K = 50
     weight_history_1, cost_history_1 = random_search(g, a, K, w, P)
     plotter = static_plotter.Visualizer()
-    plotter.two_input_contour_plot(g, weight_history_1, num_contours=35, xmin=-2.5, xmax=2.5, ymin=-2.25, ymax=2)
+    # plotter.two_input_contour_plot(g, weight_history_1, num_contours=35, xmin=-2.5, xmax=2.5, ymin=-2.25, ymax=2)
 
     # random search program
     weight_history_2, cost_history_2 = random_search(g, 'diminishing', K, w, P)

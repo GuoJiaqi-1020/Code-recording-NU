@@ -11,6 +11,7 @@ from . import cost_functions
 from . import normalizers
 
 ### animation libs ###
+from mlrefined_libraries.JSAnimation_slider_only import IPython_display_slider_only
 import matplotlib.animation as animation
 from IPython.display import clear_output
 import matplotlib.patches as mpatches
@@ -123,7 +124,7 @@ class Setup:
         self.best_weights = self.weights[ind]
         
     # compare multiple l1 regularized runs
-    def animate_lams(self,savepath,**kwargs):                   
+    def animate_lams(self,**kwargs):                   
         # initialize figure
         fig = plt.figure(figsize = (9,3))
         artist = fig
@@ -154,7 +155,7 @@ class Setup:
             ax.axhline(c='k',zorder = 2)
             
             # make bar plot
-            ax.bar(np.arange(1,len(w_best)+1).flatten(),np.array(w_best).flatten(), color='k', alpha=0.5)
+            ax.bar(np.arange(1,len(w_best)+1), w_best.flatten(), color='k', alpha=0.5)
                 
             # dress panel
             title1 = r'$\lambda = ' + str(np.round(lam,2)) + '$' 
@@ -174,12 +175,7 @@ class Setup:
 
         anim = animation.FuncAnimation(fig, animate ,frames=num_frames, interval=num_frames, blit=True)
         
-        # produce animation and save
-        fps = 50
-        if 'fps' in kwargs:
-            fps = kwargs['fps']
-        anim.save(savepath, fps=fps, extra_args=['-vcodec', 'libx264'])
-        clear_output()
+        return(anim)
 
     # static graphics
     def plot_regress(self,id1,labels):

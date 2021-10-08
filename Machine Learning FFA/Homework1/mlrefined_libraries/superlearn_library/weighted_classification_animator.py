@@ -3,6 +3,7 @@ import autograd.numpy as np                 # Thinly-wrapped numpy
 
 # import custom JS animator
 import sys
+from mlrefined_libraries.JSAnimation_slider_only import IPython_display_slider_only
 from IPython.display import clear_output
 
 # import standard plotting and animation
@@ -20,11 +21,23 @@ class Visualizer:
 
         x = data[0:2,:]
         y = data[-1,:][np.newaxis,:]
+
+        # remove points from one class for illustrative purposes
+        ind0 = np.argwhere(y == -1)
+        ind0 = [v[1] for v in ind0]
+        ind1 = np.argwhere(y == +1)
+        ind1 = [v[1] for v in ind1]
+
+        ind0 = ind0[-5:]
+        inds = ind0 + ind1
         
-        special_class = +1
+        x = x[:,inds]
+        y = y[:,inds]
+        
+        special_class = -1
         return x,y,special_class
 
-    def animate_weightings(self,savepath,csvname,**kwargs):
+    def animate_weightings(self,csvname,**kwargs):
         self.x,self.y,special_class = self.load_data(csvname)
         self.color_opts = np.array([[1,0,0.4], [ 0, 0.4, 1],[0, 1, 0.5],[1, 0.7, 0.5],[0.7, 0.6, 0.5]])
 
@@ -70,10 +83,6 @@ class Visualizer:
             
             # run optimizer
             w_hist,g_hist = bits.newtons_method(g,w,self.x,self.y,beta,max_its)
-
-            # determine minimum classification weightings
-
-
             w_best = w_hist[-1]
             self.model = lambda data: bits.model(data,w_best)
             
@@ -86,26 +95,19 @@ class Visualizer:
         
         anim = animation.FuncAnimation(fig, animate ,frames=num_slides, interval=num_slides, blit=True)
         
-        # produce animation and save
-        fps = 50
-        if 'fps' in kwargs:
-            fps = kwargs['fps']
-        anim.save(savepath, fps=fps, extra_args=['-vcodec', 'libx264'])
-        clear_output()
-                
+        return(anim)
+        
     def plot_data(self,ax,special_class,special_size):
         # scatter points in both panels
         class_nums = np.unique(self.y)
         C = len(class_nums)
-        z = 3
         for c in range(C):
             ind = np.argwhere(self.y == class_nums[c])
             ind = [v[1] for v in ind]
             s = 80
             if class_nums[c] == special_class:
                 s = special_size
-                z = 0
-            ax.scatter(self.x[0,ind],self.x[1,ind],s = s,color = self.color_opts[c],edgecolor = 'k',linewidth = 1.5,zorder = z)
+            ax.scatter(self.x[0,ind],self.x[1,ind],s = s,color = self.color_opts[c],edgecolor = 'k',linewidth = 1.5)
             
         # control viewing limits
         minx = min(self.x[0,:])

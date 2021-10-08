@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib import gridspec
 from matplotlib.ticker import FormatStrFormatter
 import matplotlib.animation as animation
+from mlrefined_libraries.JSAnimation_slider_only import IPython_display_slider_only
 from mpl_toolkits.mplot3d import Axes3D
 from IPython.display import clear_output
 
@@ -35,7 +36,7 @@ class Visualizer:
             self.y = self.y[ind,:]
             
     ########## show boosting crossval on 1d regression, with fit to residual ##########
-    def animate_trainval_regularization(self,savepath,runs,frames,num_units,**kwargs):
+    def animate_trainval_regularization(self,runs,frames,num_units,**kwargs):
         # get training / validation errors
         train_errors = []
         valid_errors = []
@@ -141,13 +142,7 @@ class Visualizer:
 
         anim = animation.FuncAnimation(fig, animate ,frames=num_frames, interval=num_frames, blit=True)
         
-        # produce animation and save
-        fps = 50
-        if 'fps' in kwargs:
-            fps = kwargs['fps']
-        anim.save(savepath, fps=fps, extra_args=['-vcodec', 'libx264'])
-        clear_output()   
-
+        return(anim)
 
     def plot_train_valid_errors(self,ax,k,train_errors,valid_errors,labels,plot):      
         if plot == True:
@@ -195,7 +190,7 @@ class Visualizer:
         ####### plot total model on original dataset #######
         # scatter original data - training and validation sets
         train_inds = run.train_inds
-        valid_inds = run.valid_inds
+        valid_inds = run.val_inds
         ax.scatter(self.x[:,train_inds],self.y[:,train_inds],color = self.colors[1],s = 40,edgecolor = 'k',linewidth = 0.9)
         ax.scatter(self.x[:,valid_inds],self.y[:,valid_inds],color = self.colors[0],s = 40,edgecolor = 'k',linewidth = 0.9)
         

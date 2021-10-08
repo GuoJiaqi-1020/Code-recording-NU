@@ -5,6 +5,9 @@ import copy
 import math
 import time
 
+# import custom JS animator
+from mlrefined_libraries.JSAnimation_slider_only import IPython_display_slider_only
+ 
 # import standard plotting and animation
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -75,7 +78,7 @@ def my_kmeans(data,centroids,max_its):
     return all_centroids,all_assignments
 
 ####### K-means demo #######
-def run_animated_demo(savepath,data,centroids,max_its,**kwargs):
+def run_animated_demo(data,centroids,max_its):
     # run K-means algo
     all_centroids,all_assignments = my_kmeans(data,centroids,max_its-1)
 
@@ -201,13 +204,7 @@ def run_animated_demo(savepath,data,centroids,max_its,**kwargs):
         return artist,
 
     anim = animation.FuncAnimation(fig, animate ,frames=num_frames, interval=num_frames, blit=True)
-
-    # produce animation and save
-    fps = 50
-    if 'fps' in kwargs:
-        fps = kwargs['fps']
-    anim.save(savepath, fps=fps, extra_args=['-vcodec', 'libx264'])
-    clear_output()
+    return(anim)
 
 # computer for the average error
 def compuate_ave(data,centroids,assignments):

@@ -5,6 +5,8 @@ from mpl_toolkits.mplot3d import Axes3D
 from IPython.display import clear_output
 from matplotlib import gridspec
 import autograd.numpy as np
+from mlrefined_libraries.JSAnimation_slider_only import IPython_display_slider_only
+from . import old_optimimzers as optimimzers
 import copy
 import time
 import bisect
@@ -185,7 +187,7 @@ class Visualizer:
     
     
     ###### fit and compare ######
-    def brows_fits(self,savepath,**kwargs):
+    def brows_fits(self,**kwargs):
         self.colors = [[1,0,0.4], [ 0, 0.4, 1],[0, 1, 0.5],[1, 0.7, 0.5],[0.7, 0.6, 0.5],'mediumaquamarine']
 
         # parse input args
@@ -200,6 +202,7 @@ class Visualizer:
         num_elements = [v+1 for v in num_elements]
         self.num_elements = max(num_elements)
         self.dial_settings()
+        opt = optimimzers.MyOptimizers()
 
         ### run through each feature type, boost, collect associated weight histories
         # make full poly and tanh feature matrices
@@ -273,13 +276,12 @@ class Visualizer:
         
         # animate
         print ('beginning animation rendering...')
-        num_frames = len(num_elements)
         def animate(k):
             # clear the panel
             ax1.cla()
             ax2.cla()
             ax3.cla()
-
+            
             # print rendering update
             if np.mod(k+1,5) == 0:
                 print ('rendering animation frame ' + str(k+1) + ' of ' + str(len(num_elements)))
@@ -291,7 +293,7 @@ class Visualizer:
             # loop over panels, produce plots
             self.D = num_elements[k] 
             cs = 0
-            for ax in [ax1,ax2,ax3]:
+            for ax in {ax1,ax2,ax3}:
                 # fit to data
                 F = 0
                 predict = 0
@@ -335,17 +337,11 @@ class Visualizer:
                 ax.set_ylabel(r'$y$', rotation = 0,fontsize = 14,labelpad = 10)
                 ax.set_xticks(np.arange(round(xmin), round(xmax)+1, 1.0))
                 ax.set_yticks(np.arange(round(ymin), round(ymax)+1, 1.0))
-
-            return artist,
             
-        anim = animation.FuncAnimation(fig, animate ,frames=num_frames, interval=num_frames, blit=True)
+        anim = animation.FuncAnimation(fig, animate,frames = len(num_elements), interval = len(num_elements), blit=True)
         
-        # produce animation and save
-        fps = 50
-        if 'fps' in kwargs:
-            fps = kwargs['fps']
-        anim.save(savepath, fps=fps, extra_args=['-vcodec', 'libx264'])
-        clear_output()
+        return(anim)
+
  
 
  

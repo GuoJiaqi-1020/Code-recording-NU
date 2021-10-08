@@ -1,10 +1,10 @@
 # import custom JS animator
 import sys
+from mlrefined_libraries.JSAnimation_slider_only import IPython_display_slider_only
 
 # import standard plotting and animation
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from IPython.display import clear_output
 
 # basic data manipulation libraries
 import numpy as np
@@ -74,7 +74,7 @@ class Visualizer:
         return w
         
     # animate regression weighting
-    def animate_weighting(self,savepath,csvname,**kwargs):
+    def animate_weighting(self,csvname,**kwargs):
         data = np.loadtxt(csvname,delimiter = ',')
         x = data[:,0]
         y = data[:,1]
@@ -124,9 +124,4 @@ class Visualizer:
         
         anim = animation.FuncAnimation(fig, animate ,frames=num_slides, interval=num_slides, blit=True)
         
-        # produce animation and save
-        fps = 50
-        if 'fps' in kwargs:
-            fps = kwargs['fps']
-        anim.save(savepath, fps=fps, extra_args=['-vcodec', 'libx264'])
-        clear_output()
+        return(anim)

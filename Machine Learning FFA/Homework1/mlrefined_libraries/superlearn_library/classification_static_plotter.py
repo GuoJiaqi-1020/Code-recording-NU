@@ -1,7 +1,21 @@
+# import custom JS animator
+from mlrefined_libraries.JSAnimation_slider_only import IPython_display_slider_only
+
 # import standard plotting and animation
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 from matplotlib import gridspec
-from autograd import numpy as np
+from IPython.display import clear_output
+from mpl_toolkits.mplot3d import proj3d
+from matplotlib.patches import FancyArrowPatch
+from matplotlib.text import Annotation
+from mpl_toolkits.mplot3d.proj3d import proj_transform
+
+# import autograd functionality
+from autograd import grad as compute_grad   # The only autograd function you may ever need
+import autograd.numpy as np
+import math
+import time
 
 class Visualizer:
     '''
@@ -10,7 +24,7 @@ class Visualizer:
     ''' 
 
     # compare cost histories from multiple runs
-    def plot_histories(self,cost_histories,count_histories,start,**kwargs):        
+    def plot_cost_histories(self,cost_histories,count_histories,start,**kwargs):        
         # plotting colors
         colors = ['k','magenta','springgreen','blueviolet','chocolate']
         

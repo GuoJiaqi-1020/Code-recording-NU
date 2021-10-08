@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib import gridspec
 from matplotlib.ticker import FormatStrFormatter
 import matplotlib.animation as animation
+from mlrefined_libraries.JSAnimation_slider_only import IPython_display_slider_only
 from mpl_toolkits.mplot3d import Axes3D
 from IPython.display import clear_output
 from matplotlib.ticker import MaxNLocator, FuncFormatter
@@ -36,7 +37,7 @@ class Visualizer:
         return 0.25*cost 
     
     #### animate multiple runs on single regression ####
-    def animate_crossval_classifications(self,savepath,runs,**kwargs):
+    def animate_crossval_classifications(self,runs,**kwargs):
         weight_history = []
         train_errors = []
         valid_errors = []
@@ -103,12 +104,8 @@ class Visualizer:
 
         anim = animation.FuncAnimation(fig, animate ,frames=num_frames, interval=num_frames, blit=True)
         
-        # produce animation and save
-        fps = 50
-        if 'fps' in kwargs:
-            fps = kwargs['fps']
-        anim.save(savepath, fps=fps, extra_args=['-vcodec', 'libx264'])
-        clear_output()        
+        return(anim)
+    
     
 
     def plot_train_valid_errors(self,ax,k,train_errors,valid_errors):

@@ -118,13 +118,9 @@ def show_encode_decode(x,cost_history,weight_history,**kwargs):
         # decode onto basis
         p = decoder(v,w_best)
 
-    # plot encoded data 
-    if v.shape[0] == 1:
-        z = np.zeros((1,np.size(v)))
-        ax2.scatter(v,z,c = 'k',s = 60,linewidth = 0.75,edgecolor = 'w')
-    elif v.shape[0] == 2:
-        ax2.scatter(v[0],v[1].flatten(),c = 'k',s = 60,linewidth = 0.75,edgecolor = 'w')
-
+    # plot decoded data 
+    z = np.zeros((1,np.size(v)))
+    ax2.scatter(v,z,c = 'k',s = 60,linewidth = 0.75,edgecolor = 'w')
     
     # plot decoded data 
     ax3.scatter(p[0,:],p[1,:],c = 'k',s = 60,linewidth = 0.75,edgecolor = 'r')
@@ -159,8 +155,8 @@ def show_encode_decode(x,cost_history,weight_history,**kwargs):
     ax3.set_title('decoded data',fontsize = 18)
     
     # plot learned manifold
-    a = np.linspace(xmin1,xmax1,400)
-    b = np.linspace(xmin2,xmax2,400)
+    a = np.linspace(xmin1,xmax1,200)
+    b = np.linspace(xmin2,xmax2,200)
     s,t = np.meshgrid(a,b)
     s.shape = (1,len(a)**2)
     t.shape = (1,len(b)**2)
@@ -182,7 +178,7 @@ def show_encode_decode(x,cost_history,weight_history,**kwargs):
         p = decoder(v,w_best)
     
     ax3.scatter(p[0,:],p[1,:],c = 'k',s = 1.5,edgecolor = 'r',linewidth = 1,zorder = 0)
-    ax3.axis('off')
+        
     # set whitespace
     #fgs.update(wspace=0.01, hspace=0.5) # set the spacing between axes. 
         
@@ -238,15 +234,12 @@ def show_encode_decode(x,cost_history,weight_history,**kwargs):
             ax.set_ylabel(r'$x_2$',fontsize = 16,rotation = 0,labelpad = 10)
 
         ax1.set_title('projection map',fontsize = 18)
-        #ax.axvline(linewidth=0.5, color='k',zorder = 0)
-        #ax.axhline(linewidth=0.5, color='k',zorder = 0)
 
         # set whitespace
         gs.update(wspace=0.01, hspace=0.5) # set the spacing between axes. 
-        #ax.set_xlim([xmin1,xmax1])
-        #ax.set_ylim([xmin2,xmax2])
-        ax.axis('off')
-    
+
+        
+        
 # draw a vector
 def vector_draw(vec,ax,**kwargs):
     color = 'k'

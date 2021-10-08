@@ -9,21 +9,15 @@ from matplotlib.patches import FancyArrowPatch
 from matplotlib.text import Annotation
 from mpl_toolkits.mplot3d.proj3d import proj_transform
 
-from matplotlib import gridspec
-from matplotlib.ticker import FormatStrFormatter
-import matplotlib.animation as animation
-from mpl_toolkits.mplot3d import Axes3D
-from IPython.display import clear_output
-import matplotlib.ticker as ticker
-
 # import custom JS animator
-# from mlrefined_libraries.JSAnimation_slider_only import IPython_display_slider_only
+from mlrefined_libraries.JSAnimation_slider_only import IPython_display_slider_only
+import matplotlib.animation as animation
 import time
 import math
 
 ### animate 2d slope visualization ###
 # animator for recursive function
-def animate_visualize2d(func,num_frames,savepath,**kwargs):
+def animate_visualize2d(func,num_frames):
     # define input space
     w = np.linspace(-10,10,500)
     guides = 'on'
@@ -114,22 +108,15 @@ def animate_visualize2d(func,num_frames,savepath,**kwargs):
             title = r'$g(w) = {:.1f}'.format(func_orig(0)) + '{:.1f}'.format(slope)+'w$'
 
         ax2.set_title(title,fontsize = 18)
-        return artist,        
+        return artist,
         
-    anim = animation.FuncAnimation(fig, animate ,frames=num_frames, interval=num_frames, blit=True)
-
-    # produce animation and save
-    fps = 50
-    if 'fps' in kwargs:
-        fps = kwargs['fps']
-    anim.save(savepath, fps=fps, extra_args=['-vcodec', 'libx264'])
-    clear_output()        
+    anim = animation.FuncAnimation(fig, animate,frames=num_frames, interval=num_frames, blit=True)
         
     return(anim)
 
 ### animate 3d slope visualization ###
 # animator for recursive function
-def animate_visualize3d(func,savepath,**kwargs):
+def animate_visualize3d(func,**kwargs):
     
     num_frames = 10
     if 'num_frames' in kwargs:
@@ -332,15 +319,8 @@ def animate_visualize3d(func,savepath,**kwargs):
         ax.set_title(r'$g(w_1,w_2) = ' + part1 + part2  + part3 + '$' ,fontsize = 15)
 
         return artist,
-              
-    anim = animation.FuncAnimation(fig, animate ,frames=num_frames, interval=num_frames, blit=True)
-
-    # produce animation and save
-    fps = 50
-    if 'fps' in kwargs:
-        fps = kwargs['fps']
-    anim.save(savepath, fps=fps, extra_args=['-vcodec', 'libx264'])
-    clear_output()            
+        
+    anim = animation.FuncAnimation(fig, animate,frames=num_frames, interval=num_frames, blit=True)
         
     return(anim)
     

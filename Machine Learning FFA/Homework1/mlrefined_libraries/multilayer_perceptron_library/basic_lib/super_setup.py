@@ -5,6 +5,7 @@ from . import normalizers
 from . import multilayer_perceptron
 from . import multilayer_perceptron_batch_normalized
 from . import history_plotters
+from . import multirun_history_plotters
 
 class Setup:
     def __init__(self,x,y,**kwargs):
@@ -131,7 +132,10 @@ class Setup:
             self.alpha_choice = kwargs['alpha_choice']
         
         # set initialization
-        self.w_init = self.multilayer_initializer()
+        if 'w_init' in kwargs:
+            self.w_init = kwargs['w_init']
+        else:
+            self.w_init = self.multilayer_initializer()
         
         # batch size for gradient descent?
         self.train_num = np.size(self.y_train)
@@ -149,8 +153,25 @@ class Setup:
         weight_history = []
         cost_history = []
         
-        # run gradient descent
-        weight_history,train_cost_history,val_cost_history = super_optimizers.gradient_descent(self.cost,self.w_init,self.x_train,self.y_train,self.x_val,self.y_val,self.alpha_choice,self.max_its,self.batch_size,verbose=verbose)
+        # run optimizer
+        algo = 'gradient_descent'
+        if 'algo' in kwargs:
+            algo = kwargs['algo']
+        if algo == 'gradient_descent':
+            version = 'standard'
+            if 'version' in kwargs:
+                version = kwargs['version']
+            weight_history,train_cost_history,val_cost_history = super_optimizers.gradient_descent(self.cost,self.w_init,self.x_train,self.y_train,self.x_val,self.y_val,self.alpha_choice,self.max_its,self.batch_size,version,verbose=verbose)
+            
+        if algo == 'RMSprop':
+            weight_history,train_cost_history,val_cost_history = super_optimizers.RMSprop(self.cost,self.w_init,self.x_train,self.y_train,self.x_val,self.y_val,self.alpha_choice,self.max_its,self.batch_size,verbose=verbose)     
+            
+        if algo == 'curvature_normalized':
+            epsilon = 10**(-4)
+            if 'epsilon' in kwargs:
+                epsilon = kwargs['epsilon']
+            weight_history,train_cost_history,val_cost_history = super_optimizers.curvature_normalized(self.cost,self.w_init,self.x_train,self.y_train,self.x_val,self.y_val,self.alpha_choice,self.max_its,epsilon)
+
                                                                                          
         # store all new histories
         self.weight_histories.append(weight_history)
@@ -175,6 +196,10 @@ class Setup:
             self.val_cost_histories = [[] for s in range(len(self.val_cost_histories))]
             self.val_accuracy_histories = [[] for s in range(len(self.val_accuracy_histories))]
         history_plotters.Setup(self.train_cost_histories,self.train_accuracy_histories,self.val_cost_histories,self.val_accuracy_histories,start)
+        
+    def show_multirun_histories(self,start,labels,**kwargs):
+        multirun_history_plotters.Setup(self.train_cost_histories,self.train_accuracy_histories,start,labels) 
+        
         
     #### for batch normalized multilayer architecture only - set normalizers to desired settings ####
     def fix_normalizers(self,w):

@@ -1,3 +1,6 @@
+# import custom JS animator
+from mlrefined_libraries.JSAnimation_slider_only import IPython_display_slider_only
+
 # import standard plotting and animation
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -80,7 +83,7 @@ class Visualizer:
 
     #### main animator #####
     # compare multiple l1 regularized runs
-    def compare_lams(self,savepath,g,lams,**kwargs):       
+    def compare_lams(self,g,lams,**kwargs):       
         if 'counter' in kwargs:
             counter = kwargs['counter']
             
@@ -164,13 +167,8 @@ class Visualizer:
 
         anim = animation.FuncAnimation(fig, animate ,frames=num_frames, interval=num_frames, blit=True)
         
-        # produce animation and save
-        fps = 50
-        if 'fps' in kwargs:
-            fps = kwargs['fps']
-        anim.save(savepath, fps=fps, extra_args=['-vcodec', 'libx264'])
-        clear_output()
-
+        return(anim)
+    
     
     # static graphics
     def plot_regress(self,id1,labels):

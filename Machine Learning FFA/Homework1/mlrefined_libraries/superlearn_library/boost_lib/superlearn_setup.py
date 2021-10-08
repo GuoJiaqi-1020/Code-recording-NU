@@ -200,9 +200,10 @@ class Setup:
         ax.axhline(c='k',zorder = 2)
             
         ### make bar plot ###
+        self.weight_vals = [v[0] for v in self.weight_vals]
         ax = plt.subplot(gs[1]); ax.axis('off')
         ax = plt.subplot(gs[2]); 
-        ax.bar(np.arange(1,len(self.weight_vals)), [w[0] for w in self.weight_vals[1:]], color='k', alpha=0.5)
+        ax.bar(np.arange(1,len(self.weight_vals)), self.weight_vals[1:], color='k', alpha=0.5)
         ax.axhline(c='k',zorder = 2)
         
         # change tick labels to used

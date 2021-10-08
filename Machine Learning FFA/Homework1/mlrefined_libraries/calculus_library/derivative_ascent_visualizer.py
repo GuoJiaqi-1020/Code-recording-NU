@@ -1,3 +1,6 @@
+# import custom JS animator
+from mlrefined_libraries.JSAnimation_slider_only import IPython_display_slider_only
+
 # import standard plotting and animation
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -360,7 +363,7 @@ def visualize3d(func,**kwargs):
 
  
 # animate ascent direction given by derivative for single input function over a range of values
-def animate_visualize2d(savepath,**kwargs):
+def animate_visualize2d(**kwargs):
     g = kwargs['g']                       # input function
     grad = compute_grad(g)         # gradient of input function
     colors = [[0,1,0.25],[0,0.75,1]]    # set of custom colors used for plotting
@@ -490,12 +493,7 @@ def animate_visualize2d(savepath,**kwargs):
          
     anim = animation.FuncAnimation(fig, animate,frames=len(w_vals), interval=len(w_vals), blit=True)
          
-    # produce animation and save
-    fps = 50
-    if 'fps' in kwargs:
-        fps = kwargs['fps']
-    anim.save(savepath, fps=fps, extra_args=['-vcodec', 'libx264'])
-    clear_output()           
+    return(anim)
 
 #### custom 3d arrow and annotator functions ###    
 # nice arrow maker from https://stackoverflow.com/questions/11140163/python-matplotlib-plotting-a-3d-cube-a-sphere-and-a-vector

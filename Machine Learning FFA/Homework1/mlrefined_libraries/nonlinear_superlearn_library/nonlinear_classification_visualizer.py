@@ -472,13 +472,13 @@ class Visualizer:
             # set plotting limits
             xmax = copy.deepcopy(max(self.x))
             xmin = copy.deepcopy(min(self.x))
-            xgap = (xmax - xmin)*0.05
+            xgap = (xmax - xmin)*0.2
             xmin -= xgap
             xmax += xgap
             
             ymax = max(self.y)
             ymin = min(self.y)
-            ygap = (ymax - ymin)*0.05
+            ygap = (ymax - ymin)*0.5
             ymin -= ygap
             ymax += ygap    
 
@@ -502,14 +502,14 @@ class Visualizer:
             ax2.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
             ax2.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
             
-            
         if np.shape(self.x)[1] == 2:
-            
-            # initialize figure
-            fig = plt.figure(figsize = (9,3))
-            gs = gridspec.GridSpec(1, 2,width_ratios = [1,1]) 
-            ax2 = plt.subplot(gs[1],aspect = 'equal');
-            ax1 = plt.subplot(gs[0],projection = '3d');
+            # construct figure
+            fig, axs = plt.subplots(1, 2, figsize=(9,4))
+
+            # create subplot with 2 panels
+            gs = gridspec.GridSpec(1, 2) 
+            ax2 = plt.subplot(gs[1],aspect = 'equal'); 
+            ax1 = plt.subplot(gs[0],projection='3d'); 
 
             # scatter points
             self.scatter_pts(ax1,self.x)
@@ -531,17 +531,14 @@ class Visualizer:
             else:
                 for c in range(C):
                     ind0 = np.argwhere(self.y == c)
-                    ax2.scatter(self.x[ind0,0],self.x[ind0,1],s = 50, color = self.colors[c], edgecolor = 'k',linewidth=2)
+                    ax2.scatter(self.x[ind0,0],self.x[ind0,1],s = 55, color = self.colors[c], edgecolor = 'k')
                     
-                  
         
             self.move_axis_left(ax1)
             ax1.set_xlabel(r'$x_1$', fontsize = 12,labelpad = 5)
             ax1.set_ylabel(r'$x_2$', rotation = 0,fontsize = 12,labelpad = 5)
             ax1.set_zlabel(r'$y$', rotation = 0,fontsize = 12,labelpad = -3)
-            view = [20,45]
-            ax1.view_init(view[0],view[1])
-            
+        
     # scatter points
     def scatter_pts(self,ax,x):
         if np.shape(x)[1] == 1:
@@ -810,7 +807,7 @@ class Visualizer:
         ##### plot top panels ####
         for d in range(C):
             # create panel
-            ax = plt.subplot(gs[d],aspect = 'equal'); ax.axis('off')
+            ax = plt.subplot(gs[d],aspect = 'equal');
                        
             for c in range(C):
                 # plot points
@@ -858,7 +855,6 @@ class Visualizer:
         gapz = (maxz - minz)*0.1
         minz -= gapz
         maxz += gapz
-        ax2.axis('off')
         
         '''
         ax1.set_zlim([minz,maxz])
@@ -884,5 +880,5 @@ class Visualizer:
         ax1.set_zlabel(r'$y$', rotation = 0,fontsize = 16,labelpad = 5)
         '''
         
-       # ax2.set_xlabel(r'$x_1$', fontsize = 18,labelpad = 10)
-       # ax2.set_ylabel(r'$x_2$', rotation = 0,fontsize = 18,labelpad = 15)
+        ax2.set_xlabel(r'$x_1$', fontsize = 18,labelpad = 10)
+        ax2.set_ylabel(r'$x_2$', rotation = 0,fontsize = 18,labelpad = 15)

@@ -1,3 +1,6 @@
+# import custom JS animator
+from mlrefined_libraries.JSAnimation_slider_only import IPython_display_slider_only
+
 # import standard plotting and animation
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -24,7 +27,7 @@ class visualizer:
         self.colors = [[0,1,0.25],[0,0.75,1]]    # set of custom colors used for plotting
 
     # compute first order approximation
-    def draw_it(self,savepath,**kwargs):
+    def draw_it(self,**kwargs):
         num_frames = 300                          # number of slides to create - the input range [-3,3] is divided evenly by this number
         if 'num_frames' in kwargs:
             num_frames = kwargs['num_frames']
@@ -132,9 +135,4 @@ class visualizer:
         
         anim = animation.FuncAnimation(fig, animate,frames=len(w_vals), interval=len(w_vals), blit=True)
         
-        # produce animation and save
-        fps = 50
-        if 'fps' in kwargs:
-            fps = kwargs['fps']
-        anim.save(savepath, fps=fps, extra_args=['-vcodec', 'libx264'])
-        clear_output()
+        return(anim)

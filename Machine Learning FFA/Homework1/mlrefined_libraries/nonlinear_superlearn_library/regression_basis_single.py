@@ -5,10 +5,12 @@ from mpl_toolkits.mplot3d import Axes3D
 from IPython.display import clear_output
 from matplotlib import gridspec
 import autograd.numpy as np
+from mlrefined_libraries.JSAnimation_slider_only import IPython_display_slider_only
 import copy
 import time
 import bisect
 from matplotlib.ticker import MaxNLocator
+from . import old_optimimzers as optimimzers
 
 class Visualizer:
     '''
@@ -18,9 +20,8 @@ class Visualizer:
     # load target function
     def load_data(self,csvname):
         data = np.loadtxt(csvname,delimiter = ',').T
-        self.x = data[:,0]
-        self.y = data[:,1]
-        self.y.shape = (len(self.y),1)
+        self.x = data[:,0][:,np.newaxis]
+        self.y = data[:,1][:,np.newaxis]
         
     # initialize after animation call
     def dial_settings(self):        
@@ -184,7 +185,7 @@ class Visualizer:
         return w_history
     
     ###### fit and compare ######
-    def browse_single_fit(self,savepath,**kwargs):
+    def browse_single_fit(self,**kwargs):
         # parse input args
         num_elements = [1,10,len(self.y)]
         if 'num_units' in kwargs:
@@ -207,6 +208,7 @@ class Visualizer:
         # set dials for tanh network and trees
         num_elements = [v+1 for v in num_elements]
         self.num_elements = max(num_elements)
+        opt = optimimzers.MyOptimizers()
 
         # choose basis type
         self.F = []
@@ -416,18 +418,14 @@ class Visualizer:
                 ax.set_ylabel(r'$y$', rotation = 0,fontsize = 14,labelpad = 10)
                 ax.set_xticks(np.arange(round(xmin), round(xmax)+1, 1.0))
                 ax.set_yticks(np.arange(round(ymin), round(ymax)+1, 1.0))
-            return artist,
                 
         anim = animation.FuncAnimation(fig, animate,frames = len(num_elements)+1, interval = len(num_elements)+1, blit=True)
         
-        # produce animation and save
-        fps = 50
-        if 'fps' in kwargs:
-            fps = kwargs['fps']
-        anim.save(savepath, fps=fps, extra_args=['-vcodec', 'libx264'])
-        clear_output()    
+        return(anim)
+    
     
     ########### cross-validation functionality ###########
+    
     # function for splitting dataset into k folds
     def split_data(self,folds):
         # split data into k equal (as possible) sized sets
@@ -441,7 +439,7 @@ class Visualizer:
         return c
     
     ###### fit and compare ######
-    def brows_single_cross_val(self,savepath,**kwargs):
+    def brows_single_cross_val(self,**kwargs):
         # parse input args
         num_elements = [1,10,len(self.y)]
         if 'num_elements' in kwargs:
@@ -467,6 +465,7 @@ class Visualizer:
         # set dials for tanh network and trees
         num_elements = [v+1 for v in num_elements]
         self.num_elements = max(num_elements)
+        opt = optimimzers.MyOptimizers()
 
         # choose basis type
         self.F = []
@@ -597,13 +596,13 @@ class Visualizer:
         ax3 = plt.subplot(gs[3]); ax2.axis('off');
 
         # set viewing range for all 3 panels
-        xmax = max(copy.deepcopy(self.x))
-        xmin = min(copy.deepcopy(self.x))
+        xmax = np.max(copy.deepcopy(self.x))
+        xmin = np.min(copy.deepcopy(self.x))
         xgap = (xmax - xmin)*0.05
         xmax += xgap
         xmin -= xgap
-        ymax = max(copy.deepcopy(self.y))[0]
-        ymin = min(copy.deepcopy(self.y))[0]
+        ymax = np.max(copy.deepcopy(self.y))
+        ymin = np.min(copy.deepcopy(self.y))
         ygap = (ymax - ymin)*0.4
         ymax += ygap
         ymin -= ygap
@@ -637,24 +636,25 @@ class Visualizer:
             ax.set_ylim([ymin,ymax])
             ax.set_xlabel(r'$x$', fontsize = 14,labelpad = 0)
             ax.set_ylabel(r'$y$', rotation = 0,fontsize = 14,labelpad = 5)
-            ax.set_xticks(np.arange(round(xmin), round(xmax)+1, 1.0))
-            ax.set_yticks(np.arange(round(ymin), round(ymax)+1, 1.0))
+
+            ax.set_xticks(np.arange(np.round(xmin), np.round(xmax)+1, 1.0))
+            ax.set_yticks(np.arange(np.round(ymin),np.round(ymax)+1, 1.0))
             ax.set_title('original data',fontsize = 15)
 
             ax1.set_xlim([xmin,xmax])
             ax1.set_ylim([ymin,ymax])
             ax1.set_xlabel(r'$x$', fontsize = 14,labelpad = 0)
             ax1.set_ylabel(r'$y$', rotation = 0,fontsize = 14,labelpad = 5)
-            ax1.set_xticks(np.arange(round(xmin), round(xmax)+1, 1.0))
-            ax1.set_yticks(np.arange(round(ymin), round(ymax)+1, 1.0))
+            ax1.set_xticks(np.arange(np.round(xmin), np.round(xmax)+1, 1.0))
+            ax1.set_yticks(np.arange(np.round(ymin), np.round(ymax)+1, 1.0))
             ax1.set_title('training data',fontsize = 15)
 
             ax2.set_xlim([xmin,xmax])
             ax2.set_ylim([ymin,ymax])
             ax2.set_xlabel(r'$x$', fontsize = 14,labelpad = 0)
             ax2.set_ylabel(r'$y$', rotation = 0,fontsize = 14,labelpad = 5)
-            ax2.set_xticks(np.arange(round(xmin), round(xmax)+1, 1.0))
-            ax2.set_yticks(np.arange(round(ymin), round(ymax)+1, 1.0))
+            ax2.set_xticks(np.arange(np.round(xmin), np.round(xmax)+1, 1.0))
+            ax2.set_yticks(np.arange(np.round(ymin), np.round(ymax)+1, 1.0))
             ax2.set_title('validation data',fontsize = 15)
                           
              # cleanup
@@ -715,10 +715,6 @@ class Visualizer:
             return artist,
             
         anim = animation.FuncAnimation(fig, animate,frames = len(num_elements)+1, interval = len(num_elements)+1, blit=True)
-        
-        # produce animation and save
-        fps = 50
-        if 'fps' in kwargs:
-            fps = kwargs['fps']
-        anim.save(savepath, fps=fps, extra_args=['-vcodec', 'libx264'])
-        clear_output()    
+
+        return(anim)
+

@@ -1,3 +1,6 @@
+# import custom JS animator
+from mlrefined_libraries.JSAnimation_slider_only import IPython_display_slider_only
+
 # import standard plotting and animation
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -38,7 +41,7 @@ class Visualizer:
             self.cost_func = self.fusion_rule
                             
     #####   #####
-    def animate_transition(self,savepath,num_frames,**kwargs):
+    def animate_transition(self,num_frames,**kwargs):
         # initialize figure
         fig = plt.figure(figsize = (10,4.5))
         artist = fig
@@ -73,13 +76,8 @@ class Visualizer:
 
         anim = animation.FuncAnimation(fig, animate ,frames=num_frames, interval=num_frames, blit=True)
         
-        # produce animation and save
-        fps = 50
-        if 'fps' in kwargs:
-            fps = kwargs['fps']
-        anim.save(savepath, fps=fps, extra_args=['-vcodec', 'libx264'])
-        clear_output()
-            
+        return(anim)
+    
     ########################################################################################
     ###### predict and cost functions #####
     ###### basic model ######

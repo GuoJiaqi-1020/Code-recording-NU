@@ -33,11 +33,11 @@ class Setup:
             
             if np.size(val_history) > 0:
                 # plot test cost function history
-                ax.plot(np.arange(start,len(val_history),1),val_history[start:],linewidth = 3*(0.8)**(c),color = self.colors[1],label = 'test cost') 
+                ax.plot(np.arange(start,len(val_history),1),val_history[start:],linewidth = 3*(0.8)**(c),color = self.colors[1],label = 'validation cost') 
 
         # clean up panel / axes labels
         xlabel = 'step $k$'
-        ylabel = r'$g\left(\mathbf{w}^k\right)$'
+        ylabel =  r'$g\left({\mathbf{\Theta}}^k\right)$'
         ax.set_xlabel(xlabel,fontsize = 14)
         ax.set_ylabel(ylabel,fontsize = 14,rotation = 0,labelpad = 25)
         title = 'train vs validation cost histories'
@@ -79,7 +79,7 @@ class Setup:
             
         # clean up panel
         xlabel = 'step $k$'
-        ylabel = r'$g\left(\mathbf{w}^k\right)$'
+        ylabel = r'$g\left({\mathbf{\Theta}}^k\right)$'
         ax1.set_xlabel(xlabel,fontsize = 14)
         ax1.set_ylabel(ylabel,fontsize = 14,rotation = 0,labelpad = 25)
         title = 'cost history'

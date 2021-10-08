@@ -1,3 +1,6 @@
+# import custom JS animator
+from mlrefined_libraries.JSAnimation_slider_only import IPython_display_slider_only
+
 # import standard plotting and animation
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -14,6 +17,7 @@ import autograd.numpy as np
 import math
 import time
 import copy
+import warnings
 
 
 class Visualizer:
@@ -278,8 +282,8 @@ class Visualizer:
 
         # create figure with single plot for contour
         gs = gridspec.GridSpec(1, 2)
-        ax1 = plt.subplot(gs[0], aspect='equal')
-        ax2 = plt.subplot(gs[1], aspect='equal')
+        ax1 = plt.subplot(gs[0], aspect='equal');
+        ax2 = plt.subplot(gs[1], aspect='equal');
 
         # remove whitespace from figure
         fig.subplots_adjust(left=0, right=1, bottom=0, top=1)  # remove whitespace
@@ -308,7 +312,7 @@ class Visualizer:
 
         # create subplot with 1 panel
         gs = gridspec.GridSpec(1, 1)
-        ax = plt.subplot(gs[0]);
+        ax = plt.subplot(gs[0])
 
         # any labels to add?        
         labels = [' ', ' ', ' ']
@@ -639,8 +643,8 @@ class Visualizer:
         for j in range(len(w_hist)):
             w_val = w_hist[j]
 
-            # plot each weight set as a point
-            ax.scatter(w_val[0], w_val[1], s=80, c=colorspec[j], edgecolor=self.edgecolor,
+            # plot each weight set as a point 
+            ax.scatter(w_val[0], w_val[1], s=80, c=np.reshape(colorspec[j], (-1, 3)), edgecolor=self.edgecolor,
                        linewidth=2 * math.sqrt((1 / (float(j) + 1))), zorder=3)
 
             # plot connector between points for visualization purposes
@@ -659,10 +663,10 @@ class Visualizer:
                         pt1 = pt1.flatten()
                         pt2 = pt2.flatten()
 
-                    # draw color connectors for visualization
+                    # draw color connectors for visualization   
                     w_old = pt1
                     w_new = pt2
-                    ax.plot([w_old[0], w_new[0]], [w_old[1], w_new[1]], color=colorspec[j], linewidth=2, alpha=1,
+                    ax.plot([w_old[0], w_new[0]], [w_old[1], w_new[1]], color='k', linewidth=2, alpha=1,
                             zorder=2)  # plot approx
                     ax.plot([w_old[0], w_new[0]], [w_old[1], w_new[1]], color='k', linewidth=3, alpha=1,
                             zorder=1)  # plot approx
@@ -723,14 +727,14 @@ class Visualizer:
         ax.set_ylabel('$w_1$', fontsize=14, rotation=0)
         ax.set_title('$g(w_0,w_1)$', fontsize=14)
 
-    ### plot points and connectors in input space in 3d plot        
+    ### plot points and connectors in input space in 3d plot      colorspec[k]   
     def show_inputspace_path(self, w_hist, ax):
         # make colors for plot
         colorspec = self.make_colorspec(w_hist)
 
         for k in range(len(w_hist)):
             pt1 = w_hist[k]
-            ax.scatter(pt1[0], pt1[1], 0, s=60, c=colorspec[k], edgecolor='k',
+            ax.scatter(pt1[0], pt1[1], 0, s=60, c=np.reshape(colorspec[k], (-1, 3)), edgecolor='k',
                        linewidth=0.5 * math.sqrt((1 / (float(k) + 1))), zorder=3)
             if k < len(w_hist) - 1:
                 pt2 = w_hist[k + 1]

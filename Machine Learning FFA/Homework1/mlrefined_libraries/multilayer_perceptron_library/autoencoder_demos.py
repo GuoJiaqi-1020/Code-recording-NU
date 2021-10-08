@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 from matplotlib import gridspec
 from matplotlib.ticker import FormatStrFormatter
 import matplotlib.animation as animation
+from mlrefined_libraries.JSAnimation_slider_only import IPython_display_slider_only
 from mpl_toolkits.mplot3d import Axes3D
 from IPython.display import clear_output
 from matplotlib.ticker import MaxNLocator, FuncFormatter
@@ -184,7 +185,7 @@ def vector_draw(vec,ax,**kwargs):
     
     
 #### animate multiple runs on single regression ####
-def animate_crossvals(savepath,x,runs,**kwargs):
+def animate_crossvals(x,runs,**kwargs):
     weight_history = []
     train_errors = []
     valid_errors = []
@@ -312,14 +313,8 @@ def animate_crossvals(savepath,x,runs,**kwargs):
 
     anim = animation.FuncAnimation(fig, animate ,frames=num_frames, interval=num_frames, blit=True)
         
-    # produce animation and save
-    fps = 50
-    if 'fps' in kwargs:
-        fps = kwargs['fps']
-    anim.save(savepath, fps=fps, extra_args=['-vcodec', 'libx264'])
+    return(anim)   
     
-    clear_output()    
-
 def plot_train_valid_errors(ax,k,train_errors,valid_errors):
     train_errors = train_errors[0]
     valid_errors = valid_errors[0]

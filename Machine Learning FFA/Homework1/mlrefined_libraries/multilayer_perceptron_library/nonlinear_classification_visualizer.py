@@ -702,7 +702,7 @@ class Visualizer:
 
         # multiclass view
         else:   
-            ax1.plot_surface(w1_vals,w2_vals,g_vals,alpha = 0.1,color = 'w',rstride=45, cstride=45,linewidth=0.25,edgecolor = 'k')
+            ax1.plot_surface(w1_vals,w2_vals,g_vals+0.5,alpha = 0.1,color = 'w',rstride=45, cstride=45,linewidth=0.25,edgecolor = 'k')
 
             for c in range(C):
                 # plot separator curve in left plot z plane
@@ -713,7 +713,7 @@ class Visualizer:
              
                 
             # plot separator in right plot
-            ax2.contour(w1_vals,w2_vals,g_vals,colors = 'k',levels = range(0,C+1),linewidths = 3,zorder = 1)
+            ax2.contour(w1_vals,w2_vals,g_vals+0.5,colors = 'k',levels = range(0,C+1),linewidths = 3,zorder = 1)
             
             # adjust height of regressor to plot filled contours
             ax2.contourf(w1_vals,w2_vals,g_vals+0.5,colors = self.colors[:],alpha = 0.2,levels = range(0,C+1))

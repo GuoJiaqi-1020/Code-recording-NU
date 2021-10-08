@@ -1,4 +1,5 @@
 import autograd.numpy as np
+
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import gridspec
@@ -7,6 +8,7 @@ import copy
 import time
 import math
 from IPython.display import clear_output
+
 
 # custom plot for spiffing up plot of a two mathematical functions
 def double_plot(func, num_samples, **kwargs):
@@ -165,48 +167,48 @@ def random_eval_experiment():
     Experiment illutrating how quickly global random evaluation will fail as a method of optimization.  Output is minimum value attained by random sampling over the cube [-1,1] x [-1,1] x... [-1,1] evaluating simple quadratic for 100, 1000, or 10000 times.  The dimension is increased from 1 to 100 and the minimum plotted for each dimension.
     '''
     # define symmetric quadratic N-dimensional
-    g = lambda w: np.dot(w.T,w)
+    g = lambda w: np.dot(w.T, w)
 
     # loop over dimensions, sample directions, evaluate
     mean_evals = []
     big_dim = 100
     num_pts = 10000
-    pt_stops = [100,1000,10000]
+    pt_stops = [100, 1000, 10000]
     for dim in range(big_dim):
         dim_eval = []
         min_val = 1000000.0
         m_eval = []
         for pt in range(num_pts):
             # generate random direction
-            direction = 2*np.random.rand(dim + 1,1) - 1
+            direction = 2 * np.random.rand(dim + 1, 1) - 1
 
             # generate evaluatin
             val = g(direction)[0][0]
 
             # reset min val
-            min_val = min(val,min_val)
+            min_val = min(val, min_val)
 
             # record mean and std of so many pts
-            if (pt+1) in pt_stops:
+            if (pt + 1) in pt_stops:
                 m_eval.append(min_val)
         mean_evals.append(m_eval)
 
     # convert to array for easy access
     mean_evals_global = np.asarray(mean_evals)
 
-    fig = plt.figure(figsize = (6,3))
+    fig = plt.figure(figsize=(6, 3))
 
     # create subplot with 3 panels, plot input function in center plot
     gs = gridspec.GridSpec(1, 1, width_ratios=[1])
-    fig.subplots_adjust(wspace=0.5,hspace=0.01)
+    fig.subplots_adjust(wspace=0.5, hspace=0.01)
 
     # plot input function
     ax = plt.subplot(gs[0])
     for k in range(len(pt_stops)):
-        mean_evals = mean_evals_global[:,k]
+        mean_evals = mean_evals_global[:, k]
 
         # scatter plot mean value
-        ax.plot(np.arange(big_dim)+1,mean_evals)
+        ax.plot(np.arange(big_dim) + 1, mean_evals)
 
     # clean up plot - label axes, etc.,
     ax.set_xlabel('dimension of input')
@@ -217,7 +219,7 @@ def random_eval_experiment():
     ax.legend(t, bbox_to_anchor=(1, 0.5))
 
     # draw horizontal axis
-    ax.plot(np.arange(big_dim) + 1,np.arange(big_dim)*0,linewidth=1,linestyle='--',color = 'k')
+    ax.plot(np.arange(big_dim) + 1, np.arange(big_dim) * 0, linewidth=1, linestyle='--', color='k')
     plt.show()
 
 

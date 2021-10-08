@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib import gridspec
 from matplotlib.ticker import FormatStrFormatter
 import matplotlib.animation as animation
+from mlrefined_libraries.JSAnimation_slider_only import IPython_display_slider_only
 from IPython.display import clear_output
 
 # import autograd functionality
@@ -15,8 +16,8 @@ import copy
 from inspect import signature
 
 # custom fit libraries
-from . import intro_boost_library
-from . import intro_general_library
+from . import library_v1
+from . import boost_lib2
 
 class Visualizer:
     '''
@@ -61,22 +62,19 @@ class Visualizer:
             print ('fitting ' + str(j + 1) + ' poly units')
 
             # import the v1 library
-            mylib = intro_general_library.superlearn_setup.Setup(self.x,self.y)
+            mylib = library_v1.superlearn_setup.Setup(self.x,self.y)
 
             # choose features
             mylib.choose_features(name = 'polys',degree = j+1)
 
             # choose normalizer
-            mylib.choose_normalizer(name = 'none')
-
-            # pick training set
-            mylib.make_train_valid_split(train_portion=1)
+            mylib.choose_normalizer(name = 'standard')
 
             # choose cost
             mylib.choose_cost(name = 'softmax')
 
             # fit an optimization
-            mylib.fit(max_its = 5,optimizer = 'newtons_method',epsilon = 10**(-5))
+            mylib.fit(max_its = 5,optimizer = 'newtons method',epsilon = 10**(-5))
 
             # add model to list
             runs.append(copy.deepcopy(mylib))
@@ -93,7 +91,7 @@ class Visualizer:
             print ('fitting ' + str(j + 1) + ' net units')
 
             # import the v1 library
-            mylib = intro_general_library.superlearn_setup.Setup(self.x,self.y)
+            mylib = library_v1.superlearn_setup.Setup(self.x,self.y)
 
             # choose features
             mylib.choose_features(name = 'multilayer_perceptron',layer_sizes = [2,j+1,1],activation = 'tanh')
@@ -101,14 +99,11 @@ class Visualizer:
             # choose normalizer
             mylib.choose_normalizer(name = 'standard')
 
-            # pick training set
-            mylib.make_train_valid_split(train_portion=1)
-
             # choose cost
             mylib.choose_cost(name = 'softmax')
 
             # fit an optimization
-            mylib.fit(max_its = 1000,alpha_choice = 10**(0),optimizer = 'gradient_descent')
+            mylib.fit(max_its = 10000,alpha_choice = 10**(0),optimizer = 'gradient descent')
 
             # add model to list
             runs.append(copy.deepcopy(mylib))
@@ -119,15 +114,12 @@ class Visualizer:
         return runs 
     
     ### run classification with tree features ###
-    def run_trees(self,num_rounds):
+    def run_trees(self,num_rounds,max_check):
         # import booster
-        mylib = intro_boost_library.stump_booster.Setup(self.x,self.y)
+        mylib = boost_lib2.superlearn_setup.Setup(self.x,self.y)
 
         # choose normalizer
         mylib.choose_normalizer(name = 'none')
-
-        # pick training set
-        mylib.make_train_valid_split(train_portion=1)
 
         # choose cost|
         mylib.choose_cost(name = 'softmax')
@@ -136,12 +128,12 @@ class Visualizer:
         mylib.choose_optimizer('newtons_method',max_its=1)
 
         # run boosting
-        mylib.boost(num_rounds)
+        mylib.boost(num_rounds,max_check=max_check)
 
         return mylib
   
     ########## show classification results ##########
-    def animate_comparisons(self,savepath,frames,**kwargs):
+    def animate_comparisons(self,frames,**kwargs):
         pt_size = 55
         if 'pt_size' in kwargs:
             pt_size = kwargs['pt_size']
@@ -250,13 +242,7 @@ class Visualizer:
 
         anim = animation.FuncAnimation(fig, animate ,frames=num_frames+1, interval=num_frames+1, blit=True)
         
-        # produce animation and save
-        fps = 50
-        if 'fps' in kwargs:
-            fps = kwargs['fps']
-        anim.save(savepath, fps=fps, extra_args=['-vcodec', 'libx264'])
-        clear_output()
-
+        return(anim)
 
     def draw_fit(self,ax,run,num_units):
         # viewing ranges
@@ -291,7 +277,7 @@ class Visualizer:
         model = run.model
         feat = run.feature_transforms
         normalizer = run.normalizer
-        cost_history = run.train_cost_histories[0]
+        cost_history = run.cost_histories[0]
         weight_history = run.weight_histories[0]
 
         # get best weights                

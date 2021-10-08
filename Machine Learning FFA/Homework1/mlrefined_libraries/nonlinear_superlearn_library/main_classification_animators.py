@@ -11,6 +11,7 @@ from autograd import hessian as compute_hess
 import math
 import time
 from matplotlib import gridspec
+from . import old_optimimzers as optimimzers
 import copy
 
 class Visualizer:
@@ -27,7 +28,7 @@ class Visualizer:
         self.colors = ['salmon','cornflowerblue','lime','bisque','mediumaquamarine','b','m','g']
   
     ########## animate results of nonlinear classification ##########
-    def animate_classifications(self,savepath,runs,frames,**kwargs):
+    def animate_classifications(self,runs,frames,**kwargs):
         # select subset of runs
         inds = np.arange(0,len(runs),int(len(runs)/float(frames)))
         
@@ -35,7 +36,7 @@ class Visualizer:
         cost_evals = []
         for run in runs:
             # get current run histories
-            cost_history = run.train_cost_histories[0]
+            cost_history = run.cost_histories[0]
             weight_history = run.weight_histories[0]
 
             # get best weights                
@@ -63,8 +64,8 @@ class Visualizer:
         minxc = 0.5
         maxxc = num_elements + 0.5
 
-        ymax = max(copy.deepcopy(cost_evals))
-        ymin = min(copy.deepcopy(cost_evals))
+        ymax = max(copy.deepcopy(cost_evals))[0]
+        ymin = min(copy.deepcopy(cost_evals))[0]
         ygap = (ymax - ymin)*0.1
         ymax += ygap
         ymin -= ygap
@@ -126,13 +127,8 @@ class Visualizer:
 
         anim = animation.FuncAnimation(fig, animate ,frames=num_frames+1, interval=num_frames+1, blit=True)
         
-        # produce animation and save
-        fps = 50
-        if 'fps' in kwargs:
-            fps = kwargs['fps']
-        anim.save(savepath, fps=fps, extra_args=['-vcodec', 'libx264'])
-        clear_output()   
-            
+        return(anim)
+    
     def draw_fit(self,ax,run,ind):
         # viewing ranges
         xmin1 = min(copy.deepcopy(self.x[0,:]))
@@ -166,7 +162,7 @@ class Visualizer:
         model = run.model
         feat = run.feature_transforms
         normalizer = run.normalizer
-        cost_history = run.train_cost_histories[0]
+        cost_history = run.cost_histories[0]
         weight_history = run.weight_histories[0]
 
         # get best weights                
