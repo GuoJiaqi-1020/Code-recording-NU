@@ -301,7 +301,7 @@ class Visualizer:
 
         # compare cost histories from multiple runs
 
-    def plot_cost_histories(self, histories, start, **kwargs):
+    def plot_cost_histories(self, histories, start, title, **kwargs):
         # plotting colors
         colors = ['k', 'magenta', 'aqua', 'blueviolet', 'chocolate']
 
@@ -362,7 +362,7 @@ class Visualizer:
             # leg = ax.legend(loc='upper left', bbox_to_anchor=(1.02, 1), borderaxespad=0)
 
         ax.set_xlim([start - 0.5, len(history) - 0.5])
-        plt.title(u" Cost History from 30-50 Iterations ", fontsize=16)
+        plt.title(title, fontsize=16)
         # fig.tight_layout()
         plt.show()
 
