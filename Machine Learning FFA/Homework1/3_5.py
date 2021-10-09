@@ -1,7 +1,4 @@
-import mlrefined_libraries
-from mlrefined_libraries.math_optimization_library import random_method_experiments
 from mlrefined_libraries.math_optimization_library import static_plotter
-import numpy as np
 
 
 def gradient_decent(G, Gradient, study_rate, iteration, w):

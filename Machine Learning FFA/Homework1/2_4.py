@@ -62,5 +62,5 @@ if __name__ == '__main__':
                                        ymin=-3, ymax=2, show_original=False)
 
     # Draw the cost history
-    # plotter.plot_cost_histories(histories=[cost_history_1, cost_history_2], start=25,
-    #                             labels=[r'$ uniform\ step\ length = 1$', r'$ diminishing\ step\ length = 1/k$'])
+    plotter.plot_cost_histories(histories=[cost_history_1, cost_history_2], start=25,
+                                labels=[r'$ uniform\ step\ length = 1$', r'$ diminishing\ step\ length = 1/k$'])

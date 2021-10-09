@@ -1,7 +1,5 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from mlrefined_libraries.math_optimization_library import static_plotter
-from matplotlib import font_manager
 import math
 
 
@@ -31,7 +29,7 @@ def Single_function_plot(G_n, observe_region):
     plt.show()
 
 
-def plot_3D_functions_contour(g_n):
+def plot_3D_functions_surface(g_n):
     """
     Draw the 3D function surface
     :param g_n: The functions that you want to plot, it should have three dimensions, X,Y,Z.
@@ -59,15 +57,15 @@ if __name__ == '__main__':
     Single_function_plot(G_a, [0.1, 0.99])
 
     # Question b
-    # G_b = lambda w: math.log(1 + pow(math.e, w))
-    # Single_function_plot(G_b, [-50, 30])
+    G_b = lambda w: math.log(1 + pow(math.e, w))
+    Single_function_plot(G_b, [-50, 30])
 
     # Question c
-    # G_c = lambda w: w*math.tanh(w)
-    # Single_function_plot(G_c, [-5, 5])
+    G_c = lambda w: w*math.tanh(w)
+    Single_function_plot(G_c, [-5, 5])
 
     # Question d
-    # C = np.array([[2, 1], [1, 3]])
-    # b = np.array([[1], [1]])
-    # G_d = lambda w: 1 / 2 * np.dot(np.dot(w.T, C), w) + np.dot(b.T, w)
-    # plot_3D_functions_contour(G_d)
+    C = np.array([[2, 1], [1, 3]])
+    b = np.array([[1], [1]])
+    G_d = lambda w: 1 / 2 * np.dot(np.dot(w.T, C), w) + np.dot(b.T, w)
+    plot_3D_functions_surface(G_d)
