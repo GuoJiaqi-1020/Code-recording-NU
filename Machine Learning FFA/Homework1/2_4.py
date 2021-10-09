@@ -1,60 +1,66 @@
-import mlrefined_libraries
-from mlrefined_libraries.math_optimization_library import random_method_experiments
 from mlrefined_libraries.math_optimization_library import static_plotter
 import numpy as np
 
 
-def random_search(g, alpha_choice, max_its, w, num_samples):
+def random_search(G_w, study_rate, max_its, ini_w, num_new_directions, decent_method=None):
+    """
+    This function will seek out a decent direction at each step by examining a number of random directions stemming
+    from our current point.
+    :param G_w: The function that you want to minimize
+    :param study_rate: The step length each iteration will take(only if decent_method = None)
+    :param max_its: The total iteration
+    :param ini_w: The coordinates of the point at which the Nth recurrence begins
+    :param num_new_directions: Number of randomly sampled directions at each decent iteration
+    :param decent_method: Implementation of random decent with a diminishing step length
+    :return: a record of cost and weight history
+    """
     weight_history = []  # container for weight history
     cost_history = []
-    alpha = 0
     for k in range(1, max_its + 1):
-        if alpha_choice == 'diminishing':
+        if decent_method == 'diminishing':
             alpha = 1 / float(k)
         else:
-            alpha = alpha_choice
+            alpha = study_rate
 
-        # record weights and cost evaluation
-        weight_history.append(w)
-        cost_history.append(g(w))
+        weight_history.append(ini_w)
+        cost_history.append(G_w(ini_w))
+        # generate random unit direction
+        directions = generate_random_direction(num_new_directions, ini_w)
+        all_new_w = ini_w + alpha * directions
 
-        # construct set of random unit directions
-        directions = np.random.randn(num_samples, np.size(w))
-        norms = np.sqrt(np.sum(directions * directions, axis=1))[:, np.newaxis]
-        directions = directions / norms
+        # Compare all new points, and pick the smallest one, get its index and output
+        small_val_ind = np.argmin(np.array([G_w(sample_direction) for sample_direction in all_new_w]))
+        if G_w(all_new_w[small_val_ind]) < G_w(ini_w):
+            # determine the best decent direction
+            d = directions[small_val_ind, :]
+            ini_w = ini_w + alpha * d
 
-        ### pick best descent direction
-        # compute all new candidate points
-        w_candidates = w + alpha * directions
-
-        # evaluate all candidates
-        evals = np.array([g(w_val) for w_val in w_candidates])
-        # if we find a real descent direction take the step in its direction
-        ind = np.argmin(evals)
-        if g(w_candidates[ind]) < g(w):
-            # pluck out best descent direction
-            d = directions[ind, :]
-
-            # take step
-            w = w + alpha * d
-
-    # record weights and cost evaluation
-    weight_history.append(w)
-    cost_history.append(g(w))
+    # record weight and cost
+    weight_history.append(ini_w)
+    cost_history.append(G_w(ini_w))
     return weight_history, cost_history
 
 
+def generate_random_direction(num_new_directions, ini_w):
+    # This function will generate a set of unit direction vectors subject to normal distribution
+    directions = np.random.randn(num_new_directions, np.size(ini_w))
+    norms = np.sqrt(np.sum(directions * directions, axis=1))[:, np.newaxis]
+    directions = directions / norms
+    return directions
+
+
 if __name__ == '__main__':
-    g = lambda w: 100 * (w[1] - w[0] ** 2) ** 2 + (w[0] - 1) ** 2
+    plotter = static_plotter.Visualizer()
+    w_0 = np.array([-2, -2])
+    G_w = lambda w: 100 * (w[1] - w[0] ** 2) ** 2 + (w[0] - 1) ** 2
     a = 1
-    w = np.array([-2, -2])
     P = 1000
     K = 50
-    weight_history_1, cost_history_1 = random_search(g, a, K, w, P)
-    plotter = static_plotter.Visualizer()
-    # plotter.two_input_contour_plot(g, weight_history_1, num_contours=35, xmin=-2.5, xmax=2.5, ymin=-2.25, ymax=2)
+    weight_history_1, cost_history_1 = random_search(G_w, a, K, w_0, P)
+    weight_history_2, cost_history_2 = random_search(G_w, a, K, w_0, P, decent_method='diminishing')
+    plotter.compare_runs_contour_plots(G_w, [weight_history_1, weight_history_2], num_contours=30, xmin=-3, xmax=3,
+                                       ymin=-3, ymax=2, show_original=False)
 
-    # random search program
-    weight_history_2, cost_history_2 = random_search(g, 'diminishing', K, w, P)
-    plotter.compare_runs_contour_plots(g, [weight_history_1, weight_history_2], num_contours=35, xmin=-2.5, xmax=2.5,
-                                       ymin=-2.25, ymax=2, show_original=False)
+    # Draw the cost history
+    # plotter.plot_cost_histories(histories=[cost_history_1, cost_history_2], start=25,
+    #                             labels=[r'$ uniform\ step\ length = 1$', r'$ diminishing\ step\ length = 1/k$'])

@@ -15,7 +15,7 @@ def Single_function_plot(G_n, observe_region):
     X = np.linspace(observe_region[0], observe_region[1], 100)
     plt.figure(figsize=(6, 5))
     Y_x2 = [G_n(w) for w in X]
-    # plt.subplot(111)  # 第一个参数表示：行，第二个参数表示；列，第三个参数；当前图例中的激活位置
+    # plt.subplot(111)
     plt.xlabel(u'X value')
     plt.ylabel(u'Y value')
     plt.title(u" G_w ", fontsize=16)
@@ -24,7 +24,7 @@ def Single_function_plot(G_n, observe_region):
     plt.ylim(-1, 5)
     # note the important point
     plt.xticks(np.linspace(observe_region[0], observe_region[1], 10))
-    # Used fot emphasizing the
+    # Emphasize the import point
     # plt.axhline(y=0, color='r', linestyle='dashed')
     # plt.axvline(x=0.5, color='r', linestyle='dashed')
     plt.plot(X, Y_x2)

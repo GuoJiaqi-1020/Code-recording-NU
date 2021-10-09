@@ -282,8 +282,8 @@ class Visualizer:
 
         # create figure with single plot for contour
         gs = gridspec.GridSpec(1, 2)
-        ax1 = plt.subplot(gs[0], aspect='equal');
-        ax2 = plt.subplot(gs[1], aspect='equal');
+        ax1 = plt.subplot(gs[0], aspect='equal')
+        ax2 = plt.subplot(gs[1], aspect='equal')
 
         # remove whitespace from figure
         fig.subplots_adjust(left=0, right=1, bottom=0, top=1)  # remove whitespace
@@ -293,11 +293,9 @@ class Visualizer:
         self.contour_plot_setup(g, ax1, **kwargs)  # draw contour plot
         w_hist = weight_histories[0]
         self.draw_weight_path(ax1, w_hist)  # draw path on contour plot
-
         self.contour_plot_setup(g, ax2, **kwargs)  # draw contour plot
         w_hist = weight_histories[1]
         self.draw_weight_path(ax2, w_hist)  # draw path on contour plot
-
         # plot
         plt.show()
 
@@ -364,7 +362,7 @@ class Visualizer:
             # leg = ax.legend(loc='upper left', bbox_to_anchor=(1.02, 1), borderaxespad=0)
 
         ax.set_xlim([start - 0.5, len(history) - 0.5])
-
+        plt.title(u" Cost History from 30-50 Iterations ", fontsize=16)
         # fig.tight_layout()
         plt.show()
 
