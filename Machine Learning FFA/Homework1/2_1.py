@@ -2,17 +2,6 @@ from mlrefined_libraries.math_optimization_library import random_method_experime
 import numpy as np
 import matplotlib.pyplot as plt
 
-
-# def originFunction(w1):
-#     w = np.array(w1)
-#     return w ** 2
-def produceN(N):
-    axis = []
-    for i in range(N):
-        axis.append(i + 1)
-    return axis
-
-
 def minimum_value(N, P):
     G_w = []
     for i in range(N):
