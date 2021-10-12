@@ -11,13 +11,21 @@
 //  specifying that vertex so that it can be used as part of a drawing primitive
 //  depicted in the CVV coord. system (+/-1, +/-1, +/-1) that fills our HTML5
 //  'canvas' object.
-// In this program, we get info for one vertex in our Vertex Buffer Object (VBO) 
-// through the 'attribute' variable a_Position, and use it.
+// Each time the shader program runs it gets info for just one vertex from our 
+//	Vertex Buffer Object (VBO); specifically, the value of its 'attribute' 
+// variable a_Position, is supplied by the VBO.
 // 
-//    ?What other vertex attributes can you set within a Vertex Shader? Color?
-//    surface normal? texture coordinates?
-//    ?How could you set each of these attributes separately for each vertex in//
-//    our VBO?  Could you store them in the VBO? Use them in the Vertex Shader?
+//   CHALLENGE: Change the program to get different pictures. 
+//	See if you can:
+//	EASY:
+//    --change the background color?
+//		--change the dot positions? 
+//		--change the size of the dots?
+//    --change the color of the dots-and-lines?
+//	HARDER: (HINT: read about 'uniform' vars in your textbook...)
+//    --change the number of dots?
+//    --get all dots in one color, and all lines in another color?
+//    --set each dot color individually? (what happens to the line colors?)
 //
 var VSHADER_SOURCE =
   'attribute vec4 a_Position;\n' +
@@ -58,17 +66,17 @@ function main() {
     return;
   }
 
-  // Specify the color for clearing <canvas>
-  gl.clearColor(0, 0, 0, 1);
+  // Specify the color for clearing <canvas>: (Northwestern purple)
+  gl.clearColor(78/255, 42/255, 132/255 , 1.0);	// R,G,B,A (A==opacity)
 
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT);
 
   // Draw 6 points. see http://www.khronos.org/opengles/sdk/docs/man/xhtml/glDrawArrays.xml
-  gl.drawArrays(gl.LINE_LOOP, 0, n); // gl.drawArrays(mode, first, count)
+ gl.drawArrays(gl.LINE_LOOP, 0, n); // gl.drawArrays(mode, first, count)
 			//mode: sets drawing primitive to use. Other valid choices: 
 				// gl.LINES, gl.LINE_STRIP, gl.LINE_LOOP, 
-				// gl.TRIA  NGLES, gl.TRIANGLES_STRIP, gl.TRIANGLE_FAN
+				// gl.TRIANGLES, gl.TRIANGLES_STRIP, gl.TRIANGLE_FAN
 			// first: index of 1st element of array.
 			// count; number of elements to read from the array.
 
@@ -87,19 +95,15 @@ function initVertexBuffers(gl) {
 //==============================================================================
 // first, create an array with all our vertex attribute values:
   var vertices = new Float32Array([
-     0.0,  0.7, 0.0, 1.0,	// 上  CAREFUL! I made these into 4D points/ vertices: x,y,z,w.
-    -0.12, 0.25, 0.0, 1.0,
-    -0.62, 0.2, 0.0, 1.0,
-    -0.2,  0.0, 0.0, 1.0,	// 中左
-    -0.5, -0.5, 0.0, 1.0,  //左下
-     0.0, -0.2, 0.0, 1.0, 	// 下
-     0.5, -0.5, 0.0, 1.0,	// 右下
-     0.2,  0.0, 0.0, 1.0, 	// 中右
-     0.62, 0.2, 0.0, 1.0,
-     0.12, 0.25, 0.0, 1.0
+     0.0,  0.5, 0.0, 1.0,	// CAREFUL! I made these into 4D points/ vertices: x,y,z,w.
+    -0.2,  0.0, 0.0, 1.0,	// new point!  (? What happens if I make w=0 instead of 1.0?)
+    -0.5, -0.5, 0.0, 1.0,   
+     0.0, -0.2, 0.0, 1.0, 	// new point!
+     0.5, -0.5, 0.0, 1.0,	// 
+     0.2,  0.0, 0.0, 1.0, 	// new point!  (note we need a trailing comma here)
      
   ]);
-  var n = 10; // The number of vertices
+  var n = 6; // The number of vertices
 
   // Then in the Graphics hardware, create a vertex buffer object (VBO)
   var vertexBuffer = gl.createBuffer();	// get it's 'handle'
@@ -113,18 +117,18 @@ function initVertexBuffers(gl) {
   // COPY data from our 'vertices' array into the vertex buffer object in GPU:
   gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
 
-  var a_Position = gl.getAttribLocation(gl.program, 'a_Position');
-  if (a_Position < 0) {
+  var a_PositionID = gl.getAttribLocation(gl.program, 'a_Position');
+  if (a_PositionID < 0) {
     console.log('Failed to get the storage location of a_Position');
     return -1;
   }
   // Assign the buffer object to a_Position variable
-  gl.vertexAttribPointer(a_Position, 4, gl.FLOAT, false, 0, 0);
+  gl.vertexAttribPointer(a_PositionID, 4, gl.FLOAT, false, 0, 0);
   // vertexAttributePointer(index, x,y,z,w size=4, type=FLOAT, 
   // NOT normalized, NO stride)
 
   // Enable the assignment to a_Position variable
-  gl.enableVertexAttribArray(a_Position);
+  gl.enableVertexAttribArray(a_PositionID);
 
   return n;
 }

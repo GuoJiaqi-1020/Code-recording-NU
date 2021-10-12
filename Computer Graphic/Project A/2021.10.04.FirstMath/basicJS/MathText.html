@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>09.30.MathText</title>
+  </head>
+
+  <body onload="main()">
+    <canvas id="webgl" width="400" height="400">   <! Canvas size in pixels -->
+    Please use a browser that supports HTML-5 "canvas"
+    </canvas>
+
+<! Load webGL-supplied libraries  >
+    <script src="../lib/webgl-utils.js"></script>  
+    <script src="../lib/webgl-debug.js"></script>
+<! Load our textbook-supplied libraries>
+    <script src="../lib/cuon-utils.js"></script>
+    <script src="../lib/cuon-matrix-quat03.js"></script>
+
+<! load a refined, high-performance vector/matrix library >
+    <script src="../lib/glmatrix.js"></script>
+
+<! Load OUR 3D graphics drawing program: from work by Vincent Bommier, 2018>
+		<script src="lib1.js"></script>
+    <script src="mathText.js"></script>
+
+<! 
+=========================================================================
+In-class activity
+============================================================================
+1)  Look in the 'lib' directory.  There you'll find the library file 
+'cuon-matrix-quat03.js', an extended version of the book's rudimentary 
+vector/matrix library ('cuon-matrix.js'). 
+ 
+2) Explore this 'cuon-matrix-quat03.js' library.  
+In it you'll find objects 'Vector3', 'Vector4' and 'Matrix4',
+which each have member functions to help you manipulate 
+3x1 vectors, 4x1 vectors and 4x4 matrices useful for computer graphics work,
+as well as a 'quaternion' object we will use later for animating rotations.
+
+3) Search this file for the string 'console', and you'll find the 'Matrix4'
+object and several others has a 'printMe()' member function.  Try it!  
+
+?HOW SHOULD I 'TRY IT'? 
+at the bottom of main(), create a new 'Matrix4' object, and use one of its 
+'setXXX()' member functions to initialize the matrix to some desirable set of
+values.  
+Can you create and print an identity matrix?  
+A 'translate' matrix?
+A 'scale' matrix?
+A 'rotation' matrix?
+
+4) Next, see if you can create and print a Vector3 object and a Vector4 object,
+and again use the 'printMe()' method to confirm their contents.
+
+5) Next, try out some basic vector/vector operations.
+--Create two different Vector4 objects with nonzero elements.  
+Compute and print their lengths in the console window. 
+Can any Vector4 member function compute that for you?  
+(or should you add a new member fcn for that?)  
+Can you normalize these vectors?
+
+--Can you compute a 'dotProduct()' for two Vector4 objects?  
+Why do we get a warning if either vector has a non-zero 'w' component?
+
+--Can you compute a 'crossProduct()' for two Vector4 objects? 
+Why do we get a warning if either vector has a non-zero 'w' component?
+
+--In the Matrix4 object, 
+	what's the difference between 'rotate()' and 'setRotate()' members?
+--What other vector/matrix operations should you test?
+!>
+
+  </body>
+</html>

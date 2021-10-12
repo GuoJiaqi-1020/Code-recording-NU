@@ -2,6 +2,7 @@ from mlrefined_libraries.math_optimization_library import random_method_experime
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def minimum_value(N, P):
     G_w = []
     for i in range(N):
@@ -27,4 +28,4 @@ if __name__ == '__main__':
     Y3 = minimum_value(100, 10000)
     minimum_value_plot(range(1, N + 1), [Y1, Y2, Y3], number_of_plot=3, label=['P=100', 'P=1000', 'P=10000'],
                        color=['g', 'r', 'b'])
-    # random_method_experiments.random_eval_experiment()
+    random_method_experiments.random_eval_experiment()
