@@ -1,7 +1,9 @@
 # Code recording NU
 <font size=2>by Jacky Guo @ [Northwestern University](https://www.northwestern.edu/)</font>
 
-<font size=1><jacky_guojj@outlook.com></font>
+<font size=1>My emai: <jacky_guojj@outlook.com></font>
+
+If you want to download specific any folder in my project, please use [**DownGit**](https://minhaskamal.github.io/DownGit/#/home) by entering the web links for the corresponding folders.
 
 <div  align="center">  
 <img src=https://www.insightintodiversity.com/wp-content/uploads/2021/05/northwestern-696x392.png width = "100%">

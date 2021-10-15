@@ -303,7 +303,7 @@ class Visualizer:
 
     def plot_cost_histories(self, histories= list, start = int, title='', **kwargs):
         # plotting colors
-        colors = ['r', 'magenta', 'aqua', 'blueviolet', 'chocolate']
+        colors = ['k', 'magenta', 'aqua', 'blueviolet', 'chocolate']
 
         # initialize figure
         fig = plt.figure(figsize=(10, 3))

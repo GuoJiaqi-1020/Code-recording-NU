@@ -44,9 +44,13 @@ if __name__ == "__main__":
     g_hessian = lambda w: np.dot((2 * np.exp(np.dot(w.T, w))) / (1 + np.exp(np.dot(w.T, w))), np.identity(dimension)) \
                           + (4 * np.dot(w, w.T) * np.exp(np.dot(w.T, w))) / ((1 + np.exp(np.dot(w.T, w))) ** 2)
     w0 = np.ones((dimension,), dtype=float)
+    w0_ = 4 * np.ones((dimension,), dtype=float)
     max_its = 10
     weight_history, cost_history = newtons_method(g, g_gradient, g_hessian, max_its, w0)
+    weight_history2, cost_history2 = newtons_method(g, g_gradient, g_hessian, max_its, w0_)
     plotter = static_plotter.Visualizer()
-    plotter.plot_cost_histories(histories=[cost_history], start=0,
-                                labels=[r'$w^0 = 1$'],
+    plotter.plot_cost_histories(histories=[cost_history, cost_history2], start=0,
+                                labels=[r'$w^0 = 1$', r'$w^0 = 4$'],
                                 title="Cost History of 10 Iterations")
+    plotter.compare_runs_contour_plots(g, [weight_history, weight_history2], num_contours=30, xmin=-1, xmax=4.2,
+                                       ymin=-1, ymax=4.2, show_original=False)
