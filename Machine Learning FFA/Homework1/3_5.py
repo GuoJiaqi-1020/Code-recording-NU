@@ -22,4 +22,5 @@ if __name__ == '__main__':
     plotter = static_plotter.Visualizer()
     plotter.plot_cost_histories(histories=[cost1, cost2, cost3], start=0,
                                 labels=[r'$\alpha = 1$', r'$\alpha = 10^{-1}$', r'$\alpha = 10^{-2}$'],
-                                title="Cost History of 1000 Iterations")
+                                title="Cost History of 1000 Iterations"
+                                )
