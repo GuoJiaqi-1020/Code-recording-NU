@@ -1,7 +1,6 @@
 # Code recording NU
 <font size=2>by Jacky Guo @ [Northwestern University](https://www.northwestern.edu/)</font>
-
-<font size=1>My emai: <jacky_guojj@outlook.com></font>
+<font size=1>Find me through my email: <jacky_guojj@outlook.com></font>
 
 If you want to download specific any folder in my project, please use [**DownGit**](https://minhaskamal.github.io/DownGit/#/home) by entering the web links for the corresponding folders.
 
