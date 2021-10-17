@@ -123,6 +123,7 @@ if __name__ == "__main__":
                                 labels=['$ RMSE $', '$ MAD $'],
                                 title="Boston Housing: Cost History of 1000 Iterations")
 
+
     # Auto-MPG
     # Least Squares Mean for linear regression
     weight_history_MPG_LSM, cost_history_MPG_LSM = MPG.gradient_decent('LSM', study_rate=0.05,
