@@ -1,25 +1,3 @@
-//3456789_123456789_123456789_123456789_123456789_123456789_123456789_123456789_
-// (JT: why the numbers? counts columns, helps me keep 80-char-wide listings)
-//
-// Chapter 5: ColoredTriangle.js (c) 2012 matsuda  AND
-// Chapter 4: RotatingTriangle_withButtons.js (c) 2012 matsuda AND
-// Chapter 2: ColoredPoints.js (c) 2012 matsuda
-//
-// merged and modified to became:
-//
-// ControlMulti.js for EECS 351-1, 
-//									Northwestern Univ. Jack Tumblin
-
-//		--converted from 2D to 4D (x,y,z,w) vertices
-//		--demonstrate how to keep & use MULTIPLE colored shapes 
-//			in just one Vertex Buffer Object(VBO).
-//		--demonstrate several different user I/O methods: 
-//				--Webpage pushbuttons 
-//				--Webpage edit-box text, and 'innerHTML' for text display
-//				--Mouse click & drag within our WebGL-hosting 'canvas'
-//				--Keyboard input: alphanumeric + 'special' keys (arrows, etc)
-//
-// Vertex shader program----------------------------------
 var VSHADER_SOURCE = 
   'uniform mat4 u_ModelMatrix;\n' +
   'attribute vec4 a_Position;\n' +
@@ -41,20 +19,10 @@ var FSHADER_SOURCE =
   '  gl_FragColor = v_Color;\n' +
   '}\n';
 
-// Global Variables
-// =========================
-// Use globals to avoid needlessly complex & tiresome function argument lists,
-// and for user-adjustable controls.
-// For example, the WebGL rendering context 'gl' gets used in almost every fcn;
-// requiring 'gl' as an argument won't give us any added 'encapsulation'; make
-// it global.  Later, if the # of global vars grows too large, we can put them 
-// into one (or just a few) sensible global objects for better modularity.
-//------------For WebGL-----------------------------------------------
+
+let stack = []
 var gl;           // webGL Rendering Context. Set in main(), used everywhere.
 var g_canvas = document.getElementById('webgl');     
-                  // our HTML-5 canvas object that uses 'gl' for drawing.
-                  
-// ----------For tetrahedron & its matrix---------------------------------
 var g_vertsMax = 0;                 // number of vertices held in the VBO 
                                     // (global: replaces local 'n' variable)
 var g_modelMatrix = new Matrix4();  // Construct 4x4 matrix; contents get sent
@@ -71,7 +39,7 @@ var g_angle01 = 0;                  // initial rotation angle
 var g_angle01Rate = 45.0;           // rotation speed, in degrees/second 
 
 var g_angle02 = 0;                  // initial rotation angle
-var g_angle02Rate = 40.0;           // rotation speed, in degrees/second 
+var g_angle02Rate = 60.0;           // rotation speed, in degrees/second 
 
 //------------For mouse click-and-drag: -------------------------------
 var g_isDrag=false;		// mouse-drag: true when user holds down mouse button
@@ -84,12 +52,6 @@ var g_digits=5;			// DIAGNOSTICS: # of digits to print in console.log (
 								 
 
 function main() {
-//==============================================================================
-/*REPLACED THIS: 
-// Retrieve <canvas> element:
- var canvas = document.getElementById('webgl'); 
-//with global variable 'g_canvas' declared & set above.
-*/
   
   // Get gl, the rendering context for WebGL, from our 'g_canvas' object
   gl = getWebGLContext(g_canvas);
@@ -121,22 +83,21 @@ function main() {
 	//    actions; Javascript's 'event-listener' will call your 'event-handler'
 	//		function each time it 'hears' the triggering event from users.
 	//
-  // KEYBOARD:
-  // The 'keyDown' and 'keyUp' events respond to ALL keys on the keyboard,
-  //      including shift,alt,ctrl,arrow, pgUp, pgDn,f1,f2...f12 etc. 
+    // KEYBOARD:
+    // The 'keyDown' and 'keyUp' events respond to ALL keys on the keyboard,
+    //      including shift,alt,ctrl,arrow, pgUp, pgDn,f1,f2...f12 etc. 
 	window.addEventListener("keydown", myKeyDown, false);
 	// After each 'keydown' event, call the 'myKeyDown()' function.  The 'false' 
 	// arg (default) ensures myKeyDown() call in 'bubbling', not 'capture' stage)
 	// ( https://www.w3schools.com/jsref/met_document_addeventlistener.asp )
 	window.addEventListener("keyup", myKeyUp, false);
 	// Called when user RELEASES the key.  Now rarely used...
-
 	// MOUSE:
 	// Create 'event listeners' for a few vital mouse events 
 	// (others events are available too... google it!).  
 	window.addEventListener("mousedown", myMouseDown); 
 	// (After each 'mousedown' event, browser calls the myMouseDown() fcn.)
-  window.addEventListener("mousemove", myMouseMove); 
+    window.addEventListener("mousemove", myMouseMove); 
 	window.addEventListener("mouseup", myMouseUp);	
 	window.addEventListener("click", myMouseClick);				
 	window.addEventListener("dblclick", myMouseDblClick); 
@@ -186,7 +147,7 @@ function main() {
   //----------------- 
   var tick = function() {
     animate();   // Update the rotation angle
-    drawAll();   // Draw all parts
+    DrawAll()   // Draw all parts
 //    console.log('g_angle01=',g_angle01.toFixed(g_digits)); // put text in console.
 
 //	Show some always-changing text in the webpage :  
@@ -206,9 +167,9 @@ function main() {
     									// Request that the browser re-draw the webpage
     									// (causes webpage to endlessly re-draw itself)
   };
-  tick();							// start (and continue) animation: draw current image
-	
+  tick();							// start (and continue) animation: draw current image	
 }
+
 
 function initVertexBuffer() {
 //==============================================================================
@@ -221,28 +182,34 @@ function initVertexBuffer() {
   // Vertex coordinates(x,y,z,w) and color (R,G,B) for a color tetrahedron:
 	//		Apex on +z axis; equilateral triangle base at z=0
 /*	Nodes:
-		 0.0,	 0.0, sq2, 1.0,			1.0, 	1.0,	1.0,	// Node 0 (apex, +z axis;  white)
+	 0.0,  0.0, sq2, 1.0,		1.0, 	1.0,	1.0,	// Node 0 (apex, +z axis;  white)
      c30, -0.5, 0.0, 1.0, 		0.0,  0.0,  1.0, 	// Node 1 (base: lower rt; red)
      0.0,  1.0, 0.0, 1.0,  		1.0,  0.0,  0.0,	// Node 2 (base: +y axis;  grn)
     -c30, -0.5, 0.0, 1.0, 		0.0,  1.0,  0.0, 	// Node 3 (base:lower lft; blue)
 
 */
-			// Face 0: (left side)  
-     0.0,	 0.0, sq2, 1.0,			1.0, 	1.0,	1.0,	// Node 0
+		// Face 0: (left side)  
+     0.0,  0.0, sq2, 1.0,		1.0,  1.0,	1.0,	// Node 0
      c30, -0.5, 0.0, 1.0, 		0.0,  0.0,  1.0, 	// Node 1
      0.0,  1.0, 0.0, 1.0,  		1.0,  0.0,  0.0,	// Node 2
-			// Face 1: (right side)
-		 0.0,	 0.0, sq2, 1.0,			1.0, 	1.0,	1.0,	// Node 0
+		// Face 1: (right side)
+	 0.0,   0.0, sq2, 1.0,		1.0,  1.0,	1.0,	// Node 0
      0.0,  1.0, 0.0, 1.0,  		1.0,  0.0,  0.0,	// Node 2
     -c30, -0.5, 0.0, 1.0, 		0.0,  1.0,  0.0, 	// Node 3
     	// Face 2: (lower side)
-		 0.0,	 0.0, sq2, 1.0,			1.0, 	1.0,	1.0,	// Node 0 
+	0.0,   0.0, sq2, 1.0,		1.0,  1.0,	1.0,	// Node 0 
     -c30, -0.5, 0.0, 1.0, 		0.0,  1.0,  0.0, 	// Node 3
      c30, -0.5, 0.0, 1.0, 		0.0,  0.0,  1.0, 	// Node 1 
      	// Face 3: (base side)  
     -c30, -0.5,  0.0, 1.0, 		0.0,  1.0,  0.0, 	// Node 3
      0.0,  1.0,  0.0, 1.0,  	1.0,  0.0,  0.0,	// Node 2
      c30, -0.5,  0.0, 1.0, 		0.0,  0.0,  1.0, 	// Node 1
+
+	//  1.0, 0.0, 0.0, 1.0,        0.0,  0.5,  0.0,
+	//  1.0, 1.0, 0.0, 1.0,        1.0,  0.0,  0.0,
+	//  1.0, 0.5, 0.0, 1.0,        0.0,  0.0,  1.0,
+
+
   ]);
   g_vertsMax = 12;		// 12 tetrahedron vertices.
   								// we can also draw any subset of these we wish,
@@ -297,98 +264,102 @@ function initVertexBuffer() {
   	FSIZE * 7, 			// Stride -- how many bytes used to store each vertex?
   									// (x,y,z,w, r,g,b) * bytes/value
   	FSIZE * 4);			// Offset -- how many bytes from START of buffer to the
-  									// value we will actually use?  Need to skip over x,y,z,w
-  									
+  									// value we will actually use?  Need to skip over x,y,z,w					
   gl.enableVertexAttribArray(a_Color);  
-  									// Enable assignment of vertex buffer object's position data
-
-	//--------------------------------DONE!
-  // Unbind the buffer object 
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-/* REMOVED -- global 'g_vertsMax' means we don't need it anymore
-  return nn;
-*/
 }
 
-function drawAll() {
-//==============================================================================
-  // Clear <canvas>  colors AND the depth buffer
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  
-// Great question from student:
-// "?How can I get the screen-clearing color (or any of the many other state
-//		variables of OpenGL)?  'glGet()' doesn't seem to work..."
-// ANSWER: from WebGL specification page: 
-//							https://www.khronos.org/registry/webgl/specs/1.0/
-//	search for 'glGet()' (ctrl-f) yields:
-//  OpenGL's 'glGet()' becomes WebGL's 'getParameter()'
 
+function DrawAll(){
+	let stack = []
+	// Clear <canvas>  colors AND the depth buffer
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	clrColr = new Float32Array(4);
 	clrColr = gl.getParameter(gl.COLOR_CLEAR_VALUE);
-	// console.log("clear value:", clrColr);
-	
-  //-------Draw Spinning Tetrahedron
-  g_modelMatrix.setTranslate(-0.4,-0.4, 0.0);  // 'set' means DISCARD old matrix,
-  						// (drawing axes centered in CVV), and then make new
-  						// drawing axes moved to the lower-left corner of CVV. 
-  g_modelMatrix.scale(1,1,-1);							// convert to left-handed coord sys
-  																				// to match WebGL display canvas.
-  g_modelMatrix.scale(0.5, 0.5, 0.5);
-  						// if you DON'T scale, tetra goes outside the CVV; clipped!
-  g_modelMatrix.rotate(g_angle01, 0, 1, 0);  // Make new drawing axes that
-  g_modelMatrix.rotate(g_angle02, 1, 0, 0);  // Make new drawing axes that
+		// console.log("clear value:", clrColr);
+	//-------Draw Spinning Tetrahedron
+	g_modelMatrix.setTranslate(-0.4,-0.4, 0.0);  // 'set' means DISCARD old matrix,
+							// (drawing axes centered in CVV), and then make new
+							// drawing axes moved to the lower-left corner of CVV. 
+	g_modelMatrix.scale(1,1,-1);							// convert to left-handed coord sys
+																					// to match WebGL display canvas.
+	g_modelMatrix.scale(0.5, 0.5, 0.5);
+							// if you DON'T scale, tetra goes outside the CVV; clipped!
+	g_modelMatrix.rotate(g_angle01, 0, 1, 0);  // Make new drawing axes that
+	g_modelMatrix.rotate(g_angle02, 1, 0, 0);  // Make new drawing axes that
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
 
-  // DRAW TETRA:  Use this matrix to transform & draw 
-  //						the first set of vertices stored in our VBO:
-  		// Pass our current matrix to the vertex shaders:
-  gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
-  		// Draw triangles: start at vertex 0 and draw 12 vertices
-  gl.drawArrays(gl.TRIANGLES, 0, 12);
 
-  // NEXT, create different drawing axes, and...
-  g_modelMatrix.setTranslate(0.4, 0.4, 0.0);  // 'set' means DISCARD old matrix,
-  						// (drawing axes centered in CVV), and then make new
-  						// drawing axes moved to the lower-left corner of CVV.
-  g_modelMatrix.scale(1,1,-1);							// convert to left-handed coord sys
-  																				// to match WebGL display canvas.
-  g_modelMatrix.scale(0.3, 0.3, 0.3);				// Make it smaller.
-  
-  // Mouse-Dragging for Rotation:
-	//-----------------------------
-	// Attempt 1:  X-axis, then Y-axis rotation:
-/*  						// First, rotate around x-axis by the amount of -y-axis dragging:
-  g_modelMatrix.rotate(-g_yMdragTot*120.0, 1, 0, 0); // drag +/-1 to spin -/+120 deg.
-  						// Then rotate around y-axis by the amount of x-axis dragging
-	g_modelMatrix.rotate( g_xMdragTot*120.0, 0, 1, 0); // drag +/-1 to spin +/-120 deg.
-				// Acts SENSIBLY if I always drag mouse to turn on Y axis, then X axis.
-				// Acts WEIRDLY if I drag mouse to turn on X axis first, then Y axis.
-				// ? Why is is 'backwards'? Duality again!
-*/
-	//-----------------------------
+	stack.push(new Matrix4(g_modelMatrix));
+	DrawTetra()
+	//==============================================================================
+	//==============================================================================
 
-	// Attempt 2: perp-axis rotation:
-							// rotate on axis perpendicular to the mouse-drag direction:
+
+
+	g_modelMatrix.translate(0.0, 0.0, Math.sqrt(2.0)+0.4);
+	g_modelMatrix.scale(1,1,-1);
+	g_modelMatrix.scale(0.4, 0.2, 0.4);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	DrawPart1();
+
+
+	g_modelMatrix = stack.pop();
+	stack.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.translate(Math.sqrt(0.75), -0.5, 0.4);
+	g_modelMatrix.scale(1,1,-1);
+	g_modelMatrix.scale(0.4, 0.2, 0.4);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	DrawPart1();
+
+
+	g_modelMatrix = stack.pop();
+	g_modelMatrix.translate(-Math.sqrt(0.75), -0.5, 0.4);
+	g_modelMatrix.scale(1,1,-1);
+	g_modelMatrix.scale(0.4, 0.2, 0.4);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	DrawPart1();
+
+
+    // NEXT, create different drawing axes, and...
+	g_modelMatrix.setTranslate(0.5, 0.5, 0.0);  // 'set' means DISCARD old matrix,
+	// (drawing axes centered in CVV), and then make new
+	// drawing axes moved to the lower-left corner of CVV.
+	g_modelMatrix.scale(1,1,-1);							// convert to left-handed coord sys
+																// to match WebGL display canvas.
+	g_modelMatrix.scale(0.2, 0.5, 0.2);				// Make it smaller.
+
+
 	var dist = Math.sqrt(g_xMdragTot*g_xMdragTot + g_yMdragTot*g_yMdragTot);
-							// why add 0.001? avoids divide-by-zero in next statement
-							// in cases where user didn't drag the mouse.)
 	g_modelMatrix.rotate(dist*120.0, -g_yMdragTot+0.0001, g_xMdragTot+0.0001, 0.0);
-				// Acts weirdly as rotation amounts get far from 0 degrees.
-				// ?why does intuition fail so quickly here?
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	//   DrawWedge()
+	DrawPart2()
+}
 
-	//-------------------------------
-	// Attempt 3: Quaternions? What will work better?
 
-					// YOUR CODE HERE
 
-	//-------------------------------
-	// DRAW 2 TRIANGLES:		Use this matrix to transform & draw
-	//						the different set of vertices stored in our VBO:
-  gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+function DrawTetra() {
+	// Draw triangles: start at vertex 0 and draw 12 vertices
+  gl.drawArrays(gl.TRIANGLES, 0, 12);
+}
+
+function DrawWedge() {
   		// Draw only the last 2 triangles: start at vertex 6, draw 6 vertices
   gl.drawArrays(gl.TRIANGLES, 6,6);
 
 }
+
+function DrawPart1(){
+   gl.drawArrays(gl.TRIANGLES, 6,6);
+
+}
+function DrawPart2(){
+	gl.drawArrays(gl.TRIANGLES, 6,3);
+}
+
+
 
 // Last time that this function was called:  (used for animation timing)
 var g_last = Date.now();
@@ -402,18 +373,18 @@ function animate() {
   
   // Update the current rotation angle (adjusted by the elapsed time)
   //  limit the angle to move smoothly between +120 and -85 degrees:
-//  if(angle >  120.0 && g_angle01Rate > 0) g_angle01Rate = -g_angle01Rate;
-//  if(angle <  -85.0 && g_angle01Rate < 0) g_angle01Rate = -g_angle01Rate;
+  //  if(angle >  120.0 && g_angle01Rate > 0) g_angle01Rate = -g_angle01Rate;
+  //  if(angle <  -85.0 && g_angle01Rate < 0) g_angle01Rate = -g_angle01Rate;
   
   g_angle01 = g_angle01 + (g_angle01Rate * elapsed) / 1000.0;
   if(g_angle01 > 180.0) g_angle01 = g_angle01 - 360.0;
   if(g_angle01 <-180.0) g_angle01 = g_angle01 + 360.0;
 
 	g_angle02 = g_angle02 + (g_angle02Rate * elapsed) / 1000.0;
-  if(g_angle02 > 180.0) g_angle02 = g_angle02 - 360.0;
-  if(g_angle02 <-180.0) g_angle02 = g_angle02 + 360.0;
+//   if(g_angle02 > 180.0) g_angle02 = g_angle02 - 360.0;
+//   if(g_angle02 <-180.0) g_angle02 = g_angle02 + 360.0;
   
-  if(g_angle02 > 45.0 && g_angle02Rate > 0) g_angle02Rate *= -1.0;
+  if(g_angle02 > 30.0 && g_angle02Rate > 0) g_angle02Rate *= -1.0;
   if(g_angle02 < 0.0  && g_angle02Rate < 0) g_angle02Rate *= -1.0;
 }
 
@@ -462,8 +433,6 @@ function runStop() {
   	g_angle01Rate = myTmp;  // use the stored rate.
   }
 }
-
-//===================Mouse and Keyboard event-handling Callbacks
 
 function myMouseDown(ev) {
 //==============================================================================
