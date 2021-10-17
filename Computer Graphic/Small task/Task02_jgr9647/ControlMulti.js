@@ -20,12 +20,9 @@ var FSHADER_SOURCE =
   '}\n';
 
 
-
+let stack = []
 var gl;           // webGL Rendering Context. Set in main(), used everywhere.
 var g_canvas = document.getElementById('webgl');     
-                  // our HTML-5 canvas object that uses 'gl' for drawing.
-                  
-// ----------For tetrahedron & its matrix---------------------------------
 var g_vertsMax = 0;                 // number of vertices held in the VBO 
                                     // (global: replaces local 'n' variable)
 var g_modelMatrix = new Matrix4();  // Construct 4x4 matrix; contents get sent
@@ -267,97 +264,98 @@ function initVertexBuffer() {
   	FSIZE * 7, 			// Stride -- how many bytes used to store each vertex?
   									// (x,y,z,w, r,g,b) * bytes/value
   	FSIZE * 4);			// Offset -- how many bytes from START of buffer to the
-  									// value we will actually use?  Need to skip over x,y,z,w
-  									
+  									// value we will actually use?  Need to skip over x,y,z,w					
   gl.enableVertexAttribArray(a_Color);  
-  									// Enable assignment of vertex buffer object's position data
-
-	//--------------------------------DONE!
-  // Unbind the buffer object 
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-
 
 }
 
 
 function DrawAll(){
-  // Clear <canvas>  colors AND the depth buffer
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	let stack = []
+	// Clear <canvas>  colors AND the depth buffer
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	clrColr = new Float32Array(4);
+	clrColr = gl.getParameter(gl.COLOR_CLEAR_VALUE);
+		// console.log("clear value:", clrColr);
+	//-------Draw Spinning Tetrahedron
+	g_modelMatrix.setTranslate(-0.4,-0.4, 0.0);  // 'set' means DISCARD old matrix,
+							// (drawing axes centered in CVV), and then make new
+							// drawing axes moved to the lower-left corner of CVV. 
+	g_modelMatrix.scale(1,1,-1);							// convert to left-handed coord sys
+																					// to match WebGL display canvas.
+	g_modelMatrix.scale(0.5, 0.5, 0.5);
+							// if you DON'T scale, tetra goes outside the CVV; clipped!
+	g_modelMatrix.rotate(g_angle01, 0, 1, 0);  // Make new drawing axes that
+	g_modelMatrix.rotate(g_angle02, 1, 0, 0);  // Make new drawing axes that
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
 
 
-  clrColr = new Float32Array(4);
-  clrColr = gl.getParameter(gl.COLOR_CLEAR_VALUE);
-	// console.log("clear value:", clrColr);
-	
-  //-------Draw Spinning Tetrahedron
-  g_modelMatrix.setTranslate(-0.4,-0.4, 0.0);  // 'set' means DISCARD old matrix,
-  						// (drawing axes centered in CVV), and then make new
-  						// drawing axes moved to the lower-left corner of CVV. 
-  g_modelMatrix.scale(1,1,-1);							// convert to left-handed coord sys
-  																				// to match WebGL display canvas.
-  g_modelMatrix.scale(0.2, 0.2, 0.2);
-  						// if you DON'T scale, tetra goes outside the CVV; clipped!
-  g_modelMatrix.rotate(g_angle01, 0, 1, 0);  // Make new drawing axes that
-  g_modelMatrix.rotate(g_angle02, 1, 0, 0);  // Make new drawing axes that
-  gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
-  DrawPart1(gl)
-//   DrawTetra(gl)
-  //==============================================================================
-  //==============================================================================
+	stack.push(new Matrix4(g_modelMatrix));
+	DrawTetra()
+	//==============================================================================
+	//==============================================================================
 
-  // NEXT, create different drawing axes, and...
-  g_modelMatrix.setTranslate(0.4, 0.4, 0.0);  // 'set' means DISCARD old matrix,
-  						// (drawing axes centered in CVV), and then make new
-  						// drawing axes moved to the lower-left corner of CVV.
-  g_modelMatrix.scale(1,1,-1);							// convert to left-handed coord sys
-  																				// to match WebGL display canvas.
-  g_modelMatrix.scale(0.3, 0.3, 0.3);				// Make it smaller.
-  
-  // Mouse-Dragging for Rotation:
-	//-----------------------------
-	// Attempt 1:  X-axis, then Y-axis rotation:
- /*  						// First, rotate around x-axis by the amount of -y-axis dragging:
-    g_modelMatrix.rotate(-g_yMdragTot*120.0, 1, 0, 0); // drag +/-1 to spin -/+120 deg.
-  						// Then rotate around y-axis by the amount of x-axis dragging
-	g_modelMatrix.rotate( g_xMdragTot*120.0, 0, 1, 0); // drag +/-1 to spin +/-120 deg.
-				// Acts SENSIBLY if I always drag mouse to turn on Y axis, then X axis.
-				// Acts WEIRDLY if I drag mouse to turn on X axis first, then Y axis.
-				// ? Why is is 'backwards'? Duality again!
- */
-	//-----------------------------
-	// Attempt 2: perp-axis rotation:
-							// rotate on axis perpendicular to the mouse-drag direction:
+
+
+	g_modelMatrix.translate(0.0, 0.0, Math.sqrt(2.0)+0.4);
+	g_modelMatrix.scale(1,1,-1);
+	g_modelMatrix.scale(0.4, 0.2, 0.4);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	DrawPart1();
+
+
+	g_modelMatrix = stack.pop();
+	stack.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.translate(Math.sqrt(0.75), -0.5, 0.4);
+	g_modelMatrix.scale(1,1,-1);
+	g_modelMatrix.scale(0.4, 0.2, 0.4);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	DrawPart1();
+
+
+	g_modelMatrix = stack.pop();
+	g_modelMatrix.translate(-Math.sqrt(0.75), -0.5, 0.4);
+	g_modelMatrix.scale(1,1,-1);
+	g_modelMatrix.scale(0.4, 0.2, 0.4);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	DrawPart1();
+
+
+    // NEXT, create different drawing axes, and...
+	g_modelMatrix.setTranslate(0.5, 0.5, 0.0);  // 'set' means DISCARD old matrix,
+	// (drawing axes centered in CVV), and then make new
+	// drawing axes moved to the lower-left corner of CVV.
+	g_modelMatrix.scale(1,1,-1);							// convert to left-handed coord sys
+																// to match WebGL display canvas.
+	g_modelMatrix.scale(0.2, 0.5, 0.2);				// Make it smaller.
+
+
 	var dist = Math.sqrt(g_xMdragTot*g_xMdragTot + g_yMdragTot*g_yMdragTot);
-							// why add 0.001? avoids divide-by-zero in next statement
-							// in cases where user didn't drag the mouse.)
 	g_modelMatrix.rotate(dist*120.0, -g_yMdragTot+0.0001, g_xMdragTot+0.0001, 0.0);
-				// Acts weirdly as rotation amounts get far from 0 degrees.
-				// ?why does intuition fail so quickly here?
-	// DRAW 2 TRIANGLES:		Use this matrix to transform & draw
-	//						the different set of vertices stored in our VBO:
-  gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
-//   DrawWedge(gl)
-  DrawPart2(gl)
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	//   DrawWedge()
+	DrawPart2()
 }
 
 
-function DrawTetra(gl) {
+
+function DrawTetra() {
 	// Draw triangles: start at vertex 0 and draw 12 vertices
   gl.drawArrays(gl.TRIANGLES, 0, 12);
 }
 
-function DrawWedge(gl) {
+function DrawWedge() {
   		// Draw only the last 2 triangles: start at vertex 6, draw 6 vertices
   gl.drawArrays(gl.TRIANGLES, 6,6);
 
 }
 
-function DrawPart1(gl){
-   gl.drawArrays(gl.TRIANGLES, 0,12);
+function DrawPart1(){
+   gl.drawArrays(gl.TRIANGLES, 6,6);
 
 }
-function DrawPart2(gl){
+function DrawPart2(){
 	gl.drawArrays(gl.TRIANGLES, 6,3);
 }
 
