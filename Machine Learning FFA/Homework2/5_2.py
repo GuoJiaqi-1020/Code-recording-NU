@@ -1,4 +1,3 @@
-# import numpy as np
 import sys
 import autograd.numpy as np
 import autograd

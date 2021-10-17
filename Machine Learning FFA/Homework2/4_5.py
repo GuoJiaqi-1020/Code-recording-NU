@@ -1,5 +1,3 @@
-from autograd import grad
-from autograd import hessian
 from mlrefined_libraries.math_optimization_library import static_plotter
 import numpy as np
 

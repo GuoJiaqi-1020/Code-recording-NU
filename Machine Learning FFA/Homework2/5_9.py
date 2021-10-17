@@ -34,9 +34,8 @@ class Linear_regression(object):
         regulator = np.zeros(self.x_std.shape)
         for i in range(len(self.x_std)):
             if self.x_std[i] <= 0.1:
-                pass
-                # regulator[i] = 1.0
-                # self.x_std += regulator
+                regulator[i] = 1.0
+                self.x_std += regulator
             else:
                 pass
 
@@ -108,7 +107,7 @@ def linear_fitting_plot(x, y, w):
 
 
 if __name__ == "__main__":
-    begin_point = 400
+    begin_point = 350
     data_bh = np.loadtxt('../mlrefined_datasets/superlearn_datasets/boston_housing.csv', delimiter=',')
     data_MpG = np.loadtxt('../mlrefined_datasets/superlearn_datasets/auto_data.csv', delimiter=',')
     BH = Linear_regression(data_bh)
@@ -121,7 +120,7 @@ if __name__ == "__main__":
     weight_history_BH_LAD, cost_history_BH_LAD = BH.gradient_decent('LAD', study_rate=0.05,
                                                                     iteration=1000)
     plotter.plot_cost_histories(histories=[cost_history_BH_LSM, cost_history_BH_LAD], start=begin_point,
-                                labels=['$ LSM $', '$ LAD $'],
+                                labels=['$ RMSE $', '$ MAD $'],
                                 title="Boston Housing: Cost History of 1000 Iterations")
 
     # Auto-MPG
@@ -132,5 +131,5 @@ if __name__ == "__main__":
     weight_history_MPG_LAD, cost_history_MPG_LAD = MPG.gradient_decent('LAD', study_rate=0.05,
                                                                        iteration=1000)
     plotter.plot_cost_histories(histories=[cost_history_MPG_LSM, cost_history_MPG_LAD], start=begin_point,
-                                labels=['$ LSM $', '$ LAD $'],
+                                labels=['$ RMSE $', '$ MAD $'],
                                 title="Auto-MPG: Cost History of 1000 Iterations")
