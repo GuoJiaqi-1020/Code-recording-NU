@@ -113,8 +113,8 @@ function main() {
 // 				and replace it's internal HTML commands (if any) with some
 //				on-screen text that reports our current angle value:
 //		--HINT: don't confuse 'getElementByID() and 'getElementById()
-		document.getElementById('CurAngleDisplay').innerHTML= 
-			'g_angle01= '+g_angle01.toFixed(g_digits);
+		// document.getElementById('CurAngleDisplay').innerHTML= 
+		// 	'g_angle01= '+g_angle01.toFixed(g_digits);
 		// Also display our current mouse-dragging state:
 		document.getElementById('Mouse').innerHTML=
 			'Mouse Drag totals (CVV coords):\t'+
@@ -863,15 +863,7 @@ function animate() {
 //==================HTML Button Callbacks======================
 
 function num_stars() {
-	// Called when user presses 'Submit' button on our webpage
-	//		HOW? Look in HTML file (e.g. ControlMulti.html) to find
-	//	the HTML 'input' element with id='usrAngle'.  Within that
-	//	element you'll find a 'button' element that calls this fcn.
-	
-	// Read HTML edit-box contents:
-		var UsrTxt = document.getElementById('Numstars').value;	
-	// Display what we read from the edit-box: use it to fill up
-	// the HTML 'div' element with id='editBoxOut':
+	  var UsrTxt = document.getElementById('Numstars').value;	
 	  document.getElementById('EditBoxOut').innerHTML ='You Typed: '+UsrTxt;
 	  console.log('NumSubmit: UsrTxt:', UsrTxt); // print in console, and
 	  num_star = parseFloat(UsrTxt);     // convert string to float number 
@@ -879,15 +871,7 @@ function num_stars() {
 
 
 function angleSubmit() {
-// Called when user presses 'Submit' button on our webpage
-//		HOW? Look in HTML file (e.g. ControlMulti.html) to find
-//	the HTML 'input' element with id='usrAngle'.  Within that
-//	element you'll find a 'button' element that calls this fcn.
-
-// Read HTML edit-box contents:
 	var UsrTxt = document.getElementById('usrAngle').value;	
-// Display what we read from the edit-box: use it to fill up
-// the HTML 'div' element with id='editBoxOut':
   document.getElementById('EditBoxOut').innerHTML ='You Typed: '+UsrTxt;
   console.log('angleSubmit: UsrTxt:', UsrTxt); // print in console, and
   g_angle01 = parseFloat(UsrTxt);     // convert string to float number 
@@ -1001,7 +985,7 @@ function myMouseUp(ev) {
 //  console.log('myMouseUp  (pixel coords):\n\t xp,yp=\t',xp,',\t',yp);
   
 	// Convert to Canonical View Volume (CVV) coordinates too:
-  var x = (xp - g_canvas.width/2)  / 		// move origin to center of canvas and
+    var x = (xp - g_canvas.width/2)  / 		// move origin to center of canvas and
   						 (g_canvas.width/2);			// normalize canvas to -1 <= x < +1,
 	var y = (yp - g_canvas.height/2) /		//										 -1 <= y < +1.
 							 (g_canvas.height/2);
@@ -1048,7 +1032,7 @@ function myKeyDown(kev) {
               "\n--kev.altKey:",  kev.altKey,   "\t--kev.metaKey:", kev.metaKey);
 
 // and report EVERYTHING on webpage:
-	document.getElementById('KeyDownResult').innerHTML = ''; // clear old results
+  document.getElementById('KeyDownResult').innerHTML = ''; // clear old results
   document.getElementById('KeyModResult' ).innerHTML = ''; 
   // key details:
   document.getElementById('KeyModResult' ).innerHTML = 
