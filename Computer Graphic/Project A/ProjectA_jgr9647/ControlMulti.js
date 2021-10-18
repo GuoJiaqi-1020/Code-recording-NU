@@ -78,59 +78,19 @@ function main() {
     console.log('Failed to set the vertex information');
     return;
   }
-
-	// Register the Keyboard & Mouse Event-handlers------------------------------
-	// When users move, click or drag the mouse and when they press a key on the 
-	// keyboard the operating system create a simple text-based 'event' message.
-	// Your Javascript program can respond to 'events' if you:
-	// a) tell JavaScript to 'listen' for each event that should trigger an
-	//   action within your program: call the 'addEventListener()' function, and 
-	// b) write your own 'event-handler' function for each of the user-triggered 
-	//    actions; Javascript's 'event-listener' will call your 'event-handler'
-	//		function each time it 'hears' the triggering event from users.
-	//
-    // KEYBOARD:
-    // The 'keyDown' and 'keyUp' events respond to ALL keys on the keyboard,
-    //      including shift,alt,ctrl,arrow, pgUp, pgDn,f1,f2...f12 etc. 
+ 
 	window.addEventListener("keydown", myKeyDown, false);
-	// After each 'keydown' event, call the 'myKeyDown()' function.  The 'false' 
-	// arg (default) ensures myKeyDown() call in 'bubbling', not 'capture' stage)
-	// ( https://www.w3schools.com/jsref/met_document_addeventlistener.asp )
+
 	window.addEventListener("keyup", myKeyUp, false);
-	// Called when user RELEASES the key.  Now rarely used...
-	// MOUSE:
-	// Create 'event listeners' for a few vital mouse events 
-	// (others events are available too... google it!).  
 	window.addEventListener("mousedown", myMouseDown); 
 	// (After each 'mousedown' event, browser calls the myMouseDown() fcn.)
     window.addEventListener("mousemove", myMouseMove); 
 	window.addEventListener("mouseup", myMouseUp);	
 	window.addEventListener("click", myMouseClick);				
 	window.addEventListener("dblclick", myMouseDblClick); 
-	// Note that these 'event listeners' will respond to mouse click/drag 
-	// ANYWHERE, as long as you begin in the browser window 'client area'.  
-	// You can also make 'event listeners' that respond ONLY within an HTML-5 
-	// element or division. For example, to 'listen' for 'mouse click' only
-	// within the HTML-5 canvas where we draw our WebGL results, try:
-	// g_canvasID.addEventListener("click", myCanvasClick);
-  //
-	// Wait wait wait -- these 'mouse listeners' just NAME the function called 
-	// when the event occurs!   How do the functions get data about the event?
-	//  ANSWER1:----- Look it up:
-	//    All mouse-event handlers receive one unified 'mouse event' object:
-	//	  https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
-	//  ANSWER2:----- Investigate:
-	// 		All Javascript functions have a built-in local variable/object named 
-	//    'argument'.  It holds an array of all values (if any) found in within
-	//	   the parintheses used in the function call.
-  //     DETAILS:  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/arguments
-	// END Keyboard & Mouse Event-Handlers---------------------------------------
-	
-  // Specify the color for clearing <canvas>
-  gl.clearColor(0.3, 0.3, 0.3, 1.0);
 
-	// NEW!! Enable 3D depth-test when drawing: don't over-draw at any pixel 
-	// unless the new Z value is closer to the eye than the old one..
+    gl.clearColor(0.3, 0.3, 0.3, 1.0);
+
 	gl.depthFunc(gl.LESS);
 	gl.enable(gl.DEPTH_TEST); 	  
 	
@@ -141,9 +101,6 @@ function main() {
     return;
   }
 
-
-  // ANIMATION: create 'tick' variable whose value is this function:
-  //----------------- 
   var tick = function() {
     animate();   // Update the rotation angle
     DrawAll()   // Draw all parts
@@ -274,58 +231,58 @@ var colorShapes = new Float32Array([
 
 
 
-
+// Draw the White cube
 	   1.0, -1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 3
-	   1.0,  1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 2
+	   1.0,  1.0, -1.0, 1.0,	  0.8, 0.8, 0.8,	// Node 2
 	   1.0,  1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,  // Node 4
 	   
 	   1.0,  1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 4
-	   1.0, -1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 7
+	   1.0, -1.0,  1.0, 1.0,	  0.8, 0.8, 0.8,	// Node 7
 	   1.0, -1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 3
   
 		  // +y face: GREEN
 	  -1.0,  1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 1
-	  -1.0,  1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 5
+	  -1.0,  1.0,  1.0, 1.0,	  0.8, 0.8, 0.8,	// Node 5
 	   1.0,  1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 4
   
 	   1.0,  1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 4
-	   1.0,  1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 2 
+	   1.0,  1.0, -1.0, 1.0,	  0.8, 0.8, 0.8,	// Node 2 
 	  -1.0,  1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 1
   
 		  // +z face: BLUE
 	  -1.0,  1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 5
-	  -1.0, -1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 6
+	  -1.0, -1.0,  1.0, 1.0,	  0.8, 0.8, 0.8,	// Node 6
 	   1.0, -1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 7
   
 	   1.0, -1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 7
-	   1.0,  1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 4
+	   1.0,  1.0,  1.0, 1.0,	  0.8, 0.8, 0.8,	// Node 4
 	  -1.0,  1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 5
   
 		  // -x face: CYAN
 	  -1.0, -1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 6	
-	  -1.0,  1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 5 
+	  -1.0,  1.0,  1.0, 1.0,	  0.8, 0.8, 0.8,	// Node 5 
 	  -1.0,  1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 1
 	  
 	  -1.0,  1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 1
-	  -1.0, -1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 0  
+	  -1.0, -1.0, -1.0, 1.0,	  0.8, 0.8, 0.8,	// Node 0  
 	  -1.0, -1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 6  
 	  
 		  // -y face: MAGENTA
 	   1.0, -1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 3
-	   1.0, -1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 7
+	   1.0, -1.0,  1.0, 1.0,	  0.8, 0.8, 0.8,	// Node 7
 	  -1.0, -1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 6
   
 	  -1.0, -1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 6
-	  -1.0, -1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 0
+	  -1.0, -1.0, -1.0, 1.0,	  0.8, 0.8, 0.8,	// Node 0
 	   1.0, -1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 3
   
 	   // -z face: YELLOW
 	   1.0,  1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 2
-	   1.0, -1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 3
+	   1.0, -1.0, -1.0, 1.0,	  0.8, 0.8, 0.8,	// Node 3
 	  -1.0, -1.0, -1.0, 1.0,	 1.0, 1.0, 1.0,	// Node 0		
   
 	  -1.0, -1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 0
-	  -1.0,  1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 1
+	  -1.0,  1.0, -1.0, 1.0,	  0.8, 0.8, 0.8,	// Node 1
 	   1.0,  1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 2
 
 
@@ -527,10 +484,10 @@ function DrawAll(){
 
 
 
-	g_modelMatrix.setTranslate(0.0,-0.3, 0.0);  // 'set' means DISCARD old matrix,
+	g_modelMatrix.setTranslate(0,-0.24, 0.0);  // 'set' means DISCARD old matrix,
 	g_modelMatrix.scale(1,1,-1);							// convert to left-handed coord sys																	// to match WebGL display canvas.
-	g_modelMatrix.scale(0.15, 0.15, 0.15);
-	g_modelMatrix.rotate(g_angle01, 2, 0, 1);  // Make new drawing axes that
+	g_modelMatrix.scale(0.12, 0.12, 0.12);
+	g_modelMatrix.rotate(g_angle01, 2, 1, 1);  // Make new drawing axes that
 	g_modelMatrix.translate(1.4, -0.6, 2);
 	g_modelMatrix.rotate(g_angle02, 1, 2, 5);  // Make new drawing axes that
 	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
@@ -569,36 +526,140 @@ function DrawAll(){
 	DrawTetra()
 	g_modelMatrix.rotate(160,1,0,0)
 	Draw_eyes()
-// //stars
-// 	g_modelMatrix.setTranslate(0.4, 0.4, 0.0);  // 'set' means DISCARD old matrix,
-// 	// (drawing axes centered in CVV), and then make new
-// 	// drawing axes moved to the lower-left corner of CVV.
-// 	g_modelMatrix.scale(1,1,-1);							// convert to left-handed coord sys													// to match WebGL display canvas.
-// 	g_modelMatrix.scale(0.2, 0.2, 0.2);				// Make it smaller.
-// 	Draw_star(400)
+	Draw_moon()
 
-// 	g_modelMatrix.setTranslate(0.4, 0.4, 0.0);  // 'set' means DISCARD old matrix,
-// 	// (drawing axes centered in CVV), and then make new
-// 	// drawing axes moved to the lower-left corner of CVV.
-// 	g_modelMatrix.scale(1,1,-1);							// convert to left-handed coord sys													// to match WebGL display canvas.
-// 	g_modelMatrix.scale(0.2, 0.2, 0.2);				// Make it smaller.
-// 	Draw_star(400)
-
-// 	g_modelMatrix.setTranslate(0.2, 0.2, 0.0);  // 'set' means DISCARD old matrix,
-// 	// (drawing axes centered in CVV), and then make new
-// 	// drawing axes moved to the lower-left corner of CVV.
-// 	g_modelMatrix.scale(1,1,-1);							// convert to left-handed coord sys													// to match WebGL display canvas.
-// 	g_modelMatrix.scale(0.2, 0.2, 0.2);				// Make it smaller.
-// 	Draw_star(100)
 
 	Draw_n_star(5)
 }
 
-// function Gen_rand_num() {
-// 	x = Math.random()*2-1
-// 	y = Math.random()*2-1
-//     return [x,y];
-// }
+function Draw_moon(){
+	let stack4 = []
+	g_modelMatrix.setTranslate(-0.45, 0.5, 0.0); 
+	g_modelMatrix.scale(1,1,-1);							// convert to left-handed coord sys													// to match WebGL display canvas.
+	g_modelMatrix.scale(0.2, 0.2, 0.2);				// Make it smaller.
+	var dist = Math.sqrt(g_xMdragTot*g_xMdragTot + g_yMdragTot*g_yMdragTot);
+	g_modelMatrix.rotate(dist*100, -g_yMdragTot+0.0001, g_xMdragTot+0.0001, 0.0);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 48, 36);
+	stack4.push(new Matrix4(g_modelMatrix));
+// RIGHT SIDE
+	g_modelMatrix.translate(0.36,0,0)
+	g_modelMatrix.scale(0.8,0.8,0.8);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 48, 36);
+	g_modelMatrix = stack4.pop();
+	stack4.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.translate(0.78,0,0)
+	g_modelMatrix.scale(0.5, 0.5, 0.5);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 48, 36);
+	g_modelMatrix = stack4.pop();
+	stack4.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.translate(1.1,0,0)
+	g_modelMatrix.scale(0.3, 0.3, 0.3);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 48, 36);
+// LEFT SIDE
+	g_modelMatrix = stack4.pop();
+	stack4.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.translate(-0.36,0,0)
+	g_modelMatrix.scale(0.8,0.8,0.8);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 48, 36);
+	g_modelMatrix = stack4.pop();
+	stack4.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.translate(-0.78,0,0)
+	g_modelMatrix.scale(0.5, 0.5, 0.5);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 48, 36);
+	g_modelMatrix = stack4.pop();
+	stack4.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.translate(-1.1,0,0)
+	g_modelMatrix.scale(0.3, 0.3, 0.3);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 48, 36);
+// UPPER SIDE
+	g_modelMatrix = stack4.pop();
+	stack4.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.translate(0,0.36,0)
+	g_modelMatrix.scale(0.8,0.8,0.8);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 48, 36);
+	g_modelMatrix = stack4.pop();
+	stack4.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.translate(0,0.78,0)
+	g_modelMatrix.scale(0.5, 0.5, 0.5);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 48, 36);
+	g_modelMatrix = stack4.pop();
+	stack4.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.translate(0,1.1,0)
+	g_modelMatrix.scale(0.3, 0.3, 0.3);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 48, 36);
+	// LOWER SIDE
+	g_modelMatrix = stack4.pop();
+	stack4.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.translate(0,-0.36,0)
+	g_modelMatrix.scale(0.8,0.8,0.8);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 48, 36);
+	g_modelMatrix = stack4.pop();
+	stack4.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.translate(0,-0.78,0)
+	g_modelMatrix.scale(0.5, 0.5, 0.5);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 48, 36);
+	g_modelMatrix = stack4.pop();
+	stack4.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.translate(0,-1.1,0)
+	g_modelMatrix.scale(0.3, 0.3, 0.3);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 48, 36);
+
+	// BACK SIDE
+	g_modelMatrix = stack4.pop();
+	stack4.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.translate(0,0.0,-0.36)
+	g_modelMatrix.scale(0.8,0.8,0.8);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 48, 36);
+	g_modelMatrix = stack4.pop();
+	stack4.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.translate(0,0,-0.78)
+	g_modelMatrix.scale(0.5, 0.5, 0.5);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 48, 36);
+	g_modelMatrix = stack4.pop();
+	stack4.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.translate(0,0,-1.1)
+	g_modelMatrix.scale(0.3, 0.3, 0.3);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 48, 36);
+
+
+	// BACK SIDE
+	g_modelMatrix = stack4.pop();
+	stack4.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.translate(0,0.0,0.36)
+	g_modelMatrix.scale(0.8,0.8,0.8);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 48, 36);
+	g_modelMatrix = stack4.pop();
+	stack4.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.translate(0,0,0.78)
+	g_modelMatrix.scale(0.5, 0.5, 0.5);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 48, 36);
+	g_modelMatrix = stack4.pop();
+	stack4.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.translate(0,0,1.1)
+	g_modelMatrix.scale(0.3, 0.3, 0.3);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 48, 36);
+
+}
+
 
 function Draw_n_star(n){
 	var i;
