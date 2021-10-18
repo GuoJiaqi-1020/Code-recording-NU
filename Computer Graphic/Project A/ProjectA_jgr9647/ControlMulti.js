@@ -32,14 +32,20 @@ var g_modelMatLoc;                  // that uniform's location in the GPU
 //------------For Animation---------------------------------------------
 var g_isRun = true;                 // run/stop for animation; used in tick().
 var g_lastMS = Date.now();    			// Timestamp for most-recently-drawn image; 
-                                    // in milliseconds; used by 'animate()' fcn 
-                                    // (now called 'timerAll()' ) to find time
-                                    // elapsed since last on-screen image.
 var g_angle01 = 0;                  // initial rotation angle
-var g_angle01Rate = 45.0;           // rotation speed, in degrees/second 
+var g_angle01Rate = 30.0;           // rotation speed, in degrees/second 
 
 var g_angle02 = 0;                  // initial rotation angle
-var g_angle02Rate = 60.0;           // rotation speed, in degrees/second 
+var g_angle02Rate = 80.0;           // rotation speed, in degrees/second 
+
+var g_angle03 = 0;                  // initial rotation angle
+var g_angle03Rate = 50.0;           // rotation speed, in degrees/second 
+
+var g_angle_leg1 = 10;                  // initial rotation angle
+var g_angle04Rate = 80.0;           // rotation speed, in degrees/second 
+
+var g_angle_leg2 = -45;                  // initial rotation angle
+var g_angle05Rate = 80.0;           // rotation speed, in degrees/second 
 
 //------------For mouse click-and-drag: -------------------------------
 var g_isDrag=false;		// mouse-drag: true when user holds down mouse button
@@ -134,14 +140,7 @@ function main() {
     console.log('Failed to get the storage location of u_ModelMatrix');
     return;
   }
-/* REPLACED by global var 'g_ModelMatrix' (declared, constructed at top)
-  // Create a local version of our model matrix in JavaScript 
-  var modelMatrix = new Matrix4();
-*/
-/* REPLACED by global g_angle01 variable (declared at top)
-  // Create, init current rotation angle value in JavaScript
-  var currentAngle = 0.0;
-*/
+
 
   // ANIMATION: create 'tick' variable whose value is this function:
   //----------------- 
@@ -172,48 +171,298 @@ function main() {
 
 
 function initVertexBuffer() {
-//==============================================================================
-// NOTE!  'gl' is now a global variable -- no longer needed as fcn argument!
+	//==============================================================================
+		var c30 = Math.sqrt(0.75);					// == cos(30deg) == sqrt(3) / 2
+		var sq2	= Math.sqrt(2.0);		
 
-	var c30 = Math.sqrt(0.75);					// == cos(30deg) == sqrt(3) / 2
-	var sq2	= Math.sqrt(2.0);						 
+var colorShapes = new Float32Array([
+	// Vertex coordinates(x,y,z,w) and color (R,G,B) for a color tetrahedron:
+	  //		Apex on +z axis; equilateral triangle base at z=0
+  /*	Nodes:  (a 'node' is a 3D location where we specify 1 or more vertices)
+	   0.0,	 0.0, sq2, 1.0,			1.0,  1.0,	1.0,	// Node 0 (apex, +z axis;  white)
+	   c30, -0.5, 0.0, 1.0, 		0.0,  0.0,  1.0, 	// Node 1 (base: lower rt; red)
+	   0.0,  1.0, 0.0, 1.0,  		1.0,  0.0,  0.0,	// Node 2 (base: +y axis;  grn)
+	  -c30, -0.5, 0.0, 1.0, 		0.0,  1.0,  0.0, 	// Node 3 (base:lower lft; blue)
+  
+	Build tetrahedron from individual triangles (gl.TRIANGLES); each triangle
+	requires us to specify 3 vertices in CCW order.  
+  */
+			  // Face 0: (left side)
+	   0.0,	 0.0, sq2, 1.0,			1.0,  0.0,  1.0,	// Node 0
+	   c30, -0.5, 0.0, 1.0, 		1.0,  1.0,  1.0, 	// Node 1
+	   0.0,  1.0, 0.0, 1.0,  		1.0,  0.0,  1.0,	// Node 2
+			  // Face 1: (right side)
+		   0.0,	 0.0, sq2, 1.0,		1.0,  0.0,  1.0,	// Node 0
+	   0.0,  1.0, 0.0, 1.0,  		1.0,  1.0,  1.0,	// Node 2
+	  -c30, -0.5, 0.0, 1.0, 		1.0,  0.0,  1.0, 	// Node 3
+		  // Face 2: (lower side)
+		   0.0,	 0.0, sq2, 1.0,		1.0,  0.0,  1.0,	// Node 0 
+	  -c30, -0.5, 0.0, 1.0, 		1.0,  1.0,  1.0, 	// Node 3
+	   c30, -0.5, 0.0, 1.0, 		1.0,  0.0,  1.0, 	// Node 1 
+		   // Face 3: (base side)  
+	  -c30, -0.5, 0.0, 1.0, 		1.0,  0.0,  1.0, 	// Node 3
+	   0.0,  1.0, 0.0, 1.0,  	    1.0,  1.0,  1.0,	// Node 2
+	   c30, -0.5, 0.0, 1.0, 		1.0,  0.0,  1.0, 	// Node 1
+   
+  /*    // Cube Nodes  ('node': a 3D location where we specify 1 or more vertices)
+	  -1.0, -1.0, -1.0, 1.0	// Node 0
+	  -1.0,  1.0, -1.0, 1.0	// Node 1
+	   1.0,  1.0, -1.0, 1.0	// Node 2
+	   1.0, -1.0, -1.0, 1.0	// Node 3
+	  
+	   1.0,  1.0,  1.0, 1.0	// Node 4
+	  -1.0,  1.0,  1.0, 1.0	// Node 5
+	  -1.0, -1.0,  1.0, 1.0	// Node 6
+	   1.0, -1.0,  1.0, 1.0	// Node 7
+  */
+		  // +x face: RED
+	   1.0, -1.0, -1.0, 1.0,	  1.0, 0.0, 0.0,	// Node 3
+	   1.0,  1.0, -1.0, 1.0,	  1.0, 1.0, 0.0,	// Node 2
+	   1.0,  1.0,  1.0, 1.0,	  1.0, 0.0, 0.0,  // Node 4
+	   
+	   1.0,  1.0,  1.0, 1.0,	  1.0, 0.1, 0.1,	// Node 4
+	   1.0, -1.0,  1.0, 1.0,	  1.0, 0.1, 0.1,	// Node 7
+	   1.0, -1.0, -1.0, 1.0,	  1.0, 0.1, 0.1,	// Node 3
+  
+		  // +y face: GREEN
+	  -1.0,  1.0, -1.0, 1.0,	  0.0, 0.5, 0.0,	// Node 1
+	  -1.0,  1.0,  1.0, 1.0,	  0.0, 1.0, 0.0,	// Node 5
+	   1.0,  1.0,  1.0, 1.0,	  0.0, 1.0, 0.0,	// Node 4
+  
+	   1.0,  1.0,  1.0, 1.0,	  0.1, 1.0, 0.1,	// Node 4
+	   1.0,  1.0, -1.0, 1.0,	  0.1, 1.0, 0.1,	// Node 2 
+	  -1.0,  1.0, -1.0, 1.0,	  0.5, 1.0, 0.1,	// Node 1
+  
+		  // +z face: BLUE
+	  -1.0,  1.0,  1.0, 1.0,	  1.0, 0.0, 1.0,	// Node 5
+	  -1.0, -1.0,  1.0, 1.0,	  0.6, 0.0, 1.0,	// Node 6
+	   1.0, -1.0,  1.0, 1.0,	  0.0, 0.0, 1.0,	// Node 7
+  
+	   1.0, -1.0,  1.0, 1.0,	  0.1, 0.3, 1.0,	// Node 7
+	   1.0,  1.0,  1.0, 1.0,	  0.6, 0.1, 1.0,	// Node 4
+	  -1.0,  1.0,  1.0, 1.0,	  0.1, 0.2, 1.0,	// Node 5
+  
+		  // -x face: CYAN
+	  -1.0, -1.0,  1.0, 1.0,	  0.0, 1.0, 1.0,	// Node 6	
+	  -1.0,  1.0,  1.0, 1.0,	  0.5, 1.0, 1.0,	// Node 5 
+	  -1.0,  1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 1
+	  
+	  -1.0,  1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 1
+	  -1.0, -1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 0  
+	  -1.0, -1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 6  
+	  
+		  // -y face: MAGENTA
+	   1.0, -1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 3
+	   1.0, -1.0,  1.0, 1.0,	  0.6, 0.1, 1.0,	// Node 7
+	  -1.0, -1.0,  1.0, 1.0,	  0.1, 1.0, 0.3,	// Node 6
+  
+	  -1.0, -1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 6
+	  -1.0, -1.0, -1.0, 1.0,	  1.0, 1.0, 0.0,	// Node 0
+	   1.0, -1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 3
+  
+	   // -z face: YELLOW
+	   1.0,  1.0, -1.0, 1.0,	  0.5, 1.0, 1.0,	// Node 2
+	   1.0, -1.0, -1.0, 1.0,	  1.0, 0.7, 1.0,	// Node 3
+	  -1.0, -1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 0		
+  
+	  -1.0, -1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 0
+	  -1.0,  1.0, -1.0, 1.0,	  1.0, 1.0, 0.3,	// Node 1
+	   1.0,  1.0, -1.0, 1.0,	  1.0, 0.2, 1.0,	// Node 2
+   
 
-  var colorShapes = new Float32Array([
-  // Vertex coordinates(x,y,z,w) and color (R,G,B) for a color tetrahedron:
-	//		Apex on +z axis; equilateral triangle base at z=0
-/*	Nodes:
-	 0.0,  0.0, sq2, 1.0,		1.0, 	1.0,	1.0,	// Node 0 (apex, +z axis;  white)
-     c30, -0.5, 0.0, 1.0, 		0.0,  0.0,  1.0, 	// Node 1 (base: lower rt; red)
-     0.0,  1.0, 0.0, 1.0,  		1.0,  0.0,  0.0,	// Node 2 (base: +y axis;  grn)
-    -c30, -0.5, 0.0, 1.0, 		0.0,  1.0,  0.0, 	// Node 3 (base:lower lft; blue)
-
-*/
-		// Face 0: (left side)  
-     0.0,  0.0, sq2, 1.0,		1.0,  1.0,	1.0,	// Node 0
-     c30, -0.5, 0.0, 1.0, 		0.0,  0.0,  1.0, 	// Node 1
-     0.0,  1.0, 0.0, 1.0,  		1.0,  0.0,  0.0,	// Node 2
-		// Face 1: (right side)
-	 0.0,   0.0, sq2, 1.0,		1.0,  1.0,	1.0,	// Node 0
-     0.0,  1.0, 0.0, 1.0,  		1.0,  0.0,  0.0,	// Node 2
-    -c30, -0.5, 0.0, 1.0, 		0.0,  1.0,  0.0, 	// Node 3
-    	// Face 2: (lower side)
-	0.0,   0.0, sq2, 1.0,		1.0,  1.0,	1.0,	// Node 0 
-    -c30, -0.5, 0.0, 1.0, 		0.0,  1.0,  0.0, 	// Node 3
-     c30, -0.5, 0.0, 1.0, 		0.0,  0.0,  1.0, 	// Node 1 
-     	// Face 3: (base side)  
-    -c30, -0.5,  0.0, 1.0, 		0.0,  1.0,  0.0, 	// Node 3
-     0.0,  1.0,  0.0, 1.0,  	1.0,  0.0,  0.0,	// Node 2
-     c30, -0.5,  0.0, 1.0, 		0.0,  0.0,  1.0, 	// Node 1
-
-	//  1.0, 0.0, 0.0, 1.0,        0.0,  0.5,  0.0,
-	//  1.0, 1.0, 0.0, 1.0,        1.0,  0.0,  0.0,
-	//  1.0, 0.5, 0.0, 1.0,        0.0,  0.0,  1.0,
 
 
-  ]);
-  g_vertsMax = 12;		// 12 tetrahedron vertices.
-  								// we can also draw any subset of these we wish,
-  								// such as the last 3 vertices.(onscreen at upper right)
+
+
+
+	   1.0, -1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 3
+	   1.0,  1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 2
+	   1.0,  1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,  // Node 4
+	   
+	   1.0,  1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 4
+	   1.0, -1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 7
+	   1.0, -1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 3
+  
+		  // +y face: GREEN
+	  -1.0,  1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 1
+	  -1.0,  1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 5
+	   1.0,  1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 4
+  
+	   1.0,  1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 4
+	   1.0,  1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 2 
+	  -1.0,  1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 1
+  
+		  // +z face: BLUE
+	  -1.0,  1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 5
+	  -1.0, -1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 6
+	   1.0, -1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 7
+  
+	   1.0, -1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 7
+	   1.0,  1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 4
+	  -1.0,  1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 5
+  
+		  // -x face: CYAN
+	  -1.0, -1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 6	
+	  -1.0,  1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 5 
+	  -1.0,  1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 1
+	  
+	  -1.0,  1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 1
+	  -1.0, -1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 0  
+	  -1.0, -1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 6  
+	  
+		  // -y face: MAGENTA
+	   1.0, -1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 3
+	   1.0, -1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 7
+	  -1.0, -1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 6
+  
+	  -1.0, -1.0,  1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 6
+	  -1.0, -1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 0
+	   1.0, -1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 3
+  
+	   // -z face: YELLOW
+	   1.0,  1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 2
+	   1.0, -1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 3
+	  -1.0, -1.0, -1.0, 1.0,	 1.0, 1.0, 1.0,	// Node 0		
+  
+	  -1.0, -1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 0
+	  -1.0,  1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 1
+	   1.0,  1.0, -1.0, 1.0,	  1.0, 1.0, 1.0,	// Node 2
+
+
+
+
+
+	   1.0, -1.0, -1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 3
+	   1.0,  1.0, -1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 2
+	   1.0,  1.0,  1.0, 1.0,	  0.0, 0.0, 0.0,  // Node 4
+	   
+	   1.0,  1.0,  1.0, 1.0,	  0.0, 0.0, 0.0,// Node 4
+	   1.0, -1.0,  1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 7
+	   1.0, -1.0, -1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 3
+  
+		  // +y face: GREEN
+	  -1.0,  1.0, -1.0, 1.0,	  0.0, 0.0, 0.0, // Node 1
+	  -1.0,  1.0,  1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 5
+	   1.0,  1.0,  1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 4
+  
+	   1.0,  1.0,  1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 4
+	   1.0,  1.0, -1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 2 
+	  -1.0,  1.0, -1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 1
+  
+		  // +z face: BLUE
+	  -1.0,  1.0,  1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 5
+	  -1.0, -1.0,  1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 6
+	   1.0, -1.0,  1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 7
+  
+	   1.0, -1.0,  1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 7
+	   1.0,  1.0,  1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 4
+	  -1.0,  1.0,  1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 5
+  
+		  // -x face: CYAN
+	  -1.0, -1.0,  1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 6	
+	  -1.0,  1.0,  1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 5 
+	  -1.0,  1.0, -1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 1
+	  
+	  -1.0,  1.0, -1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 1
+	  -1.0, -1.0, -1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 0  
+	  -1.0, -1.0,  1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 6  
+	  
+		  // -y face: MAGENTA
+	   1.0, -1.0, -1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 3
+	   1.0, -1.0,  1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 7
+	  -1.0, -1.0,  1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 6
+  
+	  -1.0, -1.0,  1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 6
+	  -1.0, -1.0, -1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 0
+	   1.0, -1.0, -1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 3
+  
+	   // -z face: YELLOW
+	   1.0,  1.0, -1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 2
+	   1.0, -1.0, -1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 3
+	  -1.0, -1.0, -1.0, 1.0,	 0.0, 0.0, 0.0,	// Node 0		
+  
+	  -1.0, -1.0, -1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 0
+	  -1.0,  1.0, -1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 1
+	   1.0,  1.0, -1.0, 1.0,	  0.0, 0.0, 0.0,	// Node 2
+
+
+	   //star
+	    0.0,  0.0,  0.25, 1.0,	  1.0, 1.0, 0.0,	// Node 0
+	    0.25, -0.25, 0.0, 1.0,	  1.0, 1.0, 0.0,	// Node 1
+		0.6,  0.0, 0.0, 1.0,	  1.0, 0.6, 0.0,
+
+		0.0,  0.0,  0.25, 1.0,	  1.0, 1.0, 0.0,	// Node 0
+	    0.25, -0.25, 0.0, 1.0,	  1.0, 1.0, 0.0,	// Node 1
+		0.0,  -0.75, 0.0, 1.0,	  1.0, 0.6, 0.0,
+
+		0.0,  0.0,  0.25, 1.0,	  1.0, 1.0, 0.0,
+	    -0.25, -0.25, 0.0, 1.0,	  1.0, 1.0, 0.0,
+		0.0,  -0.75, 0.0, 1.0,	  1.0, 0.6, 0.0,
+
+		0.0,  0.0,  0.25, 1.0,	  1.0, 1.0, 0.0,
+	    -0.25, -0.25, 0.0, 1.0,	  1.0, 1.0, 0.0,
+		-0.6,  0.0, 0.0, 1.0,	  1.0, 0.6, 0.0,
+
+		0.0,  0.0,  0.25, 1.0,	  1.0, 1.0, 0.0,
+	    -0.25, 0.25, 0.0, 1.0,	  1.0, 1.0, 0.0,
+		-0.6,  0.0, 0.0, 1.0,	  1.0, 0.6, 0.0,
+
+		0.0,  0.0,  0.25, 1.0,	  1.0, 1.0, 0.0,
+	    -0.25, 0.25, 0.0, 1.0,	  1.0, 1.0, 0.0,
+		0.0,  0.75, 0.0, 1.0,	  1.0, 0.6, 0.0,
+
+		0.0,  0.0,  0.25, 1.0,	  1.0, 1.0, 0.0,
+	    0.25, 0.25, 0.0, 1.0,	  1.0, 1.0, 0.0,
+		0.0,  0.75, 0.0, 1.0,	  1.0, 0.6, 0.0,
+
+		0.0,  0.0,  0.25, 1.0,	  1.0, 1.0, 0.0,
+	    0.25, 0.25, 0.0, 1.0,	  1.0, 1.0, 0.0,
+		0.6,  0.0, 0.0, 1.0,	  1.0, 0.6, 0.0,
+
+
+		//backside
+
+		0.0,  0.0,  -0.25, 1.0,	  1.0, 1.0, 0.0,	// Node 0
+	    0.25, -0.25, 0.0, 1.0,	  1.0, 1.0, 0.0,	// Node 1
+		0.6,  0.0, 0.0, 1.0,	  1.0, 0.6, 0.0,
+
+		0.0,  0.0,  -0.25, 1.0,	  1.0, 1.0, 0.0,	// Node 0
+	    0.25, -0.25, 0.0, 1.0,	  1.0, 1.0, 0.0,	// Node 1
+		0.0,  -0.75, 0.0, 1.0,	  1.0, 0.6, 0.0,
+
+		0.0,  0.0,  -0.25, 1.0,	  1.0, 1.0, 0.0,
+	    -0.25, -0.25, 0.0, 1.0,	  1.0, 1.0, 0.0,
+		0.0,  -0.75, 0.0, 1.0,	  1.0, 0.6, 0.0,
+
+		0.0,  0.0,  -0.25, 1.0,	  1.0, 1.0, 0.0,
+	    -0.25, -0.25, 0.0, 1.0,	  1.0, 1.0, 0.0,
+		-0.6,  0.0, 0.0, 1.0,	  1.0, 0.6, 0.0,
+
+		0.0,  0.0,  -0.25, 1.0,	  1.0, 1.0, 0.0,
+	    -0.25, 0.25, 0.0, 1.0,	  1.0, 1.0, 0.0,
+		-0.6,  0.0, 0.0, 1.0,	  1.0, 0.6, 0.0,
+
+		0.0,  0.0,  -0.25, 1.0,	  1.0, 1.0, 0.0,
+	    -0.25, 0.25, 0.0, 1.0,	  1.0, 1.0, 0.0,
+		0.0,  0.75, 0.0, 1.0,	  1.0, 0.6, 0.0,
+
+		0.0,  0.0,  -0.25, 1.0,	  1.0, 1.0, 0.0,
+	    0.25, 0.25, 0.0, 1.0,	  1.0, 1.0, 0.0,
+		0.0,  0.75, 0.0, 1.0,	  1.0, 0.6, 0.0,
+
+		0.0,  0.0,  -0.25, 1.0,	  1.0, 1.0, 0.0,
+	    0.25, 0.25, 0.0, 1.0,	  1.0, 1.0, 0.0,
+		0.6,  0.0, 0.0, 1.0,	  1.0, 0.6, 0.0,
+		
+		
+		
+
+	   
+
+
+
+	]);
+	var nn = 168;		
 	
   // Create a buffer object
   var shapeBufferHandle = gl.createBuffer();  
@@ -224,8 +473,6 @@ function initVertexBuffer() {
 
   // Bind the the buffer object to target:
   gl.bindBuffer(gl.ARRAY_BUFFER, shapeBufferHandle);
-  // Transfer data from Javascript array colorShapes to Graphics system VBO
-  // (Use sparingly--may be slow if you transfer large shapes stored in files)
   gl.bufferData(gl.ARRAY_BUFFER, colorShapes, gl.STATIC_DRAW);
 
   var FSIZE = colorShapes.BYTES_PER_ELEMENT; // how many bytes per stored value?
@@ -262,7 +509,6 @@ function initVertexBuffer() {
   	gl.FLOAT, 			// data type for each value: usually gl.FLOAT
   	false, 					// did we supply fixed-point data AND it needs normalizing?
   	FSIZE * 7, 			// Stride -- how many bytes used to store each vertex?
-  									// (x,y,z,w, r,g,b) * bytes/value
   	FSIZE * 4);			// Offset -- how many bytes from START of buffer to the
   									// value we will actually use?  Need to skip over x,y,z,w					
   gl.enableVertexAttribArray(a_Color);  
@@ -273,72 +519,225 @@ function initVertexBuffer() {
 
 function DrawAll(){
 	let stack = []
+
 	// Clear <canvas>  colors AND the depth buffer
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	clrColr = new Float32Array(4);
 	clrColr = gl.getParameter(gl.COLOR_CLEAR_VALUE);
-		// console.log("clear value:", clrColr);
-	//-------Draw Spinning Tetrahedron
-	g_modelMatrix.setTranslate(-0.4,-0.4, 0.0);  // 'set' means DISCARD old matrix,
-							// (drawing axes centered in CVV), and then make new
-							// drawing axes moved to the lower-left corner of CVV. 
-	g_modelMatrix.scale(1,1,-1);							// convert to left-handed coord sys
-																					// to match WebGL display canvas.
-	g_modelMatrix.scale(0.5, 0.5, 0.5);
-							// if you DON'T scale, tetra goes outside the CVV; clipped!
-	g_modelMatrix.rotate(g_angle01, 0, 1, 0);  // Make new drawing axes that
-	g_modelMatrix.rotate(g_angle02, 1, 0, 0);  // Make new drawing axes that
+
+
+
+	g_modelMatrix.setTranslate(0.0,-0.3, 0.0);  // 'set' means DISCARD old matrix,
+	g_modelMatrix.scale(1,1,-1);							// convert to left-handed coord sys																	// to match WebGL display canvas.
+	g_modelMatrix.scale(0.15, 0.15, 0.15);
+	g_modelMatrix.rotate(g_angle01, 2, 0, 1);  // Make new drawing axes that
+	g_modelMatrix.translate(1.4, -0.6, 2);
+	g_modelMatrix.rotate(g_angle02, 1, 2, 5);  // Make new drawing axes that
 	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
 
-
 	stack.push(new Matrix4(g_modelMatrix));
+	DrawCube()
+	g_modelMatrix.translate(-1.2, -0.3, 0);
+	g_modelMatrix.scale(1,1,-1);
+	Draw_claw_left(1,0,0)
+
+	g_modelMatrix = stack.pop();
+	stack.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.translate(1.2, -0.3, 0.0);
+	g_modelMatrix.scale(1,1,-1);
+	Draw_claw_right(1,0,0)
+
+	g_modelMatrix = stack.pop();
+	stack.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.translate(-0.5, -1.2, 0);
+	g_modelMatrix.scale(1,1,-1);
+	Draw_leg(g_angle_leg1)
+	g_modelMatrix = stack.pop();
+	stack.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.translate(0.5, -1.2, 0);
+	g_modelMatrix.scale(1,1,-1);
+	Draw_leg(g_angle_leg2)
+
+
+	g_modelMatrix = stack.pop();
+	stack.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.translate(0, 1.8, 0.0);
+	g_modelMatrix.scale(1,1,-1);
+	g_modelMatrix.rotate(20,1,0,0)
+	g_modelMatrix.rotate(180,1,0,0)
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
 	DrawTetra()
-	//==============================================================================
-	//==============================================================================
+	g_modelMatrix.rotate(160,1,0,0)
+	Draw_eyes()
+// //stars
+// 	g_modelMatrix.setTranslate(0.4, 0.4, 0.0);  // 'set' means DISCARD old matrix,
+// 	// (drawing axes centered in CVV), and then make new
+// 	// drawing axes moved to the lower-left corner of CVV.
+// 	g_modelMatrix.scale(1,1,-1);							// convert to left-handed coord sys													// to match WebGL display canvas.
+// 	g_modelMatrix.scale(0.2, 0.2, 0.2);				// Make it smaller.
+// 	Draw_star(400)
 
+// 	g_modelMatrix.setTranslate(0.4, 0.4, 0.0);  // 'set' means DISCARD old matrix,
+// 	// (drawing axes centered in CVV), and then make new
+// 	// drawing axes moved to the lower-left corner of CVV.
+// 	g_modelMatrix.scale(1,1,-1);							// convert to left-handed coord sys													// to match WebGL display canvas.
+// 	g_modelMatrix.scale(0.2, 0.2, 0.2);				// Make it smaller.
+// 	Draw_star(400)
 
+// 	g_modelMatrix.setTranslate(0.2, 0.2, 0.0);  // 'set' means DISCARD old matrix,
+// 	// (drawing axes centered in CVV), and then make new
+// 	// drawing axes moved to the lower-left corner of CVV.
+// 	g_modelMatrix.scale(1,1,-1);							// convert to left-handed coord sys													// to match WebGL display canvas.
+// 	g_modelMatrix.scale(0.2, 0.2, 0.2);				// Make it smaller.
+// 	Draw_star(100)
 
-	g_modelMatrix.translate(0.0, 0.0, Math.sqrt(2.0)+0.4);
-	g_modelMatrix.scale(1,1,-1);
-	g_modelMatrix.scale(0.4, 0.2, 0.4);
-	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
-	DrawPart1();
+	Draw_n_star(5)
+}
 
+// function Gen_rand_num() {
+// 	x = Math.random()*2-1
+// 	y = Math.random()*2-1
+//     return [x,y];
+// }
 
-	g_modelMatrix = stack.pop();
-	stack.push(new Matrix4(g_modelMatrix));
-	g_modelMatrix.translate(Math.sqrt(0.75), -0.5, 0.4);
-	g_modelMatrix.scale(1,1,-1);
-	g_modelMatrix.scale(0.4, 0.2, 0.4);
-	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
-	DrawPart1();
+function Draw_n_star(n){
+	var i;
 
-
-	g_modelMatrix = stack.pop();
-	g_modelMatrix.translate(-Math.sqrt(0.75), -0.5, 0.4);
-	g_modelMatrix.scale(1,1,-1);
-	g_modelMatrix.scale(0.4, 0.2, 0.4);
-	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
-	DrawPart1();
-
-
-    // NEXT, create different drawing axes, and...
-	g_modelMatrix.setTranslate(0.5, 0.5, 0.0);  // 'set' means DISCARD old matrix,
-	// (drawing axes centered in CVV), and then make new
-	// drawing axes moved to the lower-left corner of CVV.
-	g_modelMatrix.scale(1,1,-1);							// convert to left-handed coord sys
-																// to match WebGL display canvas.
-	g_modelMatrix.scale(0.2, 0.5, 0.2);				// Make it smaller.
-
-
-	var dist = Math.sqrt(g_xMdragTot*g_xMdragTot + g_yMdragTot*g_yMdragTot);
-	g_modelMatrix.rotate(dist*120.0, -g_yMdragTot+0.0001, g_xMdragTot+0.0001, 0.0);
-	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
-	//   DrawWedge()
-	DrawPart2()
+	for (i = 1; i < 4; i++){
+		x = Math.random()*2-1
+		y = Math.random()*2-1
+		size = Math.random()*0.1+0.05
+		rotate_par = Math.random()*160
+		Draw_star(rotate_par, x, y, size)
+	}
 }
 
 
+function Draw_star(rotate_par,x,y,size){
+	g_modelMatrix.setTranslate(x, y, 0.0); 
+	g_modelMatrix.scale(1,1,-1);							// convert to left-handed coord sys													// to match WebGL display canvas.
+	g_modelMatrix.scale(size, size, size);				// Make it smaller.
+	var dist = Math.sqrt(g_xMdragTot*g_xMdragTot + g_yMdragTot*g_yMdragTot);
+	g_modelMatrix.rotate(dist*rotate_par, -g_yMdragTot+0.0001, g_xMdragTot+0.0001, 0.0);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	// Draw only the last 2 triangles: start at vertex 6, draw 6 vertices
+	gl.drawArrays(gl.TRIANGLES, 120, 48);
+
+}
+
+function Draw_eyes(){
+	let stack3 = []
+	stack3.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.scale(0.2,0.2,0.2)
+	g_modelMatrix.translate(2.5,2,-4)
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 48, 36);
+	g_modelMatrix.scale(0.5,0.5,0.5)
+	g_modelMatrix.translate(-0.5,-0.5,-2.1)
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 84, 36);
+	g_modelMatrix = stack3.pop();
+	g_modelMatrix.scale(0.2,0.2,0.2)
+	g_modelMatrix.translate(-2.5,2,-4)
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 48, 36);
+	g_modelMatrix.scale(0.5,0.5,0.5)
+	g_modelMatrix.translate(-0.5,-0.5,-2.1)
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 84, 36);
+}
+
+function Draw_leg(g){
+	let stack2 = []
+	g_modelMatrix.scale(0.2, 0.2, 0.2);
+
+	g_modelMatrix.rotate(g, 1,0,0);  // Make new drawing axes that
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	DrawCube();
+	g_modelMatrix.translate(0, -1.5, -1.5);
+	g_modelMatrix.rotate(g, 1, 0, 0);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	DrawCube();
+	g_modelMatrix.translate(0, -1.5, -1.5);
+	g_modelMatrix.scale(2, 1, 2);
+	g_modelMatrix.rotate(g, 1, 0, 0);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	DrawCube();
+
+}
+
+function Draw_claw_right(x,y,z){
+	let stack2 = []
+	g_modelMatrix.scale(0.2, 0.2, 0.2);
+	// g_modelMatrix.rotate(g_angle02, 1, 0, 0);
+	g_modelMatrix.rotate(90, 0, -1, 0);
+	g_modelMatrix.rotate(g_angle02, x, y, z);  // Make new drawing axes that
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	DrawCube();
+	g_modelMatrix.translate(0, -1.5, -1.5);
+	g_modelMatrix.rotate(g_angle02, x, y, z);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	DrawCube();
+	g_modelMatrix.translate(0, -1.5, -1.5);
+	g_modelMatrix.rotate(g_angle02, x, y, z);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	DrawCube();
+	g_modelMatrix.translate(0, -1.5, -1.5);
+	g_modelMatrix.rotate(g_angle02, x, y, z);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	DrawCube();
+	g_modelMatrix.translate(0, -1.5, -1.5);
+	g_modelMatrix.rotate(g_angle02, x, y, z);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	DrawCube();
+
+	// // lower claw
+	// g_modelMatrix.translate(0, -2.5, 0);
+	// g_modelMatrix.scale(0.5, 0.5, 0.5);
+	// g_modelMatrix.rotate(90, 1, 0, 0)
+
+	// stack2.push(new Matrix4(g_modelMatrix));
+	// gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	// // DrawCube();
+
+	// g_modelMatrix = stack2.pop();
+	// g_modelMatrix.translate(0, 0, -2);
+	// gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	// DrawCube();
+
+
+
+}
+
+function Draw_claw_left(x,y,z){
+	g_modelMatrix.scale(0.2, 0.2, 0.2);
+	g_modelMatrix.rotate(90, 0, 1, 0);
+	g_modelMatrix.rotate(g_angle02, x, y, z);  
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	DrawCube();
+	g_modelMatrix.translate(0, -1.5, -1.5);
+	g_modelMatrix.rotate(g_angle02, x, y, z);
+	// g_modelMatrix.rotate(g_angle02, 0, 1, 0);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	DrawCube();
+	g_modelMatrix.translate(0, -1.5, -1.5);
+	g_modelMatrix.rotate(g_angle02, x, y, z);
+	// g_modelMatrix.rotate(g_angle02, 0, -1, 0);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	DrawCube();
+	g_modelMatrix.translate(0, -1.5, -1.5);
+	g_modelMatrix.rotate(g_angle02, x, y, z);
+	// g_modelMatrix.rotate(g_angle02, 0, -1, 0);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	DrawCube();
+	g_modelMatrix.translate(0, -1.5, -1.5);
+	g_modelMatrix.rotate(g_angle02, x, y, z);
+	// g_modelMatrix.rotate(g_angle02, 0, -1, 0);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	DrawCube();
+	
+
+}
 
 function DrawTetra() {
 	// Draw triangles: start at vertex 0 and draw 12 vertices
@@ -351,8 +750,8 @@ function DrawWedge() {
 
 }
 
-function DrawPart1(){
-   gl.drawArrays(gl.TRIANGLES, 6,6);
+function DrawCube(){
+   gl.drawArrays(gl.TRIANGLES, 12,36);
 
 }
 function DrawPart2(){
@@ -380,12 +779,23 @@ function animate() {
   if(g_angle01 > 180.0) g_angle01 = g_angle01 - 360.0;
   if(g_angle01 <-180.0) g_angle01 = g_angle01 + 360.0;
 
-	g_angle02 = g_angle02 + (g_angle02Rate * elapsed) / 1000.0;
+  g_angle02 = g_angle02 + (g_angle02Rate * elapsed) / 1000.0;
 //   if(g_angle02 > 180.0) g_angle02 = g_angle02 - 360.0;
 //   if(g_angle02 <-180.0) g_angle02 = g_angle02 + 360.0;
   
-  if(g_angle02 > 30.0 && g_angle02Rate > 0) g_angle02Rate *= -1.0;
+  if(g_angle02 > 45.0 && g_angle02Rate > 0) g_angle02Rate *= -1.0;
   if(g_angle02 < 0.0  && g_angle02Rate < 0) g_angle02Rate *= -1.0;
+
+  g_angle_leg1 = g_angle_leg1 - (g_angle04Rate * elapsed) / 1000.0;
+    if(g_angle_leg1 < -50.0 && g_angle04Rate > 0) g_angle04Rate *= -1.0;
+	if(g_angle_leg1 > 10.0 && g_angle04Rate < 0) g_angle04Rate *= -1.0;
+
+
+
+  g_angle_leg2 = g_angle_leg2 + (g_angle05Rate * elapsed) / 1000.0;
+	if(g_angle_leg2 > 10 && g_angle05Rate > 0) g_angle05Rate *= -1.0;
+	if(g_angle_leg2 < -50.0  && g_angle05Rate < 0) g_angle05Rate *= -1.0;
+
 }
 
 //==================HTML Button Callbacks======================
@@ -531,29 +941,12 @@ function myMouseUp(ev) {
 };
 
 function myMouseClick(ev) {
-//=============================================================================
-// Called when user completes a mouse-button single-click event 
-// (e.g. mouse-button pressed down, then released)
-// 									   
-//    WHICH button? try:  console.log('ev.button='+ev.button); 
-// 		ev.clientX, ev.clientY == mouse pointer location, but measured in webpage 
-//		pixels: left-handed coords; UPPER left origin; Y increases DOWNWARDS (!) 
-//    See myMouseUp(), myMouseDown() for conversions to  CVV coordinates.
-
-  // STUB
 	console.log("myMouseClick() on button: ", ev.button); 
 }	
 
 function myMouseDblClick(ev) {
 //=============================================================================
 // Called when user completes a mouse-button double-click event 
-// 									   
-//    WHICH button? try:  console.log('ev.button='+ev.button); 
-// 		ev.clientX, ev.clientY == mouse pointer location, but measured in webpage 
-//		pixels: left-handed coords; UPPER left origin; Y increases DOWNWARDS (!) 
-//    See myMouseUp(), myMouseDown() for conversions to  CVV coordinates.
-
-  // STUB
 	console.log("myMouse-DOUBLE-Click() on button: ", ev.button); 
 }	
 
