@@ -29,6 +29,9 @@ var g_vertsMax = 0;                 // number of vertices held in the VBO
 var g_modelMatrix = new Matrix4();  // Construct 4x4 matrix; contents get sent
                                     // to the GPU/Shaders as a 'uniform' var.
 var g_modelMatLoc;                  // that uniform's location in the GPU
+var hori_shift = 0;
+var vert_shift = 0;
+
 
 //------------For Animation---------------------------------------------
 var g_isRun = true;                 // run/stop for animation; used in tick().
@@ -483,12 +486,10 @@ function DrawAll(){
 	clrColr = new Float32Array(4);
 	clrColr = gl.getParameter(gl.COLOR_CLEAR_VALUE);
 
-
-
-	g_modelMatrix.setTranslate(0,-0.24, 0.0);  // 'set' means DISCARD old matrix,
-	g_modelMatrix.scale(1,1,-1);							// convert to left-handed coord sys																	// to match WebGL display canvas.
+	g_modelMatrix.setTranslate(0+hori_shift,-0.24+vert_shift, 0.0);  
+	g_modelMatrix.scale(1,1,-1);															// to match WebGL display canvas.
 	g_modelMatrix.scale(0.12, 0.12, 0.12);
-	g_modelMatrix.rotate(g_angle01, 2, 1, 1);  // Make new drawing axes that
+	g_modelMatrix.rotate(g_angle01, 2, 1, 1);  
 	g_modelMatrix.translate(1.4, -0.6, 2);
 	g_modelMatrix.rotate(g_angle02, 1, 2, 5);  // Make new drawing axes that
 	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
@@ -1059,6 +1060,13 @@ function myKeyDown(kev) {
 			document.getElementById('KeyDownResult').innerHTML =  
 			'myKeyDown() found a/A key. Strafe LEFT!';
 			break;
+		case "KeyR":
+			console.log("a/A key: Reset the shifting!\n");
+			document.getElementById('KeyDownResult').innerHTML =  
+			'myKeyDown() found a/A key. Reset the robot shifting!';
+			hori_shift = 0;
+			vert_shift = 0;
+			break;
     case "KeyD":
 			console.log("d/D key: Strafe RIGHT!\n");
 			document.getElementById('KeyDownResult').innerHTML = 
@@ -1080,21 +1088,25 @@ function myKeyDown(kev) {
 			// and print on webpage in the <div> element with id='Result':
   		document.getElementById('KeyDownResult').innerHTML =
   			'myKeyDown(): Left Arrow='+kev.keyCode;
+			  hori_shift -=0.05
 			break;
 		case "ArrowRight":
 			console.log('right-arrow.');
   		document.getElementById('KeyDownResult').innerHTML =
   			'myKeyDown():Right Arrow:keyCode='+kev.keyCode;
+			  hori_shift +=0.05
   		break;
 		case "ArrowUp":		
 			console.log('   up-arrow.');
   		document.getElementById('KeyDownResult').innerHTML =
   			'myKeyDown():   Up Arrow:keyCode='+kev.keyCode;
+			  vert_shift +=0.05
 			break;
 		case "ArrowDown":
 			console.log(' down-arrow.');
   		document.getElementById('KeyDownResult').innerHTML =
   			'myKeyDown(): Down Arrow:keyCode='+kev.keyCode;
+			  vert_shift -=0.05
   		break;	
     default:
       console.log("UNUSED!");
