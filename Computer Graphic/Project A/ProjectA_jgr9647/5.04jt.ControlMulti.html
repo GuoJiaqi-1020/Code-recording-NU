@@ -2,17 +2,17 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>ControlMulti</title>
+    <title>A little robot swimming in the starry night</title>
   </head>
 	<!--	Create the HTML5 'canvas' element in which we will run WebGL  -->
   <body onload="main()">
-    <canvas id="webgl" width="300" height="300">
+    <canvas id="webgl" width="600" height="600">
     Please use a browser that supports "canvas"
     </canvas>
 	<p>
 	<!-- Next, make a simple block of text 
 	-->
-	Enter the number of stars you want to appear on the canvas:
+	Enter the number of stars(n>1) you want to appear on the canvas. The higher the number, the more stars will appear on the screen at the same time
 	<!-- Next, make an HTML 'input' box element, a text-box 10 chars wide where users
 		can type in text.  Give it an ID name so that our JavaScript program
 		(e.g. ControlMulti.js, loaded near the end of this file) can access this
@@ -24,9 +24,11 @@
 
 
 <hr> <!-- Draw a horizontal-line separator------------->
-Drag the mouse to rotate the moon at the same time when the stars will follow the rotation. I hope you find the best of it
+Drag the mouse to rotate the moon at the same time when the stars will follow the rotation. 
 <br>
-</t> ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++    <br>	
+<p>
+(One thing to note is that the stars will rotate at different angles and may not be particularly easy to observe because they are flashing all the time)<br>
+</t> =====================================================================    <br>	
 <span id='MouseAtResult'  >   Mouse At: </span> <!-- myMouseMove() modifies this span object -->
 		<br>
 		<span id='MouseDragResult'> Mouse Drag: </span> <!-- myMouseUp() modifies this span object -->
@@ -35,8 +37,12 @@ Drag the mouse to rotate the moon at the same time when the stars will follow th
 			<button type="button" onClick='clearDrag()'>Reset the change to the moon </button>
 	<p>
 <hr>
-		<br>
-		<span id='KeyDownResult'  > KeyDown:    </span> <!-- myKeyDown() modifies this span object -->		
+You can use your keyboard to control the small robot can reach the moon, with the direction keys on the keyboard to control his direction<br>
+<p>		
+Press "R" to return the robot to its original orbit
+<p>
+
+<span id='KeyDownResult'  > KeyDown:    </span> <!-- myKeyDown() modifies this span object -->		
 		<br>
 		<span id='KeyModResult'   > KeyMod :<br><br>   </span> <!-- myKeyDown() modifies this span object -->
 		<br>
@@ -44,7 +50,7 @@ Drag the mouse to rotate the moon at the same time when the stars will follow th
 	<br>
     </t> Click the three buttons below to control the speed of the little robot through the starry sky	<br>
 	<br>
-	</t> ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++    <br>
+	</t> ===================================================================    <br>
 
       <button type="button" onclick="spinDown()">Travel in direction << </button>
 	  <button type="button" onclick="runStop()">Run/Stop</button>
