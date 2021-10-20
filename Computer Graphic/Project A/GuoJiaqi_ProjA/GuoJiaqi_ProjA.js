@@ -20,6 +20,7 @@ var FSHADER_SOURCE =
   '}\n';
 
 
+
 let stack = []
 var num_star=1;
 var gl;           // webGL Rendering Context. Set in main(), used everywhere.
@@ -37,13 +38,20 @@ var vert_shift = 0;
 var g_isRun = true;                 // run/stop for animation; used in tick().
 var g_lastMS = Date.now();    			// Timestamp for most-recently-drawn image; 
 var g_angle01 = 0;                  // initial rotation angle
-var g_angle01Rate = 30.0;           // rotation speed, in degrees/second 
+var g_angle01Rate = 40.0;           // rotation speed, in degrees/second 
+
+
+var g_butter = 0;                  // initial rotation angle
+var g_butterRate = 20.0;           // rotation speed, in degrees/second 
 
 var g_angle02 = 0;                  // initial rotation angle
 var g_angle02Rate = 80.0;           // rotation speed, in degrees/second 
 
 var g_angle03 = 0;                  // initial rotation angle
-var g_angle03Rate = 50.0;           // rotation speed, in degrees/second 
+var g_angle03Rate = 120.0;           // rotation speed, in degrees/second 
+
+var g_angle04 = 0;                  // initial rotation angle
+var g_angle04Ra = 120.0;           // rotation speed, in degrees/second 
 
 var g_angle_leg1 = 10;                  // initial rotation angle
 var g_angle04Rate = 80.0;           // rotation speed, in degrees/second 
@@ -137,23 +145,12 @@ function initVertexBuffer() {
 		var sq2	= Math.sqrt(2.0);		
 
 var colorShapes = new Float32Array([
-	// Vertex coordinates(x,y,z,w) and color (R,G,B) for a color tetrahedron:
-	  //		Apex on +z axis; equilateral triangle base at z=0
-  /*	Nodes:  (a 'node' is a 3D location where we specify 1 or more vertices)
-	   0.0,	 0.0, sq2, 1.0,			1.0,  1.0,	1.0,	// Node 0 (apex, +z axis;  white)
-	   c30, -0.5, 0.0, 1.0, 		0.0,  0.0,  1.0, 	// Node 1 (base: lower rt; red)
-	   0.0,  1.0, 0.0, 1.0,  		1.0,  0.0,  0.0,	// Node 2 (base: +y axis;  grn)
-	  -c30, -0.5, 0.0, 1.0, 		0.0,  1.0,  0.0, 	// Node 3 (base:lower lft; blue)
-  
-	Build tetrahedron from individual triangles (gl.TRIANGLES); each triangle
-	requires us to specify 3 vertices in CCW order.  
-  */
 			  // Face 0: (left side)
 	   0.0,	 0.0, sq2, 1.0,			1.0,  0.0,  1.0,	// Node 0
 	   c30, -0.5, 0.0, 1.0, 		1.0,  1.0,  1.0, 	// Node 1
 	   0.0,  1.0, 0.0, 1.0,  		1.0,  0.0,  1.0,	// Node 2
 			  // Face 1: (right side)
-		   0.0,	 0.0, sq2, 1.0,		1.0,  0.0,  1.0,	// Node 0
+	  0.0,	 0.0, sq2, 1.0,		1.0,  0.0,  1.0,	// Node 0
 	   0.0,  1.0, 0.0, 1.0,  		1.0,  1.0,  1.0,	// Node 2
 	  -c30, -0.5, 0.0, 1.0, 		1.0,  0.0,  1.0, 	// Node 3
 		  // Face 2: (lower side)
@@ -500,8 +497,74 @@ var colorShapes = new Float32Array([
 		 0.0, 0.0,  2.0, 1.0,	  1.0, 0.2, 0.8,	// Node 0	
 	   
 
+		 //butterfly body
+		 0.0, 0.0, 0.25, 1.0,      0.5, 1.0, 0.6,
+		 0.25, 0.0, 0.0, 1.0,      0.9, 0.6, 0.5,
+		 0.0,  1.0, 0.0, 1.0,      0.6, 0.1, 0.4,
+
+		 0.0, 0.0, 0.25, 1.0,      0.5, 1.0, 0.6,
+		 -0.25, 0.0, 0.0, 1.0,      0.9, 0.6, 0.5,
+		 0.0,  1.0, 0.0, 1.0,      0.4, 0.1, 0.4,
+
+		 0.0, 0.0, 0.25, 1.0,      0.5, 1.0, 0.6,
+		 -0.25, 0.0, 0.0, 1.0,      0.9, 0.6, 0.5,
+		 0.0,  -0.5, 0.0, 1.0,      0.6, 0.8, 0.4,
+
+		 0.0, 0.0, 0.25, 1.0,      0.5, 1.0, 0.6,
+		 0.25, 0.0, 0.0, 1.0,      0.9, 0.6, 0.5,
+		 0.0,  -0.5, 0.0, 1.0,      0.6, 0.8, 0.4,
+
+		 0.0,  -0.5, 0.0, 1.0,      0.2, 0.8, 0.4,
+		 -0.25, 0.0, 0.0, 1.0,      0.4, 0.6, 0.5,
+		 0.25, 0.0, 0.0, 1.0,       0.3, 0.1, 0.5,
+
+		 0.25, 0.0, 0.0, 1.0,       0.3, 0.7, 0.5,
+		 0.0,  1.0, 0.0, 1.0,       0.6, 0.8, 0.4,
+		 0.0,  1.0, 0.0, 1.0,      0.6, 0.8, 0.4,
+
+		 0.0, 0.0, -0.25, 1.0,      0.5, 1.0, 0.6,
+		 0.25, 0.0, 0.0, 1.0,      0.9, 0.6, 0.5,
+		 0.0,  1.0, 0.0, 1.0,      0.6, 0.1, 0.4,
+
+		 0.0, 0.0, -0.25, 1.0,      0.5, 1.0, 0.6,
+		 -0.25, 0.0, 0.0, 1.0,      0.9, 0.6, 0.5,
+		 0.0,  1.0, 0.0, 1.0,      0.4, 0.1, 0.4,
+
+		 0.0, 0.0, -0.25, 1.0,      0.5, 1.0, 0.6,
+		 -0.25, 0.0, 0.0, 1.0,      0.9, 0.6, 0.5,
+		 0.0,  -0.5, 0.0, 1.0,      0.6, 0.8, 0.4,
+
+		 0.0, 0.0, -0.25, 1.0,      0.5, 1.0, 0.6,
+		 0.25, 0.0, 0.0, 1.0,      0.9, 0.6, 0.5,
+		 0.0,  -0.5, 0.0, 1.0,      0.6, 0.8, 0.4,
+
+
+
+		 // buttterfly wings
+		 0.0, 0.5 , 0.25, 1.0,       0.6, 0.3, 0.2,
+		 1.0, 0.0, 0.0, 1.0,         0.5, 0.1, 0.2,
+		 0.0, -0.5, 0.25, 1.0,       1.0, 0.9, 1.0,
+
+		 0.0, 0.5 , 0.25, 1.0,       0.6, 0.8, 0.2,
+		 1.0,  0.0,  0.0, 1.0,        0.5, 0.1, 0.2,
+		 -1.0, 0.0, 0.0, 1.0,        0.5, 0.1, 0.2,
+
+		 1.0, 0.0, 0.0, 1.0,         0.5, 0.1, 0.2,
+		 0.0, -0.5, 0.25, 1.0,       1.0, 0.0, 0.0,
+		 -1.0, 0.0, 0.0, 1.0,        0.5, 0.1, 0.2,
+
+		 0.0, -0.5, 0.25, 1.0,       1.0, 0.0, 1.0,
+		 -1.0, 0.0, 0.0, 1.0,        0.5, 0.1, 0.2,
+		 1.0, 0.0, 0.0, 1.0,         0.5, 0.1, 0.2,
+
+
+
+
+
+
+
 	]);
-	var nn = 216;		
+	var nn = 258;		
 	
   // Create a buffer object
   var shapeBufferHandle = gl.createBuffer();  
@@ -558,20 +621,29 @@ var colorShapes = new Float32Array([
 
 function DrawAll(){
 	let stack = []
-
+	let stack2 = []
 	// Clear <canvas>  colors AND the depth buffer
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	clrColr = new Float32Array(4);
 	clrColr = gl.getParameter(gl.COLOR_CLEAR_VALUE);
+	g_modelMatrix.setTranslate(0.2, 0.74, 0.0);  
+	Draw_butterfly(0.08, 0.4)
+	g_modelMatrix.setTranslate(-0.1, -0.6, 0.0);  
+	Draw_butterfly(0.05, 1.1)
+	g_modelMatrix.setTranslate(0.6, -0.5, 0.0);  
+	Draw_butterfly(0.08,0.6)
+	g_modelMatrix.setTranslate(-0.8, 0, 0.0);  
+	Draw_butterfly(0.07,0.2)
+
+
 
 	g_modelMatrix.setTranslate(0+hori_shift,-0.24+vert_shift, 0.0);  
 	g_modelMatrix.scale(1,1,-1);															// to match WebGL display canvas.
 	g_modelMatrix.scale(0.12, 0.12, 0.12);
 	g_modelMatrix.rotate(g_angle01, 2, 1, 1);  
-	g_modelMatrix.translate(1.4, -0.6, 2);
+	g_modelMatrix.translate(1.4, -1.6, 2);
 	g_modelMatrix.rotate(g_angle02, 1, 2, 5);  // Make new drawing axes that
 	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
-
 	stack.push(new Matrix4(g_modelMatrix));
 	gl.drawArrays(gl.TRIANGLES, 168,48);
 
@@ -605,12 +677,74 @@ function DrawAll(){
 	g_modelMatrix.rotate(180,1,0,0)
 	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
 	DrawTetra()
-	g_modelMatrix.rotate(160,1,0,0)
 	Draw_eyes()
 	Draw_moon()
 	// Draw_star(100, 0.5, 0.5, 0.5)
 
 	Draw_n_star(num_star)
+}
+
+function Draw_butterfly(size,coff){
+	let stack = []
+	let stack2 = []
+	
+	g_modelMatrix.scale(1,1,-1);
+	g_modelMatrix.scale(size, size, size);
+	g_modelMatrix.rotate(g_butter*coff*0.7, 4*coff, 2*coff, 1);  
+	g_modelMatrix.translate(1.5*coff, -2, 1);
+	g_modelMatrix.rotate(g_butter*coff, 4*coff, 2*coff, 1);  
+	g_modelMatrix.translate(-1*coff, -2*coff, 1);
+	g_modelMatrix.translate(2, -2, 1);
+	g_modelMatrix.rotate(g_angle02, 1, 4, 3);  // Make new drawing axes that
+	stack.push(new Matrix4(g_modelMatrix));
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 216,30);
+	g_modelMatrix.translate(0,-0.5, 0)
+	g_modelMatrix.scale(0.15, 0.15, 0.15);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	//head
+	gl.drawArrays(gl.TRIANGLES, 48,36);
+
+	g_modelMatrix = stack.pop();
+	stack.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.scale(0.8, 0.8, 0.8);
+	g_modelMatrix.rotate(g_angle03,0,1,0)
+	g_modelMatrix.rotate(20,0,0,1)
+	g_modelMatrix.translate(0.25,0, 0);
+	stack2.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.translate(1,0, 0);
+	// g_modelMatrix.rotate()
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 246,12);
+	g_modelMatrix = stack2.pop();
+	g_modelMatrix.translate(-0.36,0, 0);
+	g_modelMatrix.rotate(g_angle03,0,1,0);
+	g_modelMatrix.rotate(-40,0,0,1);
+	g_modelMatrix.translate(1.36,0, 0);
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 246,12);
+
+
+
+	g_modelMatrix = stack.pop();
+	g_modelMatrix.rotate(180,1,0,0)
+	g_modelMatrix.scale(0.8, 0.8, 0.8);
+	g_modelMatrix.rotate(g_angle03,0,1,0)
+	g_modelMatrix.rotate(20,0,0,1)
+	g_modelMatrix.translate(-0.25,0, 0);
+	stack2.push(new Matrix4(g_modelMatrix));
+	g_modelMatrix.translate(-1,0, 0);
+	// g_modelMatrix.rotate()
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 246,12);
+	g_modelMatrix = stack2.pop();
+	g_modelMatrix.translate(0.36,0, 0);
+	g_modelMatrix.rotate(g_angle03,0,1,0);
+	g_modelMatrix.rotate(-40,0,0,1);
+	g_modelMatrix.translate(-1.36,0, 0);
+	// g_modelMatrix.rotate()
+	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 246,12);
 }
 
 function Draw_moon(){
@@ -768,6 +902,7 @@ function Draw_star(rotate_par,x,y,size){
 
 function Draw_eyes(){
 	let stack3 = []
+	g_modelMatrix.rotate(160,1,0,0)
 	stack3.push(new Matrix4(g_modelMatrix));
 	g_modelMatrix.scale(0.2,0.2,0.2)
 	g_modelMatrix.translate(2.5,2,-4)
@@ -915,6 +1050,21 @@ function animate() {
   if(g_angle01 > 180.0) g_angle01 = g_angle01 - 360.0;
   if(g_angle01 <-180.0) g_angle01 = g_angle01 + 360.0;
 
+  g_butter = g_butter + (g_butterRate * elapsed) / 1000.0;
+  if(g_butter > 180.0) g_butter = g_butter - 360.0;
+  if(g_butter <-180.0) g_butter = g_butter + 360.0;
+
+  g_angle03 = g_angle03 + (g_angle03Rate * elapsed) / 1000.0;
+  if(g_angle03 > 30.0 && g_angle03Rate > 0) g_angle03Rate *= -1.0;
+  if(g_angle03 < -20.0  && g_angle03Rate < 0) g_angle03Rate *= -1.0;
+
+
+  g_angle04 = g_angle04 + (g_angle04Ra * elapsed) / 1000.0;
+  if(g_angle04 > 30.0 && g_angle04Rate > 0) g_angle04Ra *= -1.0;
+  if(g_angle04 < -20.0  && g_angle04Rate < 0) g_angle04Ra *= -1.0;
+
+
+
   g_angle02 = g_angle02 + (g_angle02Rate * elapsed) / 1000.0;
 //   if(g_angle02 > 180.0) g_angle02 = g_angle02 - 360.0;
 //   if(g_angle02 <-180.0) g_angle02 = g_angle02 + 360.0;
@@ -934,7 +1084,6 @@ function animate() {
 
 }
 
-//==================HTML Button Callbacks======================
 
 function num_stars() {
 	  var UsrTxt = document.getElementById('Numstars').value;	
@@ -961,11 +1110,13 @@ function spinUp() {
 // Called when user presses the 'Spin >>' button on our webpage.
 // ?HOW? Look in the HTML file (e.g. ControlMulti.html) to find
 // the HTML 'button' element with onclick='spinUp()'.
-  g_angle01Rate += 25; 
+  g_angle01Rate += 25;
+  g_butterRate += 10 
 }
 
 function spinDown() {
 // Called when user presses the 'Spin <<' button
+g_butterRate -= 10 
  g_angle01Rate -= 25; 
 }
 
@@ -974,9 +1125,11 @@ function runStop() {
   if(g_angle01Rate*g_angle01Rate > 1) {  // if nonzero rate,
     myTmp = g_angle01Rate;  // store the current rate,
     g_angle01Rate = 0;      // and set to zero.
+	g_butterRate = 0;
   }
   else {    // but if rate is zero,
-  	g_angle01Rate = myTmp;  // use the stored rate.
+  	g_angle01Rate = myTmp; 
+	g_butterRate = myTmp; // use the stored rate.
   }
 }
 
