@@ -23,7 +23,7 @@ class Linear_regression(object):
         self.x_mean = x.mean(axis=1)[:, np.newaxis]
         self.data_normalization(x)
 
-    def data_normalization(self,x):
+    def data_normalization(self, x):
         # Generate the normalization function
         normalize = lambda x: (x - self.x_mean) / self.x_std
         self.x = normalize(x)
@@ -122,7 +122,6 @@ if __name__ == "__main__":
     plotter.plot_cost_histories(histories=[cost_history_BH_LSM, cost_history_BH_LAD], start=begin_point,
                                 labels=['$ RMSE $', '$ MAD $'],
                                 title="Boston Housing: Cost History of 1000 Iterations")
-
 
     # Auto-MPG
     # Least Squares Mean for linear regression

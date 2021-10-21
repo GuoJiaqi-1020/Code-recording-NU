@@ -4,7 +4,6 @@ import numpy as np
 
 # newtons method function - inputs: g (input function), max_its (maximum number of iterations), w (initialization)
 def newtons_method(g, gradient, hess, max_its, w, **kwargs):
-    # compute gradient module using autograd
     # gradient = grad(g)
     # hess = hessian(g)
 
