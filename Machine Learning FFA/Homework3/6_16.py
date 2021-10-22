@@ -18,7 +18,8 @@ class basic_ml_function(object):
             self.data_initialization()
         self.mismatching_his = None
         self.balanced_acc = None
-        self.beta = np.array([1.0, 1.0*beta])
+        self.overall_acc = None
+        self.beta = np.array([1.0, 1.0 * beta])
 
     def data_initialization(self):
         # The whole data processing piplne
@@ -77,7 +78,7 @@ class basic_ml_function(object):
         cost = np.sum(np.abs(self.linear_model(w) - self.y))
         return cost / float(np.size(self.y))
 
-    def cross_entropy(self, w):
+    def weighted_softmax(self, w):
         a = self.sigmoid(self.linear_model(w))
         ind = np.argwhere(self.y == -1)[:, 1]
         cost = -self.beta[0] * np.sum(np.log(1 - a[:, ind]))
@@ -98,8 +99,8 @@ class basic_ml_function(object):
             Loss_fun = self.softmax
         elif Loss_function == 'Perceptron':
             Loss_fun = self.perceptron
-        elif Loss_function == 'CrossEntropy':
-            Loss_fun = self.cross_entropy
+        elif Loss_function == 'WS':
+            Loss_fun = self.weighted_softmax
         else:
             raise Exception("Error Function Name")
         w = self.w0
@@ -116,6 +117,7 @@ class basic_ml_function(object):
         return weight_history, cost_history
 
     def newtons_method(self, Loss_function, iteration, **kwargs):
+        w = self.w0
         if Loss_function == 'LSM':
             Loss_fun = self.least_squares_mean
         elif Loss_function == 'LAD':
@@ -124,8 +126,8 @@ class basic_ml_function(object):
             Loss_fun = self.softmax
         elif Loss_function == 'Perceptron':
             Loss_fun = self.perceptron
-        elif Loss_function == 'CrossEntropy':
-            Loss_fun = self.cross_entropy
+        elif Loss_function == 'WS':
+            Loss_fun = self.weighted_softmax
         else:
             raise Exception("Error Function Name")
         gradient = autograd.grad(Loss_fun)
@@ -133,13 +135,12 @@ class basic_ml_function(object):
         epsilon = 10 ** (-10)
         if 'epsilon' in kwargs:
             epsilon = kwargs['epsilon']
-        w = self.w0
         weight_history = [np.array(w)]
         cost_history = [np.array(Loss_fun(w))]
         for k in range(iteration):
             grad_eval = gradient(w)
             hess_eval = hess(w)
-            hess_eval.shape = (int((np.size(hess_eval)) ** 0.5), int((np.size(hess_eval)) ** 0.5))
+            hess_eval.shape = (int((np.size(hess_eval)) ** (0.5)), int((np.size(hess_eval)) ** (0.5)))
             A = hess_eval + epsilon * np.eye(w.size)
             b = grad_eval
             w = np.linalg.solve(A, np.dot(A, w) - b)
@@ -152,22 +153,50 @@ class basic_ml_function(object):
         y_pred = np.sign(self.linear_model(w_trained))
         return y_pred
 
+    def balanced_accuracy1(self, weight_history):
+        # make predictions
+        w = weight_history[-1]
+        y_hat = np.sign(self.linear_model(w))
+        print(y_hat.shape)
+
+        # press predictions against real results
+        ind0 = np.argwhere(self.y == -1)
+        ind0 = [v[1] for v in ind0]
+        num0 = len(ind0)
+
+        ind = np.argwhere(np.abs(self.y[:, ind0] - y_hat[:, ind0]) > 0)
+        cost0 = len(ind)
+
+        ind1 = np.argwhere(self.y == +1)
+        ind1 = [v[1] for v in ind1]
+        num1 = len(ind1)
+        ind = np.argwhere(np.abs(self.y[:, ind1] - y_hat[:, ind1]) > 0)
+        cost1 = len(ind)
+
+        # compute accuracies
+        acc0 = 1 - cost0 / num0
+        acc1 = 1 - cost1 / num1
+        return (acc0 + acc1) / 2
+
     def balanced_accuracy(self, weight_history):
-        misclass1 = []
-        misclass2 = []
+        miss_1 = []
+        miss_2 = []
         ind = np.argmin(self.mismatching_his)
         w_p = weight_history[ind]
         index_class_1 = np.argwhere(self.y == -1)
-        for count in range(index_class_1.shape[0]):
-            if self.y[0][index_class_1[count][1]] == self.predict(w_p)[0][count]:
-                misclass1.append(count)
-        acc_1 = len(misclass1) / index_class_1.shape[0]
+        for v in index_class_1:
+            miss_1.append(v[1])
+        true_sample1 = np.argwhere(self.y[:, miss_1] == self.predict(w_p)[:, miss_1])
+        acc1 = len(true_sample1) / len(miss_1)
+
         index_class_2 = np.argwhere(self.y == 1)
-        for count in range(index_class_2.shape[0]):
-            if self.y[0][index_class_2[count][1]] == self.predict(w_p)[0][count]:
-                misclass2.append(count)
-        acc_2 = len(misclass2) / index_class_2.shape[0]
-        self.balanced_acc = (acc_2 + acc_1) / 2
+        for v in index_class_2:
+            miss_2.append(v[1])
+        true_sample2 = np.argwhere(self.y[:, miss_2] == self.predict(w_p)[:, miss_2])
+        acc2 = len(true_sample2) / len(miss_2)
+        self.balanced_acc = (acc1 + acc2) / 2
+        self.overall_acc = (len(true_sample1)+len(true_sample2))/(len(miss_1)+len(miss_2))
+
 
     def counting_mis_classification(self, weight_history):
         mismatching_his = []
@@ -219,34 +248,40 @@ if __name__ == "__main__":
     """
     Beta = 1
     """
-    # JQ1 = basic_ml_function(data_3D, stdlize=False, beta=1)
-    # weight_history_JQ2_Per, cost_history_JQ2_Per = JQ1.newtons_method('CrossEntropy', study_rate=0.1, iteration=10)
-    # mismatch_his_Sof = JQ1.counting_mis_classification(weight_history_JQ2_Per)
-    # JQ1.balanced_accuracy(weight_history_JQ2_Per)
-    # plotter.plot_mismatching_histories(histories=[mismatch_his_Sof], start=0, labels=['$ Perceptron $'],
-    #                                    title="Beta=1: Training Mis-classification History of 10 Iterations")
-    # plotter.plot_cost_histories(histories=[cost_history_JQ2_Per], start=0, labels=['$ Perceptron $'],
-    #                             title="Beta=1: Training Cost History of 10 Iterations")
+    JQ1 = basic_ml_function(data_3D, stdlize=False, beta=1)
+    weight_history_JQ2_Per, cost_history_JQ2_Per = JQ1.newtons_method('WS', study_rate=0.1, iteration=10)
+    mismatch_his_Sof = JQ1.counting_mis_classification(weight_history_JQ2_Per)
+    JQ1.balanced_accuracy(weight_history_JQ2_Per)
+    plotter.plot_mismatching_histories(histories=[mismatch_his_Sof], start=0, labels=['Weighted Softmax'],
+                                       title="Beta=1: Training Mis-classification History of 10 Iterations")
+    plotter.plot_cost_histories(histories=[cost_history_JQ2_Per], start=0, labels=['Weighted Softmax'],
+                                title="Beta=1: Training Cost History of 10 Iterations")
+    print("the balanced acc is:" + str(JQ1.balanced_acc))
+    print("the overall acc is:" + str(JQ1.overall_acc))
     """
     Beta = 5
     """
-    # JQ2 = basic_ml_function(data_3D, stdlize=False, beta=5)
-    # weight_history_JQ2_Per, cost_history_JQ2_Per = JQ2.newtons_method('CrossEntropy', study_rate=0.1, iteration=10)
-    # mismatch_his_Sof = JQ2.counting_mis_classification(weight_history_JQ2_Per)
-    # JQ2.balanced_accuracy(weight_history_JQ2_Per)
-    # plotter.plot_mismatching_histories(histories=[mismatch_his_Sof], start=0, labels=['$ Perceptron $'],
-    #                                    title="Beta=5: Training Mis-classification History of 10 Iterations")
-    # plotter.plot_cost_histories(histories=[cost_history_JQ2_Per], start=0, labels=['$ Perceptron $'],
-    #                             title="Beta=5: Training Cost History of 10 Iterations")
+    JQ2 = basic_ml_function(data_3D, stdlize=False, beta=5)
+    weight_history_JQ2_Per, cost_history_JQ2_Per = JQ2.newtons_method('WS', study_rate=0.1, iteration=10)
+    mismatch_his_Sof = JQ2.counting_mis_classification(weight_history_JQ2_Per)
+    JQ2.balanced_accuracy(weight_history_JQ2_Per)
+    plotter.plot_mismatching_histories(histories=[mismatch_his_Sof], start=0, labels=['Weighted Softmax'],
+                                       title="Beta=5: Training Mis-classification History of 10 Iterations")
+    plotter.plot_cost_histories(histories=[cost_history_JQ2_Per], start=0, labels=['Weighted Softmax'],
+                                title="Beta=5: Training Cost History of 10 Iterations")
+    print("the balanced acc is:" + str(JQ2.balanced_acc))
+    print("the overall acc is:" + str(JQ2.overall_acc))
     """
     Beta = 10
     """
     JQ3 = basic_ml_function(data_3D, stdlize=False, beta=10)
-    weight_history_JQ2_Per, cost_history_JQ2_Per = JQ3.newtons_method('CrossEntropy', study_rate=0.1, iteration=10)
+    weight_history_JQ2_Per, cost_history_JQ2_Per = JQ3.newtons_method('WS', study_rate=0.1, iteration=5)
     mismatch_his_Sof = JQ3.counting_mis_classification(weight_history_JQ2_Per)
+    # JQ3.balanced_accuracy(weight_history_JQ2_Per)
     JQ3.balanced_accuracy(weight_history_JQ2_Per)
-    plotter.plot_mismatching_histories(histories=[mismatch_his_Sof], start=0, labels=['$ Perceptron $'],
+    plotter.plot_mismatching_histories(histories=[mismatch_his_Sof], start=0, labels=['Weighted Softmax'],
                                        title="Beta=10: Training Mis-classification History of 10 Iterations")
-    plotter.plot_cost_histories(histories=[cost_history_JQ2_Per], start=0, labels=['$ Perceptron $'],
-                                title="Training Cost History of 10 Iterations")
-
+    plotter.plot_cost_histories(histories=[cost_history_JQ2_Per], start=0, labels=['Weighted Softmax'],
+                                title="Beta=10: Training Cost History of 10 Iterations")
+    print("the balanced acc is:" + str(JQ3.balanced_acc))
+    print("the overall acc is:" + str(JQ3.overall_acc))

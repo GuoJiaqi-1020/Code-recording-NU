@@ -129,12 +129,15 @@ if __name__ == "__main__":
     data_bcd = np.loadtxt('../mlrefined_datasets/superlearn_datasets/breast_cancer_data.csv', delimiter=',')
     BCD = basic_ml_function(data_bcd, stdlize=False)
     weight_history_BCD_Per, cost_history_BCD_Per = BCD.gradient_decent('Perceptron', study_rate=0.1, iteration=1000)
-    weight_history_BCD_Sof, cost_history_BCD_Sof = BCD.gradient_decent('Softmax', study_rate=1, iteration=1000)
+    weight_history_BCD_Sof, cost_history_BCD_Sof = BCD.gradient_decent('Softmax', study_rate=0.5, iteration=1000)
     mismatch_his_Per = BCD.counting_mis_classification(weight_history_BCD_Per)
     mismatch_his_Sof = BCD.counting_mis_classification(weight_history_BCD_Sof)
-    plotter.plot_cost_histories(histories=[mismatch_his_Per, mismatch_his_Sof], start=0,
-                                labels=['$ Perceptron $', '$ Softmax $'],
-                                title="BR Dataset: Mismatching History of 1000 Iterations")
+    plotter.plot_mismatching_histories(histories=[mismatch_his_Per, mismatch_his_Sof], start=0,
+                                       labels=['$ Perceptron $', '$ Softmax $'],
+                                       title="BR Dataset: Mis-Classification History of 1000 Iterations")
     plotter.plot_cost_histories(histories=[cost_history_BCD_Per, cost_history_BCD_Sof], start=0,
                                 labels=['$ Perceptron $', '$ Softmax $'],
                                 title="BR Dataset: Cost History of 1000 Iterations")
+    mini_percept = np.min(mismatch_his_Per)
+    mini_soft = np.min(mismatch_his_Sof)
+    print('mini_per：' + str(mini_percept) + "mini_soft:" + str(mini_soft))

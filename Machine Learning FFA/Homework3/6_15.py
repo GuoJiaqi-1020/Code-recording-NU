@@ -172,9 +172,9 @@ if __name__ == "__main__":
     CD.confusion_matrix(weight_history_BCD_Sof, labels=["bad", "good"], normalize=False)
     mismatch_his_Sof = CD.counting_mis_classification(weight_history_BCD_Sof)
 
-    plotter.plot_cost_histories(histories=[mismatch_his_Per, mismatch_his_Sof], start=0,
-                                labels=['$ Perceptron $', '$ Softmax $'],
-                                title="Credit Check: Training Mismatching History of 1000 Iterations")
+    plotter.plot_mismatching_histories(histories=[mismatch_his_Per, mismatch_his_Sof], start=0,
+                                       labels=['$ Perceptron $', '$ Softmax $'],
+                                       title="Credit Check: Training Mis-classification History of 1000 Iterations")
     plotter.plot_cost_histories(histories=[cost_history_BCD_Per, cost_history_BCD_Sof], start=0,
                                 labels=['$ Perceptron $', '$ Softmax $'],
                                 title="Credit Check: Cost History of 1000 Iterations")
