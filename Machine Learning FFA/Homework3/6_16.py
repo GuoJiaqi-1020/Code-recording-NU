@@ -219,14 +219,14 @@ if __name__ == "__main__":
     """
     Beta = 1
     """
-    # JQ2 = basic_ml_function(data_3D, stdlize=False, beta=1)
-    # weight_history_JQ2_Per, cost_history_JQ2_Per = JQ2.newtons_method('CrossEntropy', study_rate=0.1, iteration=10)
-    # mismatch_his_Sof = JQ2.counting_mis_classification(weight_history_JQ2_Per)
-    # JQ2.balanced_accuracy(weight_history_JQ2_Per)
+    # JQ1 = basic_ml_function(data_3D, stdlize=False, beta=1)
+    # weight_history_JQ2_Per, cost_history_JQ2_Per = JQ1.newtons_method('CrossEntropy', study_rate=0.1, iteration=10)
+    # mismatch_his_Sof = JQ1.counting_mis_classification(weight_history_JQ2_Per)
+    # JQ1.balanced_accuracy(weight_history_JQ2_Per)
     # plotter.plot_mismatching_histories(histories=[mismatch_his_Sof], start=0, labels=['$ Perceptron $'],
     #                                    title="Beta=1: Training Mis-classification History of 10 Iterations")
     # plotter.plot_cost_histories(histories=[cost_history_JQ2_Per], start=0, labels=['$ Perceptron $'],
-    #                             title="Training Cost History of 10 Iterations")
+    #                             title="Beta=1: Training Cost History of 10 Iterations")
     """
     Beta = 5
     """
@@ -237,7 +237,7 @@ if __name__ == "__main__":
     # plotter.plot_mismatching_histories(histories=[mismatch_his_Sof], start=0, labels=['$ Perceptron $'],
     #                                    title="Beta=5: Training Mis-classification History of 10 Iterations")
     # plotter.plot_cost_histories(histories=[cost_history_JQ2_Per], start=0, labels=['$ Perceptron $'],
-    #                             title="Training Cost History of 10 Iterations")
+    #                             title="Beta=5: Training Cost History of 10 Iterations")
     """
     Beta = 10
     """
