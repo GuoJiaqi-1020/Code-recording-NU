@@ -10,14 +10,15 @@ sys.path.append('../')
 
 
 class basic_ml_function(object):
-    def __init__(self, data_set, stdlize=True, b=np.array([1.0, 1.0])):
+    def __init__(self, data_set, stdlize=True, beta=1):
         self.x = data_set[:-1, :]
         self.y = data_set[-1:, :]
         self.w0 = self.decent_initializer()
         if stdlize:
             self.data_initialization()
         self.mismatching_his = None
-        self.b = b
+        self.balanced_acc = None
+        self.beta = np.array([1.0, 1.0*beta])
 
     def data_initialization(self):
         # The whole data processing piplne
@@ -79,9 +80,9 @@ class basic_ml_function(object):
     def cross_entropy(self, w):
         a = self.sigmoid(self.linear_model(w))
         ind = np.argwhere(self.y == -1)[:, 1]
-        cost = -self.b[0]*np.sum(np.log(1 - a[:, ind]))
+        cost = -self.beta[0] * np.sum(np.log(1 - a[:, ind]))
         ind = np.argwhere(self.y == 1)[:, 1]
-        cost -= self.b[1]*np.sum(np.log(a[:, ind]))
+        cost -= self.beta[1] * np.sum(np.log(a[:, ind]))
         return cost / self.y.size
 
     # Optimization function
@@ -146,9 +147,27 @@ class basic_ml_function(object):
             cost_history.append(np.array(Loss_fun(w)))
         return weight_history, cost_history
 
+    #  Result counting
     def predict(self, w_trained):
         y_pred = np.sign(self.linear_model(w_trained))
         return y_pred
+
+    def balanced_accuracy(self, weight_history):
+        misclass1 = []
+        misclass2 = []
+        ind = np.argmin(self.mismatching_his)
+        w_p = weight_history[ind]
+        index_class_1 = np.argwhere(self.y == -1)
+        for count in range(index_class_1.shape[0]):
+            if self.y[0][index_class_1[count][1]] == self.predict(w_p)[0][count]:
+                misclass1.append(count)
+        acc_1 = len(misclass1) / index_class_1.shape[0]
+        index_class_2 = np.argwhere(self.y == 1)
+        for count in range(index_class_2.shape[0]):
+            if self.y[0][index_class_2[count][1]] == self.predict(w_p)[0][count]:
+                misclass2.append(count)
+        acc_2 = len(misclass2) / index_class_2.shape[0]
+        self.balanced_acc = (acc_2 + acc_1) / 2
 
     def counting_mis_classification(self, weight_history):
         mismatching_his = []
@@ -196,12 +215,38 @@ class basic_ml_function(object):
 if __name__ == "__main__":
     data_3D = np.loadtxt('../mlrefined_datasets/superlearn_datasets/3d_classification_data_v2_mbalanced.csv',
                          delimiter=',')
-    CD = basic_ml_function(data_3D, stdlize=False)
-    weight_history_BCD_Per, cost_history_BCD_Per = CD.newtons_method('CrossEntropy', study_rate=0.1, iteration=10)
-    mismatch_his_Sof = CD.counting_mis_classification(weight_history_BCD_Per)
-    plotter.plot_cost_histories(histories=[mismatch_his_Sof], start=0,
-                                labels=['$ Perceptron $'],
-                                title="Credit Check: Training Mismatching History of 10 Iterations")
-    plotter.plot_cost_histories(histories=[cost_history_BCD_Per], start=0,
-                                labels=['$ Perceptron $'],
-                                title="Credit Check: Training Cost History of 10 Iterations")
+
+    """
+    Beta = 1
+    """
+    # JQ2 = basic_ml_function(data_3D, stdlize=False, beta=1)
+    # weight_history_JQ2_Per, cost_history_JQ2_Per = JQ2.newtons_method('CrossEntropy', study_rate=0.1, iteration=10)
+    # mismatch_his_Sof = JQ2.counting_mis_classification(weight_history_JQ2_Per)
+    # JQ2.balanced_accuracy(weight_history_JQ2_Per)
+    # plotter.plot_mismatching_histories(histories=[mismatch_his_Sof], start=0, labels=['$ Perceptron $'],
+    #                                    title="Beta=1: Training Mis-classification History of 10 Iterations")
+    # plotter.plot_cost_histories(histories=[cost_history_JQ2_Per], start=0, labels=['$ Perceptron $'],
+    #                             title="Training Cost History of 10 Iterations")
+    """
+    Beta = 5
+    """
+    # JQ2 = basic_ml_function(data_3D, stdlize=False, beta=5)
+    # weight_history_JQ2_Per, cost_history_JQ2_Per = JQ2.newtons_method('CrossEntropy', study_rate=0.1, iteration=10)
+    # mismatch_his_Sof = JQ2.counting_mis_classification(weight_history_JQ2_Per)
+    # JQ2.balanced_accuracy(weight_history_JQ2_Per)
+    # plotter.plot_mismatching_histories(histories=[mismatch_his_Sof], start=0, labels=['$ Perceptron $'],
+    #                                    title="Beta=5: Training Mis-classification History of 10 Iterations")
+    # plotter.plot_cost_histories(histories=[cost_history_JQ2_Per], start=0, labels=['$ Perceptron $'],
+    #                             title="Training Cost History of 10 Iterations")
+    """
+    Beta = 10
+    """
+    JQ3 = basic_ml_function(data_3D, stdlize=False, beta=10)
+    weight_history_JQ2_Per, cost_history_JQ2_Per = JQ3.newtons_method('CrossEntropy', study_rate=0.1, iteration=10)
+    mismatch_his_Sof = JQ3.counting_mis_classification(weight_history_JQ2_Per)
+    JQ3.balanced_accuracy(weight_history_JQ2_Per)
+    plotter.plot_mismatching_histories(histories=[mismatch_his_Sof], start=0, labels=['$ Perceptron $'],
+                                       title="Beta=10: Training Mis-classification History of 10 Iterations")
+    plotter.plot_cost_histories(histories=[cost_history_JQ2_Per], start=0, labels=['$ Perceptron $'],
+                                title="Training Cost History of 10 Iterations")
+
