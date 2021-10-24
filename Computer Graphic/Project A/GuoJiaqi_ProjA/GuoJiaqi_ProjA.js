@@ -696,12 +696,12 @@ function Draw_butterfly(size,coff){
 	gl.uniformMatrix4fv(g_modelMatLoc, false, g_modelMatrix.elements);
 	//head
 	gl.drawArrays(gl.TRIANGLES, 48,36);
-
 	g_modelMatrix = stack.pop();
+	
 	stack.push(new Matrix4(g_modelMatrix));
 	g_modelMatrix.scale(0.8, 0.8, 0.8);
-	g_modelMatrix.rotate(g_angle03,0,1,0)
-	g_modelMatrix.rotate(20,0,0,1)
+	g_modelMatrix.rotate(g_angle03,0,1,0);
+	g_modelMatrix.rotate(20,0,0,1);
 	g_modelMatrix.translate(0.25,0, 0);
 	stack2.push(new Matrix4(g_modelMatrix));
 	g_modelMatrix.translate(1,0, 0);
