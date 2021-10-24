@@ -22,7 +22,7 @@ class basic_ml_function(object):
         self.beta = np.array([1.0, 1.0 * beta])
 
     def data_initialization(self):
-        # The whole data processing piplne
+        # The whole data processing pipeline
         self.deviation_regulartor(self.x)
         x = self.data_recovery(self.x)
         self.x_mean = x.mean(axis=1)[:, np.newaxis]
@@ -153,31 +153,6 @@ class basic_ml_function(object):
         y_pred = np.sign(self.linear_model(w_trained))
         return y_pred
 
-    def balanced_accuracy1(self, weight_history):
-        # make predictions
-        w = weight_history[-1]
-        y_hat = np.sign(self.linear_model(w))
-        print(y_hat.shape)
-
-        # press predictions against real results
-        ind0 = np.argwhere(self.y == -1)
-        ind0 = [v[1] for v in ind0]
-        num0 = len(ind0)
-
-        ind = np.argwhere(np.abs(self.y[:, ind0] - y_hat[:, ind0]) > 0)
-        cost0 = len(ind)
-
-        ind1 = np.argwhere(self.y == +1)
-        ind1 = [v[1] for v in ind1]
-        num1 = len(ind1)
-        ind = np.argwhere(np.abs(self.y[:, ind1] - y_hat[:, ind1]) > 0)
-        cost1 = len(ind)
-
-        # compute accuracies
-        acc0 = 1 - cost0 / num0
-        acc1 = 1 - cost1 / num1
-        return (acc0 + acc1) / 2
-
     def balanced_accuracy(self, weight_history):
         miss_1 = []
         miss_2 = []
@@ -195,8 +170,7 @@ class basic_ml_function(object):
         true_sample2 = np.argwhere(self.y[:, miss_2] == self.predict(w_p)[:, miss_2])
         acc2 = len(true_sample2) / len(miss_2)
         self.balanced_acc = (acc1 + acc2) / 2
-        self.overall_acc = (len(true_sample1)+len(true_sample2))/(len(miss_1)+len(miss_2))
-
+        self.overall_acc = (len(true_sample1) + len(true_sample2)) / (len(miss_1) + len(miss_2))
 
     def counting_mis_classification(self, weight_history):
         mismatching_his = []

@@ -165,11 +165,13 @@ if __name__ == "__main__":
     CD = basic_ml_function(data_CD, )
 
     weight_history_BCD_Per, cost_history_BCD_Per = CD.gradient_decent('Perceptron', study_rate=0.1, iteration=1000)
-    CD.confusion_matrix(weight_history_BCD_Per, labels=["bad", "good"], normalize=False)
+    CD.confusion_matrix(weight_history_BCD_Per, labels=["bad", "good"], normalize=False,
+                        title="Confusion matrix: Perceptron")
     mismatch_his_Per = CD.counting_mis_classification(weight_history_BCD_Per)
 
     weight_history_BCD_Sof, cost_history_BCD_Sof = CD.gradient_decent('Softmax', study_rate=1, iteration=1000)
-    CD.confusion_matrix(weight_history_BCD_Sof, labels=["bad", "good"], normalize=False)
+    CD.confusion_matrix(weight_history_BCD_Sof, labels=["bad", "good"], normalize=False,
+                        title="Confusion matrix: Softmax")
     mismatch_his_Sof = CD.counting_mis_classification(weight_history_BCD_Sof)
 
     plotter.plot_mismatching_histories(histories=[mismatch_his_Per, mismatch_his_Sof], start=0,
