@@ -267,6 +267,6 @@ class multi_class_ml_function(Visualizer):
 if __name__ == "__main__":
     data = np.loadtxt('../mlrefined_datasets/superlearn_datasets/3class_data.csv', delimiter=',')
     Q2 = multi_class_ml_function(data, stdlize=False)
-    Q2.show_dataset()
+    # Q2.show_dataset()
     weight_history = Q2.gradient_descent(g=Q2.multiclass_perceptron, max_its=1000, study_rate=0.05)
     Q2.show_complete_coloring(weight_history, cost=Q2.multiclass_perceptron)
