@@ -1,0 +1,79 @@
+These book-style programs begin with drawings restricted to the CVV.
+Put another way, the vertices on-screen were transformed in the GPU by the ModelMatrix uniform only, creating on-screen position values that are all within the +/-1 cube centered at the origin (the CVV).   The purpose of the CVV coordinate system was to specify all on-screen locations in a consistent way (within a +/-1 cube that filled the HTML-5 canvas). 
+
+Our new goal is to view these same 3D scenes using a 3D perspective camera, one that is no longer locked inside the unit cube (+/-1 in x,y,z) of the CVV, but instead can move anywhere in a 3D world, aimed in any direction to see the world from that viewpoint.
+
+But first, our ‘3D world’ needs its own coordinate system -- because we must have a way specify the locations of everything that the ‘world’ contains, from its 'ground plane' and the various shapes and moving assemblies resting upon it, to the location of the camera we will use to view that world.
+
+The ‘world’ coordinate system gives us fixed coordinate numbers for every point in the world, from the corners of the floor at our feet, the corners of the ceiling above us, and all points beyond well, from sky to sea to all surrounding terraion.
+
+We define the ‘world’ coordinate system as:
+-- one sensible fixed ‘origin point’, and
+-- 3 fixed coordinate axes that define the 3 perpendicular x,y,z directions.
+The origin is truly arbitrary -- it’s your own 3D world, so you decide what is the ‘center of the world’, but in this excercise, we choose the ‘world origin’ as the center of the ground-plane-grid.
+
+===== **IMPORTANT** =====
+In the ‘world’ coordinate system, the Z direction always points up to the sky above, and the X,Y directions are always level horizontal: they define a ‘ground plane’ at z==0.
+=========================
+
+Within this ‘world’ coordinate system,  we want a camera we can position at any desired (x,y,z) location, and that we can aim in direction, and can gaze out towards a distant horizon because all objects appear smaller ('foreshortened') as they get further away from us.
+-------------------------------------------------
+You're 'DONE' when your program has:
+    camera positioned at 3D point (5,5,3),
+    looking at the 3D point (-1,-2,-0.5),
+    using up vector (0,0,1),
+
+and that camera's 'lens' has:
+    Vertical field-of-view of 42.0 degrees
+    (a typicsl ‘normal’ camera lens-width; similar to 50mm lens on 35mm camera)
+    an aspect ratio of  1.0
+    a 'znear' value of +1.0
+    a 'zfar' value of    +1000.0
+----------------------------------------------------
+
+
+To do this, we must apply two new transforms to vertices:
+--The 'view' matrix, which positions our 3D camera in 'world' coords, and
+--The 'projection' matrix which performs a lens-like homogeneous transform
+that results in on-screen perspective, where far-away things look smaller.
+
+Note that these matrices get applied in a seemingly awkward manner:
+in the scene graph, the 'CVV' drawing axes become the 'world' axes,
+and we put our two new matrices ABOVE the world axes(!).
+As we traverse our scene-graph from top to bottom,
+we start with the CVV drawing axes (as always), then
+--the 'projection' matrix transforms from CVV axes to 'lens' axes
+	(which define the camera's viewing frustum in eye coords), then
+--the 'view' matrix transforms the 'lens' axes to the 'world' axes.
+	(Previously, the CVV was our ‘world’ where we drew all our
+	 parts & assemblies).
+--the 'model' matrix does all the transforms necessary 
+to draw all jointed 3D shapes in ‘world’ coordinates.
+
+----------------DETAILS--------------------
+1)  You will improve the 'BasicShapesCam' starter code in several ways, but
+  --DO NOT change any of the 3D shapes it already displays,
+     (ground-plane grid in x,y plane; spinning sphere, spinning tapered cylinder, spinning torus),
+  --DO NOT change the Vertex Shader or the Fragment Shader,
+  --DO NOT add any more uniforms -- you only need to change the contents of the existing ModelMatrix uniform, and apply pushMatrix(), popMatrix() functions to it as necessary.
+
+2) Instead, you will:
+a) Correctly use the cuon-matrix-quat03.js function "lookAt()" or "setLookAt()'
+  (see 'lib' directory)
+    to apply a 'viewing' transformation that positions a 3D perspective camera (defined below), with:
+
+    camera positioned at 3D point (5,5,3),
+    looking at the 3D point (-1,-2,-0.5),
+    using up vector (0,0,1)
+
+b) Correctly use the cuon-matrix-quat03.js function "perspective()" or "setPerspective()"  (see 'lib' directory)  to apply a 'projection' transformation that forms our 3D point-perspective camera (positioned above), with:
+
+    Vertical field-of-view of 42.0 degrees
+    (a 'normal' camera; similar to 50mm lens on 35mm camera)
+    an aspect ratio of  1.0
+    a 'znear' value of +1.0
+    a 'zfar' value of    +1000.0
+
+The resulting image should show a horizontal ground-plane grid that stretches towards the horizon, with the rotating sphere, torus, and tapered-cylinder spinning at their unchanged x,y,z world-space positions near the ground plane grid. 
+
+(Confused? Note that their original x,y,z positions in the CVV should now be used as their x,y,z world-space positions, but now our 3D camera sees them from a different viewpoint, and with perspective. Your camera will see these objects spinning nearby at different horizontal positions along the now-horizontal ground-plane, which how stretches towards the horizon).
