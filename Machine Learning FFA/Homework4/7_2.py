@@ -263,6 +263,6 @@ class multi_class_ml_function(Visualizer):
 if __name__ == "__main__":
     data = np.loadtxt('../mlrefined_datasets/superlearn_datasets/4class_data.csv', delimiter=',')
     Q1 = multi_class_ml_function(data, stdlize=False)
-    Q1.show_dataset()
-    # Q1.OvA(Loss_function='softmax', iteration=10, study_rate=0.01, opt='softmax')
-    # Q1.show_complete_coloring()
+    # Q1.show_dataset()
+    Q1.OvA(Loss_function='softmax', iteration=100, study_rate=0.01, opt='newtons law')
+    Q1.show_complete_coloring()
