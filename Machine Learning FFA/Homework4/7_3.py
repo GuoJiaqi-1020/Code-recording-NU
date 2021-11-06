@@ -252,7 +252,6 @@ class multi_class_ml_function(Visualizer):
         self.mismatching_his = mismatching_his
 
 
-
 if __name__ == "__main__":
     data = np.loadtxt('../mlrefined_datasets/superlearn_datasets/3class_data.csv', delimiter=',')
     Q2 = multi_class_ml_function(data, stdlize=False)
@@ -261,5 +260,5 @@ if __name__ == "__main__":
     Q2.show_complete_coloring(weight_history, cost=Q2.multiclass_perceptron)
     Q2.counting_mis_classification(weight_history)
     plotter.plot_mismatching_histories(histories=[Q2.mismatching_his], start=0,
-                                labels=['$ multiclass perceptron $'],
-                                title="Misclassification History of 1000 Iterations")
+                                       labels=['$ multiclass perceptron $'],
+                                       title="Misclassification History of 200 Iterations")
