@@ -6,9 +6,12 @@ from IPython.display import clear_output
 from autograd import grad as compute_grad
 from autograd import hessian as compute_hess
 from autograd.misc.flatten import flatten_func
+from mlrefined_libraries.math_optimization_library import static_plotter
 import autograd.numpy as np
 import time
 import copy
+
+plotter = static_plotter.Visualizer()
 
 sys.path.append('../')
 
@@ -149,6 +152,7 @@ class multi_class_ml_function(Visualizer):
         if 'verbose' in kwargs:
             verbose = kwargs['verbose']
         weight_history = [w]
+        cost_history = [g(w)]
         if verbose:
             print('starting optimization...')
         for k in range(max_its):
@@ -164,11 +168,13 @@ class multi_class_ml_function(Visualizer):
             if steplength_rule == 'diminishing':
                 study_rate = 1 / (float(k + 1))
             w = w - study_rate * grad_eval
+            cost_history.append(g(w))
             weight_history.append(w)
         if verbose:
             print('...optimization complete!')
             time.sleep(1.0)
             clear_output()
+        self.cost_history = cost_history
         return weight_history
 
     def backtracking(self, g, w, grad_eval):
@@ -179,40 +185,6 @@ class multi_class_ml_function(Visualizer):
         while g(w - study_rate * grad_eval) > func_eval - study_rate * 0.5 * grad_norm:
             study_rate = t * study_rate
         return study_rate
-
-    # Plotting
-    def confusion_matrix(self, weight_his, labels, normalize=False, title='Confusion Matrix', precision="%0.f"):
-        self.counting_mis_classification(weight_his)
-        ind = np.argmin(self.mismatching_his)
-        w_p = weight_his[ind]
-        tick_marks = np.array(range(len(labels))) + 0.5
-        cm = confusion_matrix(self.y[0], self.predict(w_p)[0])
-        if normalize:
-            cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-            title = "Normalized " + title
-            precision = "%0.2f"
-        plt.figure(figsize=(12, 8), dpi=120)
-        ind_array = np.arange(len(labels))
-        x, y = np.meshgrid(ind_array, ind_array)
-        for x_val, y_val in zip(x.flatten(), y.flatten()):
-            c = cm[y_val][x_val]
-            if c > 0.0:
-                plt.text(x_val, y_val, precision % (c,), color='k', fontsize=17, va='center', ha='center')
-        plt.gca().set_xticks(tick_marks, minor=True)
-        plt.gca().set_yticks(tick_marks, minor=True)
-        plt.gca().xaxis.set_ticks_position('none')
-        plt.gca().yaxis.set_ticks_position('none')
-        plt.grid(True, which='minor', linestyle='-')
-        plt.gcf().subplots_adjust(bottom=0.15)
-        plt.imshow(cm, interpolation='nearest', cmap='Blues')
-        plt.title(title)
-        plt.colorbar()
-        xlocations = np.array(range(len(labels)))
-        plt.xticks(xlocations, labels, rotation=90)
-        plt.yticks(xlocations, labels)
-        plt.ylabel('True label')
-        plt.xlabel('Predicted label')
-        plt.show()
 
     # Others
     def one_versus_others_seperator(self, label):
@@ -263,10 +235,31 @@ class multi_class_ml_function(Visualizer):
         self.weight = np.array(self.weight)
         self.weight.shape = (num_classes, np.shape(self.x)[1] + 1)
 
+    def predict(self, w_trained):
+        class_y = np.argmax(self.linear_model(self.x, w_trained), axis=0)
+        distance_y = np.max(self.linear_model(self.x, w_trained), axis=0)
+        return class_y
+
+    def counting_mis_classification(self, weight_history):
+        mismatching_his = []
+        for w_p in weight_history:
+            misclass = 0
+            class_y = self.predict(w_p)
+            for i, c in enumerate(class_y):
+                if c != self.y[i, 0]:
+                    misclass += 1
+            mismatching_his.append(misclass)
+        self.mismatching_his = mismatching_his
+
+
 
 if __name__ == "__main__":
     data = np.loadtxt('../mlrefined_datasets/superlearn_datasets/3class_data.csv', delimiter=',')
     Q2 = multi_class_ml_function(data, stdlize=False)
     # Q2.show_dataset()
-    weight_history = Q2.gradient_descent(g=Q2.multiclass_perceptron, max_its=1000, study_rate=0.05)
+    weight_history = Q2.gradient_descent(g=Q2.multiclass_perceptron, max_its=200, study_rate=0.5)
     Q2.show_complete_coloring(weight_history, cost=Q2.multiclass_perceptron)
+    Q2.counting_mis_classification(weight_history)
+    plotter.plot_mismatching_histories(histories=[Q2.mismatching_his], start=0,
+                                labels=['$ multiclass perceptron $'],
+                                title="Misclassification History of 1000 Iterations")
