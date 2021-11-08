@@ -18,6 +18,7 @@ var FSHADER_SOURCE =
   '}\n';
 
 // Global Variables
+// Shift variable for the small robot
 var g_digits = 5
 var hori_shift = 0;
 var vert_shift = 0;
@@ -25,12 +26,12 @@ var vert_shift = 0;
 var ANGLE_STEP = 45.0;		// Rotation angle rate (degrees/second)
 var floatsPerVertex = 7;	// # of Float32Array elements used for each vertex
 var g_canvas = document.getElementById('webgl');
-///////////////////
+
 var qNew = new Quaternion(0,0,0,1); // most-recent mouse drag's rotation
 var qTot = new Quaternion(0,0,0,1);	// 'current' orientation (made from qNew)
 var quatMatrix = new Matrix4();	
 
-
+///////////////////
 //------------For mouse click-and-drag: -------------------------------
 var g_isDrag=false;		// mouse-drag: true when user holds down mouse button
 var g_xMclik=0.0;			// last mouse button-down position (in CVV coords)
@@ -40,11 +41,11 @@ var g_yMdragTot=0.0;
 
 
 				
-//added need modify													
-var cam_posi_X = 7.0, cam_posi_Y = 7.0, cam_posi_Z = 5.0; //! Location of our camera
-var look_X = 4.5, look_Y = 4.5, look_Z = 4.5; //! Where our camera is look_ing
-var g_aimTheta = 215;
-var g_aimZDiff = look_Z - cam_posi_Z;
+// Define varibles for the camera's sys point and look-at point											
+var cam_Px = 1, cam_Py = -4.7, cam_Pz = 5.0; //! Location of our camera
+var look_Px = 4.5, look_Py = 4.5, look_Pz = 4.2; //! Where our camera is look_ing
+var g_Theta = 111, ini_Theta = 111;
+var g_Z = look_Pz - cam_Pz, ini_Z = -0.8;
 var perspective_changing_rate = 2.0;
 
 
@@ -79,6 +80,7 @@ function main() {
 	var projMatrix = new Matrix4();
 	var ModelMatrix = new Matrix4();
 
+	// Event Listerner: keyboard and mouse
 	window.addEventListener("keydown", myKeyDown, false);
 	window.addEventListener("keyup", myKeyUp, false);
 	window.addEventListener("mousedown", myMouseDown); 
@@ -118,22 +120,33 @@ function main() {
     // Create, init current rotation angle value in JavaScript
 	var currentAngle = 0.0;
 
+    var tick = function() {
+        currentAngle = animate(currentAngle);
+        g_canvas = Resized_Web(g_canvas);   // Draw shapes
+        drawAll(gl, g_canvas, currentAngle, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix);               // draw in all viewports.
+        requestAnimationFrame(tick, g_canvas);   
+    };
+    tick();
+}
 
 
-	var tick = function() {
-		currentAngle = animate(currentAngle);
-		drawResize(gl, g_canvas, currentAngle, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix);   // Draw shapes
-    	requestAnimationFrame(tick, g_canvas);   
-	};
-	tick();
-	}
+
+//Make canvas fill the top 70% of our browser height
+function Resized_Web(g_canvas) {
+    g_canvas.width = innerWidth - 15;
+    // Ensure the side margin equal
+    g_canvas.height = (innerHeight*0.7);
+    // IMPORTANT!  Need a fresh drawing in the re-sized viewports.
+    return g_canvas
+}
 
 function initVertexBuffer(gl) {
 	makeCylinder();					// create, fill the cylVerts array
-	makeSphere();						// create, fill the sphVerts array
-	makeTorus();						// create, fill the torVerts array
+	makeSphere();					// create, fill the sphVerts array
+	makeAxis();
+	makeTorus();					// create, fill the torVerts array
 	makeGroundGrid();				// create, fill the gndVerts array
-	var mySiz = (cylVerts.length + sphVerts.length + 
+	var mySiz = (cylVerts.length + sphVerts.length + axis.length +
 							 torVerts.length + gndVerts.length);						
 	// How many vertices total?
 	var nn = mySiz / floatsPerVertex;
@@ -157,6 +170,11 @@ function initVertexBuffer(gl) {
 	for(j=0; j< gndVerts.length; i++, j++) {
 		colorShapes[i] = gndVerts[j];
 		}
+		axisStart = i;
+	for(j=0; j<axis.length; i++, j++){  // store the axis
+		colorShapes[i] = axis[j];
+	}
+
 	// Create a buffer object on the graphics hardware:
 	var shapeBufferHandle = gl.createBuffer();  
 	if (!shapeBufferHandle) {
@@ -236,7 +254,6 @@ function makePyramid() {
 
   	// YOU write this one...
 }
-
 
 function makeCylinder() {
 //==============================================================================
@@ -549,66 +566,99 @@ function makeGroundGrid() {
 	}
 }
 
+function makeAxis(){
+	axis = new Float32Array([
+		0.0,  0.0,  0.0, 1.0,		1.0,  0.0,  0.0,
+		1.0,  0.0,  0.0, 1.0,		1.0,  0.0,  0.0,	// 						 (endpoint: red)
+		
+		0.0,  0.0,  0.0, 1.0,       0.0,  1.0,  0.0,	// Y axis line (origin: white)
+		0.0,  1.0,  0.0, 1.0,		0.0,  1.0,  0.0,	//						 (endpoint: green)
+
+		0.0,  0.0,  0.0, 1.0,		0.0,  0.0,  1.0,	// Z axis line (origin:white)
+		0.0,  0.0,  1.0, 1.0,		0.0,  0.0,  1.0,	//						 (endpoint: blue)
+		]);
+}
 
 function drawAll(gl, g_canvas, currentAngle, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix) {
+	var far = 100.0
+	var near = 1.0
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	modelMatrix.setIdentity();
 	ModelMatrix.setIdentity();
 	projMatrix.setIdentity();
 	viewMatrix.setIdentity();
+
+	
 	// added   Need to modify
-	look_X = cam_posi_X + Math.cos(Angle2Rad(g_aimTheta));
-	look_Y = cam_posi_Y + Math.sin(Angle2Rad(g_aimTheta));
-	look_Z = cam_posi_Z + g_aimZDiff;
+	look_Px = cam_Px + Math.cos(Angle2Rad(g_Theta));
+	look_Py = cam_Py + Math.sin(Angle2Rad(g_Theta));
+	look_Pz = cam_Pz + g_Z;
+	
 	// set the ViewPoint accoding the requirement
 	gl.viewport(0, 0, innerWidth / 2, innerWidth / 2);
 
-    //set the first camera
-	viewMatrix.setLookAt(cam_posi_X,  cam_posi_Y,  cam_posi_Z, // center of projection
-		look_X, look_Y, look_Z, // look-at point
-		0.0,     0.0,     1.0); // View UP vector
-
-	projMatrix.setPerspective(42.0, // FOVY
+	projMatrix.setPerspective(40.0, // FOV = 40 fixed value
 		g_canvas.width/g_canvas.height/2, // Aspect ratio
-		1.0, // z-near
-		100.0 /* z-far */);
+		near,
+		far);
 
+    //set the 3D perspective camera
+	viewMatrix.setLookAt(cam_Px,  cam_Py,  cam_Pz, // center of projection
+		look_Px, look_Py, look_Pz, // look-at point
+		0.0,     0.0,    1.0); // View UP vector
+
+	
 	drawMyScene(gl, currentAngle, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix);
 
-    //set the second orth camera
+	
+    //Set the orthographic camera (with same eye_point, look at poiny, up vector, z_near, z_far values)
 	modelMatrix.setIdentity();
 	ModelMatrix.setIdentity();
 	projMatrix.setIdentity();
 	viewMatrix.setIdentity();
 
-	viewMatrix.setLookAt(cam_posi_X,  cam_posi_Y,  cam_posi_Z, // center of projection
-		look_X, look_Y, look_Z, // look-at point
+	viewMatrix.setLookAt(cam_Px,  cam_Py,  cam_Pz, // center of projection
+		look_Px, look_Py, look_Pz, // look-at point
 		0.0,     0.0,     1.0); // View UP vector
 		
-	projMatrix.setOrtho(-3, 3, -3, 3, 0, 99.0 / 3);
+	projMatrix.setOrtho(-3, 3, -3, 3,   //x, y, z, w 
+		0, 
+		(far-near)/3);
 	gl.viewport(innerWidth / 2, 0, innerWidth / 2, innerWidth / 2);
 	drawMyScene(gl, currentAngle, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix);
 }
 
 
+function Draw_axis(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix){
+	modelMatrix.scale(1,1,1)
+	Set_ModelMatrix(gl, ModelMatrix, u_ModelMatrix, projMatrix, viewMatrix, modelMatrix);
+	gl.drawArrays(gl.LINES, axisStart/floatsPerVertex,6);
+}
+
+
 // // added need to modify
 function drawMyScene(gl, currentAngle, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix) {
+	
 	// ! Draw Cylinder
 	modelMatrix.setIdentity();
- 	 pushMatrix(modelMatrix);     // SAVE world coord system;
-    	//-------Draw Spinning Cylinder:
+ 	pushMatrix(modelMatrix);     // SAVE world coord system;
+	Draw_axis(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix);
+    modelMatrix.setIdentity();
+	//-------Draw Spinning Cylinder:
     modelMatrix.translate(-0.4,-0.4, 0.3);  // 'set' means DISCARD old matrix,
     						// (drawing axes centered in CVV), and then make new
     						// drawing axes moved to the lower-left corner of CVV. 
     modelMatrix.scale(0.2, 0.2, 0.2);
     						// if you DON'T scale, cyl goes outside the CVV; clipped!
-		modelMatrix.rotate(0, 0, 1, 0);  // spin around y axis.
-		setModelMatrix(gl, ModelMatrix, u_ModelMatrix, projMatrix, viewMatrix, modelMatrix);
+	modelMatrix.rotate(0, 0, 1, 0);  // spin around y axis.
+	Set_ModelMatrix(gl, ModelMatrix, u_ModelMatrix, projMatrix, viewMatrix, modelMatrix);
     // Draw the cylinder's vertices, and no other vertices:
-    gl.drawArrays(gl.TRIANGLE_STRIP,				// use this drawing primitive, and
+    
+	gl.drawArrays(gl.TRIANGLE_STRIP,				// use this drawing primitive, and
     							cylStart/floatsPerVertex, // start at this vertex number, and
     							cylVerts.length/floatsPerVertex);	// draw this many vertices.
     modelMatrix = popMatrix();  // RESTORE 'world' drawing coords.
+	
     //===========================================================
    
     pushMatrix(modelMatrix);  // SAVE world drawing coords.
@@ -620,13 +670,13 @@ function drawMyScene(gl, currentAngle, modelMatrix, viewMatrix, projMatrix, Mode
     modelMatrix.scale(0.3, 0.3, 0.3);
 								// Make it smaller:
 		
-	modelMatrix.rotate(g_aimTheta + 90, 0.0, 0.0, 1.0); // make sure Quaternion rotation works at all camera angles
+	modelMatrix.rotate(g_Theta + 90, 0.0, 0.0, 1.0); // make sure Quaternion rotation works at all camera angles
 	quatMatrix.setFromQuat(qTot.x, qTot.y, qTot.z, qTot.w);	// Quaternion-->Matrix
 	modelMatrix.concat(quatMatrix);	// apply that matrix.
-  	setModelMatrix(gl, ModelMatrix, u_ModelMatrix, projMatrix, viewMatrix, modelMatrix);
+  	Set_ModelMatrix(gl, ModelMatrix, u_ModelMatrix, projMatrix, viewMatrix, modelMatrix);
     // Draw just the sphere's vertices
 	modelMatrix.translate(0.0, 0.0, -1.0);
-	setModelMatrix(gl, ModelMatrix, u_ModelMatrix, projMatrix, viewMatrix, modelMatrix);
+	Set_ModelMatrix(gl, ModelMatrix, u_ModelMatrix, projMatrix, viewMatrix, modelMatrix);
 	gl.drawArrays(gl.TRIANGLE_STRIP, torStart/floatsPerVertex, torVerts.length/floatsPerVertex);
 	modelMatrix = popMatrix();  // RESTORE 'world' drawing coords.
 	pushMatrix(modelMatrix);
@@ -634,7 +684,7 @@ function drawMyScene(gl, currentAngle, modelMatrix, viewMatrix, projMatrix, Mode
 			modelMatrix.scale(0.3, 0.5, 0.5);
 			modelMatrix.rotate(90, 0.0, 1.0, 0.0);
 			modelMatrix.rotate(currentAngle, 0.0, 0.0, 1.0);
-			setModelMatrix(gl, ModelMatrix, u_ModelMatrix, projMatrix, viewMatrix, modelMatrix);
+			Set_ModelMatrix(gl, ModelMatrix, u_ModelMatrix, projMatrix, viewMatrix, modelMatrix);
 			gl.drawArrays(gl.TRIANGLE_STRIP, torStart/floatsPerVertex, torVerts.length/floatsPerVertex);
 
 	modelMatrix = popMatrix();
@@ -648,16 +698,17 @@ function drawMyScene(gl, currentAngle, modelMatrix, viewMatrix, projMatrix, Mode
 
   	// Drawing:
   	// Pass our current matrix to the vertex shaders:
-    setModelMatrix(gl, ModelMatrix, u_ModelMatrix, projMatrix, viewMatrix, modelMatrix);
+    Set_ModelMatrix(gl, ModelMatrix, u_ModelMatrix, projMatrix, viewMatrix, modelMatrix);
     // Draw just the ground-plane's vertices
     gl.drawArrays(gl.LINES, 								// use this drawing primitive, and
     						  gndStart/floatsPerVertex,	// start at this vertex number, and
     						  gndVerts.length/floatsPerVertex);	// draw this many vertices.
   	modelMatrix = popMatrix();  // RESTORE 'world' drawing coords.
+	
   	//===========================================================
 }
 
-function setModelMatrix(gl, ModelMatrix, u_ModelMatrix, projMatrix, viewMatrix, modelMatrix) {
+function Set_ModelMatrix(gl, ModelMatrix, u_ModelMatrix, projMatrix, viewMatrix, modelMatrix) {
 	ModelMatrix.set(projMatrix).multiply(viewMatrix).multiply(modelMatrix);
 	gl.uniformMatrix4fv(u_ModelMatrix, false, ModelMatrix.elements);
 }
@@ -669,29 +720,15 @@ var g_last = Date.now();
 
 
 function animate(angle) {
-//==============================================================================
-  // Calculate the elapsed time
 	var now = Date.now();
 	var elapsed = now - g_last;
 	g_last = now;    
-	// Update the current rotation angle (adjusted by the elapsed time)
-	//  limit the angle to move smoothly between +20 and -85 degrees:
-	//  if(angle >  120.0 && ANGLE_STEP > 0) ANGLE_STEP = -ANGLE_STEP;
-	//  if(angle < -120.0 && ANGLE_STEP < 0) ANGLE_STEP = -ANGLE_STEP;
-	
 	var newAngle = angle + (ANGLE_STEP * elapsed) / 1000.0;
 	return newAngle %= 360;
 }
 
 
 function myMouseDown(ev) {
-	//==============================================================================
-	// Called when user PRESSES down any mouse button;
-	// 									(Which button?    console.log('ev.button='+ev.button);   )
-	// 		ev.clientX, ev.clientY == mouse pointer location, but measured in webpage 
-	//		pixels: left-handed coords; UPPER left origin; Y increases DOWNWARDS (!)  
-	
-	// Create right-handed 'pixel' coords with origin at WebGL canvas LOWER left;
 	var rect = ev.target.getBoundingClientRect();	// get canvas corners in pixels
 	var xp = ev.clientX - rect.left;									// x==0 at canvas left edge
 	var yp = g_canvas.height - (ev.clientY - rect.top);	// y==0 at canvas bottom edge
@@ -713,8 +750,7 @@ function myMouseDown(ev) {
 };
 
 function myMouseMove(ev) {
-
-	var Amp = 20.0
+	var Amp = 23.0 //set the sensitivity of mouse drag
 	if(g_isDrag==false) return;				// IGNORE all mouse-moves except 'dragging'
 	var rect = ev.target.getBoundingClientRect();	// get canvas corners in pixels
 	var xp = ev.clientX - rect.left;									// x==0 at canvas left edge
@@ -725,21 +761,20 @@ function myMouseMove(ev) {
 	var y = (yp - g_canvas.height/2) /		//									-1 <= y < +1.
 							(g_canvas.height/2);
 	//	console.log('myMouseMove(CVV coords  ):  x, y=\t',x,',\t',y);
-	g_aimTheta += (x-g_xMclik)*Amp;
-	g_aimZDiff -= Angle2Rad(y - g_yMclik)*Amp;
-    if(g_aimTheta > 360) g_aimTheta -= 360.0;
-    if(g_aimTheta < 0) g_aimTheta += 360.0;
+	g_Theta += (x-g_xMclik)*Amp;
+	g_Z -= Angle2Rad(y - g_yMclik)*Amp;
+    if(g_Theta > 360) g_Theta -= 360.0;
+    if(g_Theta < 0) g_Theta += 360.0;
     
 	// find how far we dragged the mouse:
-	g_xMdragTot += (x - g_xMclik);			// Accumulate change-in-mouse-position,&
+	g_xMdragTot += (x - g_xMclik);
 	g_yMdragTot += (y - g_yMclik);
 	// Report new mouse position & how far we moved on webpage:
 	document.getElementById('MouseAtResult').innerHTML = 
 		'Mouse At: '+x.toFixed(g_digits)+', '+y.toFixed(g_digits);
 	document.getElementById('MouseDragResult').innerHTML = 
 		'Mouse Drag: '+(x - g_xMclik).toFixed(g_digits)+', ' 
-								+(y - g_yMclik).toFixed(g_digits);
-	
+								+(y - g_yMclik).toFixed(g_digits)
 	g_xMclik = x;											// Make next drag-measurement from here.
 	g_yMclik = y;
 	};
@@ -770,13 +805,11 @@ function myMouseUp(ev) {
 
 function myKeyDown(kev) {
 	//added need to modify
-	var xd = cam_posi_X - look_X;
-	var yd = cam_posi_Y - look_Y;
-	var zd = cam_posi_Z - look_Z;
+	var xd = cam_Px - look_Px;
+	var yd = cam_Py - look_Py;
+	var zd = cam_Pz - look_Pz;
 	var len = Math.sqrt(Math.pow(xd, 2) + Math.pow(yd, 2) + Math.pow(zd, 2));
 	var moveRateRad = Angle2Rad(perspective_changing_rate);
-
-
 	console.log(  "--kev.code:",    kev.code,   "\t\t--kev.key:",     kev.key, 
 				"\n--kev.ctrlKey:", kev.ctrlKey,  "\t--kev.shiftKey:",kev.shiftKey,
 				"\n--kev.altKey:",  kev.altKey,   "\t--kev.metaKey:", kev.metaKey);
@@ -805,10 +838,10 @@ function myKeyDown(kev) {
 				break;
 			//------------------WASD navigation-----------------
 			case "KeyA":
-				var xStrafe = Math.cos(Angle2Rad(g_aimTheta + 90));
-				var yStrafe = Math.sin(Angle2Rad(g_aimTheta + 90));
-				cam_posi_X += xStrafe / len;
-				cam_posi_Y += yStrafe / len;
+				var xStrafe = Math.cos(Angle2Rad(g_Theta + 45));
+				var yStrafe = Math.sin(Angle2Rad(g_Theta + 45));
+				cam_Px += xStrafe / len;
+				cam_Py += yStrafe / len;
 				break;
 			case "KeyR":
 				console.log("a/A key: Reset the shifting!\n");
@@ -816,57 +849,61 @@ function myKeyDown(kev) {
 				'myKeyDown() found a/A key. Reset the robot shifting!';
 				hori_shift = 0;
 				vert_shift = 0;
+				g_Theta = ini_Theta;
+				g_Z = ini_Z;
+				cam_Px = 1, cam_Py = -4.7, cam_Pz = 5.0; 
+				look_Px = 4.5, look_Py = 4.5, look_Pz = 4.2; 
 				break;
 			case "KeyD":
 				console.log("d/D key: Strafe RIGHT!\n");
-				var xStrafe = Math.cos(Angle2Rad(g_aimTheta + 90));
-				var yStrafe = Math.sin(Angle2Rad(g_aimTheta + 90));
-				cam_posi_X -= xStrafe / len;
-				cam_posi_Y -= yStrafe / len;
+				var xStrafe = Math.cos(Angle2Rad(g_Theta + 45));
+				var yStrafe = Math.sin(Angle2Rad(g_Theta + 45));
+				cam_Px -= xStrafe / len;
+				cam_Py -= yStrafe / len;
 				break;
 			case "KeyS":
 				console.log("s/S key: Move BACK!\n");
-				look_X += (xd / len);
-				look_Y += (yd / len);
-				look_Z += (zd / len);
+				look_Px += (xd / len);
+				look_Py += (yd / len);
+				look_Pz += (zd / len);
 	
-				cam_posi_X += (xd / len);
-				cam_posi_Y += (yd / len);
-				cam_posi_Z += (zd / len);
+				cam_Px += (xd / len);
+				cam_Py += (yd / len);
+				cam_Pz += (zd / len);
 				break;
 			case "KeyW":
 				console.log("w/W key: Move FWD!\n");
-				look_X -= (xd / len);
-				look_Y -= (yd / len);
-				look_Z -= (zd / len);
+				look_Px -= (xd / len);
+				look_Py -= (yd / len);
+				look_Pz -= (zd / len);
 	
-				cam_posi_X -= (xd / len);
-				cam_posi_Y -= (yd / len);
-				cam_posi_Z -= (zd / len);
+				cam_Px -= (xd / len);
+				cam_Py -= (yd / len);
+				cam_Pz -= (zd / len);
 				break;
 			//----------------Arrow keys------------------------
 			case "ArrowLeft": 	
 				console.log(' left-arrow.');
-				g_aimTheta += perspective_changing_rate;
-				if(g_aimTheta > 360) g_aimTheta -= 360.0;
-				if(g_aimTheta < 0) g_aimTheta += 360.0;
+				g_Theta += perspective_changing_rate;
+				if(g_Theta > 360) g_Theta -= 360.0;
+				if(g_Theta < 0) g_Theta += 360.0;
 				hori_shift -=0.05
 				break;
 			case "ArrowRight":
 				console.log(' right-arrow.');	
-				g_aimTheta -= perspective_changing_rate;
-				if(g_aimTheta > 360) g_aimTheta -= 360.0;
-				if(g_aimTheta < 0) g_aimTheta += 360.0;
+				g_Theta -= perspective_changing_rate;
+				if(g_Theta > 360) g_Theta -= 360.0;
+				if(g_Theta < 0) g_Theta += 360.0;
 				hori_shift +=0.05
 				break;
 			case "ArrowUp":	
 				console.log(' up-arrow.');	
-				g_aimZDiff += moveRateRad;
+				g_Z += moveRateRad;
 				vert_shift +=0.05
 				break;
 			case "ArrowDown":
 				console.log(' down-arrow.');
-				g_aimZDiff -= moveRateRad;
+				g_Z -= moveRateRad;
 				vert_shift -=0.05
 			break;	
 		default:
@@ -881,15 +918,6 @@ function myKeyUp(kev) {
 	console.log('myKeyUp()--keyCode='+kev.keyCode+' released.');
 	}
 	
-// added need to be modify
-function drawResize(gl, g_canvas, currentAngle, modelMatrix, viewMatrix, projMatrix, mvpMatrix, u_MvpMatrix) {
-	//Make canvas fill the top 3/4 of our browser window:
-	var xtraMargin = 130;    // keep a margin (otherwise, browser adds scroll-bars)
-	g_canvas.width = innerWidth - xtraMargin;
-	g_canvas.height = (innerHeight*3/4) - xtraMargin;
-	// IMPORTANT!  Need a fresh drawing in the re-sized viewports.
-	drawAll(gl, g_canvas, currentAngle, modelMatrix, viewMatrix, projMatrix, mvpMatrix, u_MvpMatrix);				// draw in all viewports.
-}
 
 function Angle2Rad(angle) {
 	return angle * (Math.PI/180);

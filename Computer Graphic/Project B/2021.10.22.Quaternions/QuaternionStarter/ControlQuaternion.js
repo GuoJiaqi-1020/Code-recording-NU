@@ -53,85 +53,85 @@ var qTot = new Quaternion(0,0,0,1);	// 'current' orientation (made from qNew)
 var quatMatrix = new Matrix4();				// rotation matrix, made from latest qTot
 
 function main() {
-//==============================================================================
-  // Retrieve <canvas> element
-  var canvas = document.getElementById('webgl');
+	//==============================================================================
+	// Retrieve <canvas> element
+	var canvas = document.getElementById('webgl');
 
-  // Get the rendering context for WebGL
-  var gl = getWebGLContext(canvas);
-  if (!gl) {
-    console.log('Failed to get the rendering context for WebGL');
-    return;
-  }
+	// Get the rendering context for WebGL
+	var gl = getWebGLContext(canvas);
+	if (!gl) {
+		console.log('Failed to get the rendering context for WebGL');
+		return;
+	}
 
-  // Initialize shaders
-  if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
-    console.log('Failed to intialize shaders.');
-    return;
-  }
+	// Initialize shaders
+	if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
+		console.log('Failed to intialize shaders.');
+		return;
+	}
 
-  // Initialize a Vertex Buffer in the graphics system to hold our vertices
-  var n = initVertexBuffer(gl);
-  if (n < 0) {
-    console.log('Failed to set the vertex information');
-    return;
-  }
-	// Register the Mouse & Keyboard Event-handlers-------------------------------
-	// If users press any keys on the keyboard or move, click or drag the mouse,
-	// the operating system records them as 'events' (small text strings that 
-	// can trigger calls to functions within running programs). JavaScript 
-	// programs running within HTML webpages can respond to these 'events' if we:
-	//		1) write an 'event handler' function (called when event happens) and
-	//		2) 'register' that function--connect it to the desired HTML page event. //
-	// Here's how to 'register' all mouse events found within our HTML-5 canvas:
-  canvas.onmousedown	=	function(ev){myMouseDown( ev, gl, canvas) }; 
-  					// when user's mouse button goes down, call mouseDown() function
-  canvas.onmousemove = 	function(ev){myMouseMove( ev, gl, canvas) };
-											// when the mouse moves, call mouseMove() function					
-  canvas.onmouseup = 		function(ev){myMouseUp(   ev, gl, canvas)};
-  					// NOTE! 'onclick' event is SAME as on 'mouseup' event
-  					// in Chrome Brower on MS Windows 7, and possibly other 
-  					// operating systems; thus I use 'mouseup' instead.
-  
-	// END Mouse & Keyboard Event-Handlers-----------------------------------
+	// Initialize a Vertex Buffer in the graphics system to hold our vertices
+	var n = initVertexBuffer(gl);
+	if (n < 0) {
+		console.log('Failed to set the vertex information');
+		return;
+	}
+		// Register the Mouse & Keyboard Event-handlers-------------------------------
+		// If users press any keys on the keyboard or move, click or drag the mouse,
+		// the operating system records them as 'events' (small text strings that 
+		// can trigger calls to functions within running programs). JavaScript 
+		// programs running within HTML webpages can respond to these 'events' if we:
+		//		1) write an 'event handler' function (called when event happens) and
+		//		2) 'register' that function--connect it to the desired HTML page event. //
+		// Here's how to 'register' all mouse events found within our HTML-5 canvas:
+	canvas.onmousedown	=	function(ev){myMouseDown( ev, gl, canvas) }; 
+						// when user's mouse button goes down, call mouseDown() function
+	canvas.onmousemove = 	function(ev){myMouseMove( ev, gl, canvas) };
+												// when the mouse moves, call mouseMove() function					
+	canvas.onmouseup = 		function(ev){myMouseUp(   ev, gl, canvas)};
+						// NOTE! 'onclick' event is SAME as on 'mouseup' event
+						// in Chrome Brower on MS Windows 7, and possibly other 
+						// operating systems; thus I use 'mouseup' instead.
 	
-  // Specify the color for clearing <canvas>
-  gl.clearColor(0.0, 0.0, 0.0, 1.0);
+		// END Mouse & Keyboard Event-Handlers-----------------------------------
+		
+	// Specify the color for clearing <canvas>
+	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
-	// NEW!! Enable 3D depth-test when drawing: don't over-draw at any pixel 
-	// unless the new Z value is closer to the eye than the old one..
-	gl.depthFunc(gl.LESS);			// default value--just so you know it's there.
-	gl.enable(gl.DEPTH_TEST); 	  
+		// NEW!! Enable 3D depth-test when drawing: don't over-draw at any pixel 
+		// unless the new Z value is closer to the eye than the old one..
+		gl.depthFunc(gl.LESS);			// default value--just so you know it's there.
+		gl.enable(gl.DEPTH_TEST); 	  
+		
+	// Get handle to graphics system's storage location of u_ModelMatrix
+	var u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
+	if (!u_ModelMatrix) { 
+		console.log('Failed to get the storage location of u_ModelMatrix');
+		return;
+	}
+	// Create our JavaScript 'model' matrix: 
+	var modelMatrix = new Matrix4();
+
+	// Create, init current rotation angle value in JavaScript
+	var currentAngle = 0.0;
 	
-  // Get handle to graphics system's storage location of u_ModelMatrix
-  var u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
-  if (!u_ModelMatrix) { 
-    console.log('Failed to get the storage location of u_ModelMatrix');
-    return;
-  }
-  // Create our JavaScript 'model' matrix: 
-  var modelMatrix = new Matrix4();
+	//====================================
+		testQuaternions();		// test fcn at end of file
+	//=====================================
 
-  // Create, init current rotation angle value in JavaScript
-  var currentAngle = 0.0;
-  
-//====================================
-	testQuaternions();		// test fcn at end of file
-//=====================================
-
-  // ANIMATION: create 'tick' variable whose value is this function:
-  //----------------- 
-  var tick = function() {
-    currentAngle = animate(currentAngle);  // Update the rotation angle
-    draw(gl, n, currentAngle, modelMatrix, u_ModelMatrix);   // Draw shapes
-//    console.log('currentAngle=',currentAngle); // put text in console.
+	// ANIMATION: create 'tick' variable whose value is this function:
+	//----------------- 
+	var tick = function() {
+		currentAngle = animate(currentAngle);  // Update the rotation angle
+		draw(gl, n, currentAngle, modelMatrix, u_ModelMatrix);   // Draw shapes
+	//    console.log('currentAngle=',currentAngle); // put text in console.
 
 
-    requestAnimationFrame(tick, canvas);   
-    									// Request that the browser re-draw the webpage
-    									// (causes webpage to endlessly re-draw itself)
-  };
-  tick();							// start (and continue) animation: draw current image
+		requestAnimationFrame(tick, canvas);   
+											// Request that the browser re-draw the webpage
+											// (causes webpage to endlessly re-draw itself)
+	};
+	tick();							// start (and continue) animation: draw current image
 	
 }
 
