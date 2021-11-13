@@ -1,5 +1,5 @@
 import sys
-import edgebased_feature_extractor
+import edge_extract
 from mlrefined_libraries.math_optimization_library import static_plotter
 import autograd.numpy as np
 from autograd.misc.flatten import flatten_func
@@ -81,7 +81,7 @@ class multi_class_ml_function(object):
             [[1, 1, 0],
              [1, 0, -1],
              [0, -1, -1]]])
-        extractor = edgebased_feature_extractor.tensor_conv_layer()
+        extractor = edge_extract.tensor_conv_layer()
         x_transformed = extractor.conv_layer(x.T, kernels).T
         return x_transformed
 
