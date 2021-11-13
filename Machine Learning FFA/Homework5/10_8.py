@@ -7,11 +7,9 @@ Visualizer = ncv.Visualizer
 
 class multi_class_ml_function(Visualizer):
     def __init__(self, file_path):
-        Visualizer.__init__(self, file_path)
+        super().__init__(file_path)
         self.decent_initializer(2)
-        self.w_best = None
-        self.model = None
-        self.w0 = None
+
 
     def decent_initializer(self, scale):
         self.w0 = [scale * np.random.randn(3, 1), scale * np.random.randn(2, 1)]

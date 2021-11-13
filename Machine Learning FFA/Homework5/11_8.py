@@ -27,7 +27,6 @@ class multi_class_ml_function(Visualizer):
 
     def train(self, num_bag, train_portion, degree):
         model = []
-
         for j in range(num_bag):
             setup = Setup(self.x, self.y)
             setup.preprocessing_steps(name="standard")
@@ -40,7 +39,7 @@ class multi_class_ml_function(Visualizer):
             # keep only the best degree, based on lowest validation cost
             val_costs = [np.min(setup.valid_count_histories[i]) for i in range(degree)]
             min_ind = np.argmin(val_costs)
-            min_val = val_costs[min_ind]
+            # min_val = val_costs[min_ind]
 
             # get minor of minor
             smallest_ind = np.argmin(setup.valid_count_histories[min_ind])
@@ -50,8 +49,6 @@ class multi_class_ml_function(Visualizer):
             setup.valid_count_histories = setup.valid_count_histories[min_ind][smallest_ind]
             setup.weight_histories = setup.weight_histories[min_ind][smallest_ind]
             setup.choose_features(name='polys', degree=min_ind + 1)
-
-            # store
             model.append(copy.deepcopy(setup))
         return model
 
