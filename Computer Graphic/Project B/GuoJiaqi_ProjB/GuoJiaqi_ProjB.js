@@ -1005,8 +1005,9 @@ function makeBlackcube() {
 }
 
 function drawAll(gl, g_canvas, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix) {
-	var far = 1000.0
-	var near = 1.0
+	var fov = 35.0
+	var far = 21.1
+	var near = 0.1
 	look_Px = cam_Px + Math.cos(Angle2Rad(g_Theta));
 	look_Py = cam_Py + Math.sin(Angle2Rad(g_Theta));
 	look_Pz = cam_Pz + G_z;
@@ -1020,7 +1021,7 @@ function drawAll(gl, g_canvas, modelMatrix, viewMatrix, projMatrix, ModelMatrix,
 
 	// set the ViewPoint accoding the requirement
 	gl.viewport(0, 0, innerWidth / 2, innerWidth / 2);
-	projMatrix.setPerspective(35.0, // FOV = 35 fixed value
+	projMatrix.setPerspective(fov, // FOV = 35 fixed value
 		g_canvas.width/g_canvas.height/2, // Aspect ratio
 		near,
 		far);
@@ -1037,17 +1038,17 @@ function drawAll(gl, g_canvas, modelMatrix, viewMatrix, projMatrix, ModelMatrix,
 	projMatrix.setIdentity();
 	viewMatrix.setIdentity();
 
+	var vpAspect = g_canvas.width/2 / (g_canvas.height);
+	var OrthH = 2.0*((far-near)/3)*Math.tan(fov * 0.5 / 180.0 * Math.PI);
+	var OrthoW = OrthH*vpAspect;
 
-	projMatrix.setOrtho(-3, 3, -3, 3,   //x, y, z, w 
-		near,
+	projMatrix.setOrtho(-OrthoW, OrthoW, -OrthH, OrthH, 
+		near, 
 		far);
 
-		// projMatrix.setOrtho(-(g_canvas.width/2)/((far-near)/3+near),
-		// (g_canvas.width/2)/((far-near)/3+near), 
-		// -(g_canvas.height)/((far-near)/3+near), 
-		// (g_canvas.height)/((far-near)/3+near),   //x, y, z, w 
-		// near,
-		// far);
+	// projMatrix.setOrtho(-3, 3, -3, 3,   //x, y, z, w 
+	// 	near,
+	// 	far);
 
 	viewMatrix.setLookAt(cam_Px,  cam_Py,  cam_Pz, // center of projection
 		look_Px, look_Py, look_Pz, // look-at point
