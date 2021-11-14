@@ -20,7 +20,11 @@ var FSHADER_SOURCE =
 // Global Variables
 
 // Shift variable for the small robot
-var g_digits = 5
+var g_last = Date.now();
+
+var angel_limit = 45;
+// shifting variable for the robots
+var g_digits = 5;
 var hori_shift = 0;
 var vert_shift = 0;
 
@@ -32,45 +36,42 @@ var qNew = new Quaternion(0,0,0,1); // most-recent mouse drag's rotation
 var qTot = new Quaternion(0,0,0,1);	// 'current' orientation (made from qNew)
 var quatMatrix = new Matrix4();	
 
-///////////////////
 //------------For mouse click-and-drag: -------------------------------
 var g_isDrag=false;		// mouse-drag: true when user holds down mouse button
 var g_xMclik=0.0;			// last mouse button-down position (in CVV coords)
 var g_yMclik=0.0;   
 var g_xMdragTot=0.0;	// total (accumulated) mouse-drag amounts (in CVV coords).
 var g_yMdragTot=0.0; 
-
-				
+			
 // Define varibles for the camera's sys point and look-at point											
 var cam_Px = 2, cam_Py = -9.4, cam_Pz = 6.0; //! Location of our camera
 var look_Px = 4.5, look_Py = 4.5, look_Pz = 5.5; //! Where our camera is look_ing
-var g_Theta = 111, ini_Theta = 111;
-var g_Z = look_Pz - cam_Pz, ini_Z = -0.5;
+var ini_Theta = 111;
+var g_Theta = ini_Theta;
+var ini_Gz = look_Pz - cam_Pz;
+var G_z = look_Pz - cam_Pz;
 var perspective_changing_rate = 2.0;
 
+//Animation Angle For Animation 
+var g_angle01 = 0.0;
+var g_angle01Rate = 40.0;
 
-//Animation Angle
-// For Animation 
-var g_angle01 = 0.0;                  // initial rotation angle
-var g_angle01Rate = 40.0;           // rotation speed, in degrees/second 
+var g_butter = 0;
+var g_butterRate = 20.0;
 
-var g_butter = 0;                  // initial rotation angle
-var g_butterRate = 20.0;           // rotation speed, in degrees/second 
+var g_angle02 = 0;
+var g_angle02Rate = 80.0;
 
-var g_angle02 = 0;                  // initial rotation angle
-var g_angle02Rate = 80.0;           // rotation speed, in degrees/second 
+var g_angle03 = 0; 
+var g_angle03Rate = 120.0;
 
-var g_angle03 = 0;                  // initial rotation angle
-var g_angle03Rate = 120.0;           // rotation speed, in degrees/second 
+var g_planet = 0;
+var g_planetRate = 100.0;
 
-var g_planet = 0;                  // initial rotation angle
-var g_planetRate = 100.0;           // rotation speed, in degrees/second 
+var g_angle_leg1 = 10;
+var g_angle04Rate = 80.0;
 
-
-var g_angle_leg1 = 10;                  // initial rotation angle
-var g_angle04Rate = 80.0;           // rotation speed, in degrees/second 
-
-var g_angle_leg2 = -45;                  // initial rotation angle
+var g_angle_leg2 = -45;
 var g_angle05Rate = 80.0; 
 
 var g_angle06 = 0.0;
@@ -78,16 +79,7 @@ var g_angle06Rate = 60.0;
 
 var g_angle07 = 0.0;
 var g_angle07Rate = 60.0;
-// var g_angle05 = 0.0;
-// var g_angle05Rate = 20.0;
 
-// var g_angle06 = 0.0;
-// var g_angle06Rate = 20.0;
-
-// Create a local version of our model matrix in JavaScript 
-
-
-////////////////////
 
 function main() {
 	var modelMatrix = new Matrix4();
@@ -132,22 +124,19 @@ function main() {
 		return;
 	}
 
-    // Create, init current rotation angle value in JavaScript
 	var currentAngle = 0.0;
-
     var tick = function() {
         currentAngle = animate(currentAngle);
         g_canvas = Resized_Web(g_canvas);   // Draw shapes
-        drawAll(gl, g_canvas, currentAngle, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix);               // draw in all viewports.
+        drawAll(gl, g_canvas, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix);               // draw in all viewports.
         requestAnimationFrame(tick, g_canvas);   
     };
     tick();
 }
 
-//Make canvas fill the top 70% of our browser height
 function Resized_Web(g_canvas) {
     g_canvas.width = innerWidth - 15;
-    // Ensure the side margin equal
+    //Make canvas fill the top 70% of our browser height
     g_canvas.height = (innerHeight*0.7);
     // IMPORTANT!  Need a fresh drawing in the re-sized viewports.
     return g_canvas
@@ -172,12 +161,12 @@ function initVertexBuffer(gl) {
 		+ RobotbodyVerts.length + ConcaVerts.length);
 	var mySiz = (cylVerts.length + sphVerts.length + axis.length +
 							 torVerts.length + gndVerts.length + subsiz);						
-	// How many vertices total?
 	var nn = mySiz / floatsPerVertex;
 	console.log('nn is', nn, 'mySiz is', mySiz, 'floatsPerVertex is', floatsPerVertex);
 	// Copy all shapes into one big Float32 array:
     var colorShapes = new Float32Array(mySiz);
 	// Copy them:  remember where to start for each shape:
+
 	cylStart = 0;							// we stored the cylinder first.
     for(i=0,j=0; j< cylVerts.length; i++,j++) {
   	colorShapes[i] = cylVerts[j];
@@ -191,7 +180,6 @@ function initVertexBuffer(gl) {
 		colorShapes[i] = torVerts[j];
 		}
 		gndStart = i;						// next we'll store the ground-plane;
-	////////////
 	for(j=0; j< gndVerts.length; i++, j++) {
 		colorShapes[i] = gndVerts[j];
 		}
@@ -285,19 +273,10 @@ function initVertexBuffer(gl) {
 										// value we will actually use?  Need to skip over x,y,z,w
 										
 	gl.enableVertexAttribArray(a_Color);  
-										// Enable assignment of vertex buffer object's position data
-
-		//--------------------------------DONE!
-	// Unbind the buffer object 
 	gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
 	return nn;
-	}
+}
 
-// simple & quick-- 
-// I didn't use any arguments such as color choices, # of verts,slices,bars, etc.
-// YOU can improve these functions to accept useful arguments...
-//
 function makeDiamond() {
 //==============================================================================
 // Make a diamond-like shape from two adjacent tetrahedra, aligned with Z axis.
@@ -305,7 +284,6 @@ function makeDiamond() {
 	// YOU write this one...
 	
 }
-
 
 function makeConcaveHex() {
 	const s30 = 0.5;										 // == sin(30deg) == 1 / 2
@@ -371,7 +349,7 @@ function makeConcaveHex() {
 			0.1,  0.1,  0.0,  1.0,    0.0,  0.0,  1.0,  // Node 5 BLUE
 			c30, -s30,  0.25, 1.0,    0.0,  0.0,  1.0,  // Node 8 BLUE 
 			]);
-	}
+}
 
 function makeRobotbody() {
 	RobotbodyVerts = new Float32Array([
@@ -451,125 +429,104 @@ function makeRobotbody() {
 }
 
 function makeCylinder() {
-//==============================================================================
-// Make a cylinder shape from one TRIANGLE_STRIP drawing primitive, using the
-// 'stepped spiral' design described in notes.
-// Cylinder center at origin, encircles z axis, radius 1, top/bottom at z= +/-1.
-//
- var ctrColr = new Float32Array([0.2, 0.2, 0.2]);	// dark gray
- var topColr = new Float32Array([0.4, 0.7, 0.4]);	// light green
- var botColr = new Float32Array([0.5, 0.5, 1.0]);	// light blue
- var capVerts = 16;	// # of vertices around the topmost 'cap' of the shape
- var botRadius = 1.6;		// radius of bottom of cylinder (top always 1.0)
- 
- // Create a (global) array to hold this cylinder's vertices;
- cylVerts = new Float32Array(  ((capVerts*6) -2) * floatsPerVertex);
-										// # of vertices * # of elements needed to store them. 
+	var ctrColr = new Float32Array([0.2, 0.2, 0.2]);	// dark gray
+	var topColr = new Float32Array([0.4, 0.7, 0.4]);	// light green
+	var botColr = new Float32Array([0.5, 0.5, 1.0]);	// light blue
+	var capVerts = 16;	// # of vertices around the topmost 'cap' of the shape
+	var botRadius = 1.6;		// radius of bottom of cylinder (top always 1.0)
+	
+	// Create a (global) array to hold this cylinder's vertices;
+	cylVerts = new Float32Array(  ((capVerts*6) -2) * floatsPerVertex);
+											// # of vertices * # of elements needed to store them. 
 
-	// Create circle-shaped top cap of cylinder at z=+1.0, radius 1.0
-	// v counts vertices: j counts array elements (vertices * elements per vertex)
-	for(v=1,j=0; v<2*capVerts; v++,j+=floatsPerVertex) {	
-		// skip the first vertex--not needed.
-		if(v%2==0)
-		{				// put even# vertices at center of cylinder's top cap:
-			cylVerts[j  ] = 0.0; 			// x,y,z,w == 0,0,1,1
-			cylVerts[j+1] = 0.0;	
-			cylVerts[j+2] = 1.0; 
-			cylVerts[j+3] = 1.0;			// r,g,b = topColr[]
-			cylVerts[j+4]=ctrColr[0]; 
-			cylVerts[j+5]=ctrColr[1]; 
-			cylVerts[j+6]=ctrColr[2];
-		}
-		else { 	// put odd# vertices around the top cap's outer edge;
-						// x,y,z,w == cos(theta),sin(theta), 1.0, 1.0
-						// 					theta = 2*PI*((v-1)/2)/capVerts = PI*(v-1)/capVerts
-			cylVerts[j  ] = Math.cos(Math.PI*(v-1)/capVerts);			// x
-			cylVerts[j+1] = Math.sin(Math.PI*(v-1)/capVerts);			// y
-			//	(Why not 2*PI? because 0 < =v < 2*capVerts, so we
-			//	 can simplify cos(2*PI * (v-1)/(2*capVerts))
-			cylVerts[j+2] = 1.0;	// z
-			cylVerts[j+3] = 1.0;	// w.
-			// r,g,b = topColr[]
-			cylVerts[j+4]=topColr[0]; 
-			cylVerts[j+5]=topColr[1]; 
-			cylVerts[j+6]=topColr[2];			
-		}
-	}
-	// Create the cylinder side walls, made of 2*capVerts vertices.
-	// v counts vertices within the wall; j continues to count array elements
-	for(v=0; v< 2*capVerts; v++, j+=floatsPerVertex) {
-		if(v%2==0)	// position all even# vertices along top cap:
-		{		
-				cylVerts[j  ] = Math.cos(Math.PI*(v)/capVerts);		// x
-				cylVerts[j+1] = Math.sin(Math.PI*(v)/capVerts);		// y
+		// Create circle-shaped top cap of cylinder at z=+1.0, radius 1.0
+		// v counts vertices: j counts array elements (vertices * elements per vertex)
+		for(v=1,j=0; v<2*capVerts; v++,j+=floatsPerVertex) {	
+			// skip the first vertex--not needed.
+			if(v%2==0)
+			{				// put even# vertices at center of cylinder's top cap:
+				cylVerts[j  ] = 0.0; 			// x,y,z,w == 0,0,1,1
+				cylVerts[j+1] = 0.0;	
+				cylVerts[j+2] = 1.0; 
+				cylVerts[j+3] = 1.0;			// r,g,b = topColr[]
+				cylVerts[j+4]=ctrColr[0]; 
+				cylVerts[j+5]=ctrColr[1]; 
+				cylVerts[j+6]=ctrColr[2];
+			}
+			else { 	// put odd# vertices around the top cap's outer edge;
+							// x,y,z,w == cos(theta),sin(theta), 1.0, 1.0
+							// 					theta = 2*PI*((v-1)/2)/capVerts = PI*(v-1)/capVerts
+				cylVerts[j  ] = Math.cos(Math.PI*(v-1)/capVerts);			// x
+				cylVerts[j+1] = Math.sin(Math.PI*(v-1)/capVerts);			// y
+				//	(Why not 2*PI? because 0 < =v < 2*capVerts, so we
+				//	 can simplify cos(2*PI * (v-1)/(2*capVerts))
 				cylVerts[j+2] = 1.0;	// z
 				cylVerts[j+3] = 1.0;	// w.
 				// r,g,b = topColr[]
 				cylVerts[j+4]=topColr[0]; 
 				cylVerts[j+5]=topColr[1]; 
 				cylVerts[j+6]=topColr[2];			
+			}
 		}
-		else		// position all odd# vertices along the bottom cap:
-		{
-				cylVerts[j  ] = botRadius * Math.cos(Math.PI*(v-1)/capVerts);		// x
-				cylVerts[j+1] = botRadius * Math.sin(Math.PI*(v-1)/capVerts);		// y
+		// Create the cylinder side walls, made of 2*capVerts vertices.
+		// v counts vertices within the wall; j continues to count array elements
+		for(v=0; v< 2*capVerts; v++, j+=floatsPerVertex) {
+			if(v%2==0)	// position all even# vertices along top cap:
+			{		
+					cylVerts[j  ] = Math.cos(Math.PI*(v)/capVerts);		// x
+					cylVerts[j+1] = Math.sin(Math.PI*(v)/capVerts);		// y
+					cylVerts[j+2] = 1.0;	// z
+					cylVerts[j+3] = 1.0;	// w.
+					// r,g,b = topColr[]
+					cylVerts[j+4]=topColr[0]; 
+					cylVerts[j+5]=topColr[1]; 
+					cylVerts[j+6]=topColr[2];			
+			}
+			else		// position all odd# vertices along the bottom cap:
+			{
+					cylVerts[j  ] = botRadius * Math.cos(Math.PI*(v-1)/capVerts);		// x
+					cylVerts[j+1] = botRadius * Math.sin(Math.PI*(v-1)/capVerts);		// y
+					cylVerts[j+2] =-1.0;	// z
+					cylVerts[j+3] = 1.0;	// w.
+					// r,g,b = topColr[]
+					cylVerts[j+4]=botColr[0]; 
+					cylVerts[j+5]=botColr[1]; 
+					cylVerts[j+6]=botColr[2];			
+			}
+		}
+		// Create the cylinder bottom cap, made of 2*capVerts -1 vertices.
+		// v counts the vertices in the cap; j continues to count array elements
+		for(v=0; v < (2*capVerts -1); v++, j+= floatsPerVertex) {
+			if(v%2==0) {	// position even #'d vertices around bot cap's outer edge
+				cylVerts[j  ] = botRadius * Math.cos(Math.PI*(v)/capVerts);		// x
+				cylVerts[j+1] = botRadius * Math.sin(Math.PI*(v)/capVerts);		// y
 				cylVerts[j+2] =-1.0;	// z
 				cylVerts[j+3] = 1.0;	// w.
 				// r,g,b = topColr[]
 				cylVerts[j+4]=botColr[0]; 
 				cylVerts[j+5]=botColr[1]; 
-				cylVerts[j+6]=botColr[2];			
+				cylVerts[j+6]=botColr[2];		
+			}
+			else {				// position odd#'d vertices at center of the bottom cap:
+				cylVerts[j  ] = 0.0; 			// x,y,z,w == 0,0,-1,1
+				cylVerts[j+1] = 0.0;	
+				cylVerts[j+2] =-1.0; 
+				cylVerts[j+3] = 1.0;			// r,g,b = botColr[]
+				cylVerts[j+4]=botColr[0]; 
+				cylVerts[j+5]=botColr[1]; 
+				cylVerts[j+6]=botColr[2];
+			}
 		}
-	}
-	// Create the cylinder bottom cap, made of 2*capVerts -1 vertices.
-	// v counts the vertices in the cap; j continues to count array elements
-	for(v=0; v < (2*capVerts -1); v++, j+= floatsPerVertex) {
-		if(v%2==0) {	// position even #'d vertices around bot cap's outer edge
-			cylVerts[j  ] = botRadius * Math.cos(Math.PI*(v)/capVerts);		// x
-			cylVerts[j+1] = botRadius * Math.sin(Math.PI*(v)/capVerts);		// y
-			cylVerts[j+2] =-1.0;	// z
-			cylVerts[j+3] = 1.0;	// w.
-			// r,g,b = topColr[]
-			cylVerts[j+4]=botColr[0]; 
-			cylVerts[j+5]=botColr[1]; 
-			cylVerts[j+6]=botColr[2];		
-		}
-		else {				// position odd#'d vertices at center of the bottom cap:
-			cylVerts[j  ] = 0.0; 			// x,y,z,w == 0,0,-1,1
-			cylVerts[j+1] = 0.0;	
-			cylVerts[j+2] =-1.0; 
-			cylVerts[j+3] = 1.0;			// r,g,b = botColr[]
-			cylVerts[j+4]=botColr[0]; 
-			cylVerts[j+5]=botColr[1]; 
-			cylVerts[j+6]=botColr[2];
-		}
-	}
 }
 
 function makeSphere() {
-//==============================================================================
-// Make a sphere from one OpenGL TRIANGLE_STRIP primitive.   Make ring-like 
-// equal-lattitude 'slices' of the sphere (bounded by planes of constant z), 
-// and connect them as a 'stepped spiral' design (see makeCylinder) to build the
-// sphere from one triangle strip.
-  var slices = 13;		// # of slices of the sphere along the z axis. >=3 req'd
-											// (choose odd # or prime# to avoid accidental symmetry)
-  var sliceVerts	= 27;	// # of vertices around the top edge of the slice
-											// (same number of vertices on bottom of slice, too)
-  var topColr = new Float32Array([0.9, 0.9, 0.9]);	// North Pole: light gray
-  var equColr = new Float32Array([0.9, 0.9, 0.9]);	// Equator:    bright green
-  var botColr = new Float32Array([0.9, 0.9, 0.9]);	// South Pole: brightest gray.
-  var sliceAngle = Math.PI/slices;	// lattitude angle spanned by one slice.
-
-	// Create a (global) array to hold this sphere's vertices:
-  sphVerts = new Float32Array(  ((slices * 2* sliceVerts) -2) * floatsPerVertex);
-										// # of vertices * # of elements needed to store them. 
-										// each slice requires 2*sliceVerts vertices except 1st and
-										// last ones, which require only 2*sliceVerts-1.
-										
-	// Create dome-shaped top slice of sphere at z=+1
-	// s counts slices; v counts vertices; 
-	// j counts array elements (vertices * elements per vertex)
+	var slices = 13;
+	var sliceVerts	= 27;
+	var topColr = new Float32Array([0.9, 0.9, 0.9]);	// North Pole: light gray
+	var equColr = new Float32Array([0.9, 0.9, 0.9]);	// Equator:    bright green
+	var botColr = new Float32Array([0.9, 0.9, 0.9]);	// South Pole: brightest gray.
+	var sliceAngle = Math.PI/slices;	// lattitude angle spanned by one slice.
+	sphVerts = new Float32Array(  ((slices * 2* sliceVerts) -2) * floatsPerVertex);
 	var cos0 = 0.0;					// sines,cosines of slice's top, bottom edge.
 	var sin0 = 0.0;
 	var cos1 = 0.0;
@@ -1047,54 +1004,57 @@ function makeBlackcube() {
 	]);
 }
 
-
-function drawAll(gl, g_canvas, currentAngle, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix) {
+function drawAll(gl, g_canvas, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix) {
 	var far = 1000.0
 	var near = 1.0
+	look_Px = cam_Px + Math.cos(Angle2Rad(g_Theta));
+	look_Py = cam_Py + Math.sin(Angle2Rad(g_Theta));
+	look_Pz = cam_Pz + G_z;
+
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
 	modelMatrix.setIdentity();
 	ModelMatrix.setIdentity();
 	projMatrix.setIdentity();
 	viewMatrix.setIdentity();
 
-	
-	// added   Need to modify
-	look_Px = cam_Px + Math.cos(Angle2Rad(g_Theta));
-	look_Py = cam_Py + Math.sin(Angle2Rad(g_Theta));
-	look_Pz = cam_Pz + g_Z;
-	
 	// set the ViewPoint accoding the requirement
 	gl.viewport(0, 0, innerWidth / 2, innerWidth / 2);
-
-	projMatrix.setPerspective(40.0, // FOV = 40 fixed value
+	projMatrix.setPerspective(35.0, // FOV = 35 fixed value
 		g_canvas.width/g_canvas.height/2, // Aspect ratio
 		near,
 		far);
-
     //set the 3D perspective camera
 	viewMatrix.setLookAt(cam_Px,  cam_Py,  cam_Pz, // center of projection
 		look_Px, look_Py, look_Pz, // look-at point
 		0.0,     0.0,    1.0); // View UP vector
 
-	
-	draw_Scene(gl, g_Theta, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix);
+	draw_Scene(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix);
 
-	
     //Set the orthographic camera (with same eye_point, look at poiny, up vector, z_near, z_far values)
 	modelMatrix.setIdentity();
 	ModelMatrix.setIdentity();
 	projMatrix.setIdentity();
 	viewMatrix.setIdentity();
 
+
+	projMatrix.setOrtho(-3, 3, -3, 3,   //x, y, z, w 
+		near,
+		far);
+
+		// projMatrix.setOrtho(-(g_canvas.width/2)/((far-near)/3+near),
+		// (g_canvas.width/2)/((far-near)/3+near), 
+		// -(g_canvas.height)/((far-near)/3+near), 
+		// (g_canvas.height)/((far-near)/3+near),   //x, y, z, w 
+		// near,
+		// far);
+
 	viewMatrix.setLookAt(cam_Px,  cam_Py,  cam_Pz, // center of projection
 		look_Px, look_Py, look_Pz, // look-at point
 		0.0,     0.0,     1.0); // View UP vector
 		
-	projMatrix.setOrtho(-3, 3, -3, 3,   //x, y, z, w 
-		near,
-		far);
 	gl.viewport(innerWidth / 2, 0, innerWidth / 2, innerWidth / 2);
-	draw_Scene(gl, g_Theta, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix);
+	draw_Scene(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix);
 }
 
 function Draw_axis(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix){
@@ -1103,12 +1063,10 @@ function Draw_axis(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_Model
 	gl.drawArrays(gl.LINES, axisStart/floatsPerVertex,6);
 }
 
-// // added need to modify
-function draw_Scene(gl, g_aimTheta, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix) {
-
+function draw_Scene(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix) {
 	modelMatrix.setIdentity();
- 	pushMatrix(modelMatrix);     // SAVE world coord system;
-	Draw_axis(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix);
+	Draw_axis(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix)
+ 	pushMatrix(modelMatrix);     // SAVE point1
 ///////////////////////////////////////////////////
 	modelMatrix = popMatrix(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix);  
 	pushMatrix(modelMatrix);
@@ -1133,16 +1091,19 @@ function draw_Scene(gl, g_aimTheta, modelMatrix, viewMatrix, projMatrix, ModelMa
 	modelMatrix = popMatrix(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix);  
 	pushMatrix(modelMatrix);
 	Draw_spaceship(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix)
-///////////////////////////////////////////////////
-	modelMatrix = popMatrix();  
-    pushMatrix(modelMatrix);  // SAVE world drawing coords.
-  	modelMatrix.translate( 0.4, -0.4, 0.0);	
-  	modelMatrix.scale(0.1, 0.1, 0.1);				// shrink by 10X:
+
+	modelMatrix = popMatrix(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix);  
+	pushMatrix(modelMatrix);
+	Draw_GroundAxis(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix)
+}
+
+function Draw_GroundAxis(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix){
+	modelMatrix.translate( 0.4, -0.4, 0.0);	
+	modelMatrix.scale(0.1, 0.1, 0.1);				// shrink by 10X:
     Set_ModelMatrix(gl, ModelMatrix, u_ModelMatrix, projMatrix, viewMatrix, modelMatrix);
     gl.drawArrays(gl.LINES, 								// use this drawing primitive, and
 					gndStart/floatsPerVertex,	// start at this vertex number, and
 					gndVerts.length/floatsPerVertex);	// draw this many vertices.
-  	modelMatrix = popMatrix();
 }
 
 function Draw_spaceship(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix){
@@ -1151,7 +1112,7 @@ function Draw_spaceship(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_
 	modelMatrix.rotate(g_angle07*0.5, 0, 1, 0);  
 	modelMatrix.rotate(-g_angle07*0.45, 1, 0.2, 0);
 	stack.push(new Matrix4(modelMatrix));  
-
+	Draw_axis(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix)
 	modelMatrix.scale(0.2, 0.2, 0.2);
 	Set_ModelMatrix(gl, ModelMatrix, u_ModelMatrix, projMatrix, viewMatrix, modelMatrix);
     gl.drawArrays(gl.TRIANGLE_STRIP, 								// use this drawing primitive, and
@@ -1227,7 +1188,6 @@ function Draw_spaceship(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_
 		sphVerts.length/floatsPerVertex);
 				
 }
-
 
 function Draw_planet(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix){
 	let stack = []
@@ -1417,12 +1377,13 @@ function Draw_claw_left(x,y,z,gl, modelMatrix, viewMatrix, projMatrix, ModelMatr
 function Draw_moon(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix){
 	let stack4 = []
 	modelMatrix.translate(-0.75, -0.6, 0.0); 					// convert to left-handed coord sys													// to match WebGL display canvas.
-	modelMatrix.scale(0.35, 0.35, 0.35);				// Make it smaller.
-	// modelMatrix.rotate(g_angle06, 1,1,0);  // Make new drawing axes that
 	modelMatrix.rotate(g_Theta + 90, 0.0, 0.0, 1.0);
 	quatMatrix.setFromQuat(qTot.x, qTot.y, qTot.z, qTot.w);	// Quaternion-->Matrix
 	modelMatrix.concat(quatMatrix);
+	Draw_axis(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix)
+	modelMatrix.scale(0.35, 0.35, 0.35);
 	Set_ModelMatrix(gl, ModelMatrix, u_ModelMatrix, projMatrix, viewMatrix, modelMatrix);
+
 	
 	
 	gl.drawArrays(gl.TRIANGLES, 
@@ -1585,7 +1546,7 @@ function Draw_moon(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_Model
 
 function DrawCube(gl){
 	gl.drawArrays(gl.TRIANGLES, cube_vStart/floatsPerVertex, cube_v.length/floatsPerVertex);
- }
+}
 
 function Draw_butterfly(gl, size, coff, inv , modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix){
 	let stack = []
@@ -1594,12 +1555,13 @@ function Draw_butterfly(gl, size, coff, inv , modelMatrix, viewMatrix, projMatri
 	modelMatrix.rotate(inv*g_butter, 0, 0, 1);  
 	modelMatrix.translate(1, -1.7, 0.0); 
 	modelMatrix.translate(-3.0*coff, 3.0*coff, 0);
-	modelMatrix.scale(size,size,size);
+	
 	modelMatrix.rotate(inv*g_butter, -4, 2, 0);  
 	modelMatrix.translate(-1, -2, 1);
 	modelMatrix.translate(2, -2, 1);
 	modelMatrix.rotate(g_angle02, 1, 4, 3);  // Make new drawing axes th
-
+	Draw_axis(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix);
+	modelMatrix.scale(size,size,size);
 	stack.push(new Matrix4(modelMatrix));
 	Set_ModelMatrix(gl, ModelMatrix, u_ModelMatrix, projMatrix, viewMatrix, modelMatrix);
 	gl.drawArrays(gl.TRIANGLES, butter_body_vStart/floatsPerVertex, 
@@ -1656,14 +1618,10 @@ function Draw_butterfly(gl, size, coff, inv , modelMatrix, viewMatrix, projMatri
 		butter_wing_v.length/floatsPerVertex);
 }
 
-
 function Set_ModelMatrix(gl, ModelMatrix, u_ModelMatrix, projMatrix, viewMatrix, modelMatrix) {
 	ModelMatrix.set(projMatrix).multiply(viewMatrix).multiply(modelMatrix);
 	gl.uniformMatrix4fv(u_ModelMatrix, false, ModelMatrix.elements);
 }
-
-// Last time that this function was called:  (used for animation timing)
-var g_last = Date.now();
 
 function animate(angle) {
 	var now = Date.now();
@@ -1683,7 +1641,7 @@ function animate(angle) {
 		if(g_angle01 <-180.0) g_angle01 = g_angle01 + 360.0;
 	
 	g_angle02 = g_angle02 + (g_angle02Rate * elapsed) / 1000.0;
-		if(g_angle02 > 45.0 && g_angle02Rate > 0) g_angle02Rate *= -1.0;
+		if(g_angle02 > angel_limit && g_angle02Rate > 0) g_angle02Rate *= -1.0;
 		if(g_angle02 < 0.0  && g_angle02Rate < 0) g_angle02Rate *= -1.0;
 
 	g_butter = g_butter + (g_butterRate * elapsed) / 1000.0;
@@ -1712,40 +1670,13 @@ function animate(angle) {
 }
 
 function dragQuat(xdrag, ydrag) {
-	//==============================================================================
-	// Called when user drags mouse by 'xdrag,ydrag' as measured in CVV coords.
-	// We find a rotation axis perpendicular to the drag direction, and convert the 
-	// drag distance to an angular rotation amount, and use both to set the value of 
-	// the quaternion qNew.  We then combine this new rotation with the current 
-	// rotation stored in quaternion 'qTot' by quaternion multiply.  Note the 
-	// 'draw()' function converts this current 'qTot' quaternion to a rotation 
-	// matrix for drawing. 
 	var qTmp = new Quaternion(0,0,0,1);
-	
 	var dist = Math.sqrt(xdrag*xdrag + ydrag*ydrag);
-	// console.log('xdrag,ydrag=',xdrag.toFixed(5),ydrag.toFixed(5),'dist=',dist.toFixed(5));
+	console.log('xdrag,ydrag=',xdrag.toFixed(5),ydrag.toFixed(5),'dist=',dist.toFixed(5));
+	// qNew.setFromAxisAngle(ydrag*Math.sin(Math.PI/2-phase1) + xdrag*Math.sin(-phase2)*Math.cos(-Math.PI/2-phase1) + 0.0001, -ydrag*Math.cos(Math.PI/2-phase1) - xdrag*Math.sin(-phase2)*Math.sin(Math.PI/2-phase1) + 0.0001 , xdrag*Math.cos(-phase2) , dist*150.0);
 	qNew.setFromAxisAngle(-ydrag + 0.0001, xdrag + 0.0001, 0.0, dist*150.0);
-	// (why add tiny 0.0001? To ensure we never have a zero-length rotation axis)
-							// why axis (x,y,z) = (-yMdrag,+xMdrag,0)? 
-							// -- to rotate around +x axis, drag mouse in -y direction.
-							// -- to rotate around +y axis, drag mouse in +x direction.
-							
-	qTmp.multiply(qNew,qTot);			// apply new rotation to current rotation. 
-	//--------------------------
-	// IMPORTANT! Why qNew*qTot instead of qTot*qNew? (Try it!)
-	// ANSWER: Because 'duality' governs ALL transformations, not just matrices. 
-	// If we multiplied in (qTot*qNew) order, we would rotate the drawing axes
-	// first by qTot, and then by qNew--we would apply mouse-dragging rotations
-	// to already-rotated drawing axes.  Instead, we wish to apply the mouse-drag
-	// rotations FIRST, before we apply rotations from all the previous dragging.
-	//------------------------
-	// IMPORTANT!  Both qTot and qNew are unit-length quaternions, but we store 
-	// them with finite precision. While the product of two (EXACTLY) unit-length
-	// quaternions will always be another unit-length quaternion, the qTmp length
-	// may drift away from 1.0 if we repeat this quaternion multiply many times.
-	// A non-unit-length quaternion won't work with our quaternion-to-matrix fcn.
-	// Matrix4.prototype.setFromQuat().
-	qTmp.normalize();						// normalize to ensure we stay at length==1.0.
+	qTmp.multiply(qNew,qTot);			 // apply new rotation to current rotation. 
+	qTmp.normalize();		 // normalize to ensure we stay at length==1.0.
 	qTot.copy(qTmp);
 }
 
@@ -1768,7 +1699,7 @@ function myMouseDown(ev) {
 	// report on webpage
 	document.getElementById('MouseAtResult').innerHTML = 
 		'Mouse At: '+x.toFixed(g_digits)+', '+y.toFixed(g_digits);
-};
+}
 
 function myMouseMove(ev) {
 	var Amp = 23.0 //set the sensitivity of mouse drag
@@ -1782,11 +1713,11 @@ function myMouseMove(ev) {
 	var y = (yp - g_canvas.height/2) /		//									-1 <= y < +1.
 							(g_canvas.height/2);
 	//	console.log('myMouseMove(CVV coords  ):  x, y=\t',x,',\t',y);
-// 	g_Theta += (x-g_xMclik)*Amp;
-// 	g_Z -= Angle2Rad(y - g_yMclik)*Amp;
-//     if(g_Theta > 360) g_Theta -= 360.0;
-//     if(g_Theta < 0) g_Theta += 360.0;
-//     
+	// 	g_Theta += (x-g_xMclik)*Amp;
+	// 	G_z -= Angle2Rad(y - g_yMclik)*Amp;
+	//     if(g_Theta > 360) g_Theta -= 360.0;
+	//     if(g_Theta < 0) g_Theta += 360.0;
+	//     
 	// find how far we dragged the mouse:
 	g_xMdragTot += (x - g_xMclik);
 	g_yMdragTot += (y - g_yMclik);
@@ -1796,11 +1727,10 @@ function myMouseMove(ev) {
 	document.getElementById('MouseDragResult').innerHTML = 
 		'Mouse Drag: '+(x - g_xMclik).toFixed(g_digits)+', ' 
 								+(y - g_yMclik).toFixed(g_digits)
-
 	dragQuat(-(x - g_xMclik), -(y - g_yMclik));
 	g_xMclik = x;											// Make next drag-measurement from here.
 	g_yMclik = y;
-};
+}
 
 function myMouseUp(ev) {
 	var rect = ev.target.getBoundingClientRect();	// get canvas corners in pixels
@@ -1822,7 +1752,7 @@ function myMouseUp(ev) {
 	console.log('myMouseUp: g_xMdragTot,g_yMdragTot =',
 		g_xMdragTot.toFixed(g_digits),',\t',g_yMdragTot.toFixed(g_digits));
 	dragQuat(-(x - g_xMclik), -(y - g_yMclik));
-};
+}
 
 function myKeyDown(kev) {
 	//added need to modify
@@ -1871,7 +1801,7 @@ function myKeyDown(kev) {
 				hori_shift = 0;
 				vert_shift = 0;
 				g_Theta = ini_Theta;
-				g_Z = ini_Z;
+				G_z = ini_Gz;
 				cam_Px = 2, cam_Py = -9.4, cam_Pz = 6.0; 
 				look_Px = 4.5, look_Py = 4.5, look_Pz = 5.5;
 				break;
@@ -1919,12 +1849,12 @@ function myKeyDown(kev) {
 				break;
 			case "ArrowUp":	
 				console.log(' up-arrow.');	
-				g_Z += moveRateRad;
+				G_z += moveRateRad;
 				vert_shift +=0.05
 				break;
 			case "ArrowDown":
 				console.log(' down-arrow.');
-				g_Z -= moveRateRad;
+				G_z -= moveRateRad;
 				vert_shift -=0.05
 			break;	
 		default:
@@ -1937,7 +1867,7 @@ function myKeyDown(kev) {
 
 function myKeyUp(kev) {
 	console.log('myKeyUp()--keyCode='+kev.keyCode+' released.');
-	}	
+}	
 
 function Angle2Rad(angle) {
 	return angle * (Math.PI/180);
@@ -1974,4 +1904,16 @@ function runStop() {
 	g_butterRate = myTmp; // 
   }
 }
+
+function num_stars() {
+	var UsrTxt = document.getElementById('angel_limit').value;	
+	document.getElementById('EditBoxOut').innerHTML ='You Typed: '+UsrTxt;
+	console.log('NumSubmit: UsrTxt:', UsrTxt); // print in console, and
+	var cache = angel_limit
+	angel_limit = parseFloat(UsrTxt);     // convert string to float number 
+	if (angel_limit<0 || angel_limit>40){
+		angel_limit = cache
+	}
+
+  };
  
