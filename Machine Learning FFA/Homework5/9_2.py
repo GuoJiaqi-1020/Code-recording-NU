@@ -6,11 +6,10 @@ from autograd.misc.flatten import flatten_func
 from autograd import grad as gradient
 from timeit import default_timer as timer
 from sklearn.datasets import fetch_openml
+
 sys.path.append('..')
 
 plotter = static_plotter.Visualizer()
-
-sys.path.append('../')
 
 
 def linear_model(x, w):
@@ -33,11 +32,10 @@ def multiclass_perceptron(w, x, y, iter):
     return cost / float(np.size(y_p))
 
 
-class multi_class_ml_function(object):
+class MNIST_Classification(object):
     def __init__(self, x, y, n_sample):
         self.x = np.array(x.T)
         self.y = np.array([int(value) for value in y])[np.newaxis, :]
-        # self.w0 = self.decent_initializer()
         self.shuffle_data(n_sample)
         self.data_initialization()
         self.x_edge = self.edge_feature_extract(self.x)
@@ -140,13 +138,11 @@ class multi_class_ml_function(object):
                 grad_eval = grad(w, x_train, y_train, batch_inds)
                 grad_eval.shape = np.shape(w)
                 w = w - alpha * grad_eval
-
             end = timer()
 
             train_cost = g_flat(w, x_train, y_train, np.arange(num_train))
             w_hist.append(unflatten(w))
             train_hist.append(train_cost)
-
             if verbose:
                 print('step ' + str(k + 1) + ' done in ' + str(np.round(end - start, 1)) + ' secs, train cost = ' + str(
                     np.round(train_hist[-1][0], 4)))
@@ -187,15 +183,15 @@ class multi_class_ml_function(object):
 
 if __name__ == "__main__":
     x, y = fetch_openml('mnist_784', version=1, return_X_y=True)
-    minist = multi_class_ml_function(x, y, n_sample=50000)
-    weight_his, cost_his = minist.gradient_descent(multiclass_perceptron, minist.x, minist.y, alpha=0.01,
-                                                   max_its=75,
-                                                   x=minist.x, batch_size=200, verbose=True)
-    weight_edge_his, cost_edge_his = minist.gradient_descent(multiclass_perceptron, minist.x_edge, minist.y,
-                                                             alpha=0.01, max_its=75,
-                                                             x=minist.x_edge, batch_size=200, verbose=True)
-    mis1 = minist.counting_mis_classification(minist.x, weight_his)
-    mis2 = minist.counting_mis_classification(minist.x_edge, weight_edge_his)
+    mnist = MNIST_Classification(x, y, n_sample=50000)
+    weight_his, cost_his = mnist.gradient_descent(multiclass_perceptron, mnist.x, mnist.y, alpha=0.01,
+                                                  max_its=75,
+                                                  x=mnist.x, batch_size=200, verbose=True)
+    weight_edge_his, cost_edge_his = mnist.gradient_descent(multiclass_perceptron, mnist.x_edge, mnist.y,
+                                                            alpha=0.01, max_its=75,
+                                                            x=mnist.x_edge, batch_size=200, verbose=True)
+    mis1 = mnist.counting_mis_classification(mnist.x, weight_his)
+    mis2 = mnist.counting_mis_classification(mnist.x_edge, weight_edge_his)
     plotter.plot_mismatching_histories(histories=[mis1, mis2], start=0,
                                        labels=['raw', 'edge-based'],
                                        title="Training Mis-classification History of 75 Iterations")

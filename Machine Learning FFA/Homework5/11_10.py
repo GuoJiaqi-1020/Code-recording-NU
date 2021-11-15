@@ -7,21 +7,23 @@ from IPython.display import clear_output
 from mlrefined_libraries.nonlinear_superlearn_library.kfolds_reg_lib.superlearn_setup import Setup
 
 
-class multi_class_ml_function(Setup):
+class Diabetes_Classification(Setup):
     def __init__(self, file_path, K_fold):
         data = np.loadtxt(file_path, delimiter=',')
         self.x = data[:-1, :]
         self.y = data[-1:, :]
         super().__init__(self.x, self.y)
-        self.fold_num = self.assign_to_folds(self.y.size, K_fold)
+        self.fold_num = self.fold_assigning(self.y.size, K_fold)
         self.x_mean = np.nanmean(self.x, axis=1)[:, np.newaxis]
         self.x_std = np.nanstd(self.x, axis=1)[:, np.newaxis]
         self.K_fold = K_fold
         self.lam = None
 
+    def decent_ini(self):
+        self.w_0 = 0.1 * np.random.randn(self.x.shape[0] + 1, 1)
+
     @staticmethod
-    def assign_to_folds(L, K):
-        # split data into k equal (as possible) sized sets
+    def fold_assigning(L, K):
         order = np.random.permutation(L)
         c = np.ones((L, 1))
         L = int(np.round((1 / K) * L))
@@ -31,7 +33,6 @@ class multi_class_ml_function(Setup):
         return c
 
     def data_initialization(self):
-        # The whole data processing pipeline
         self.deviation_regulartor(self.x)
         x = self.data_recovery(self.x)
         self.x_mean = np.nanmean(x, axis=1)[:, np.newaxis]
@@ -52,28 +53,24 @@ class multi_class_ml_function(Setup):
         normalize = lambda x: (x - self.x_mean) / self.x_std
         self.x = normalize(x)
 
-    @staticmethod
-    def linear_model(x, w):
-        a = w[0] + np.dot(x.T, w[1:])
-        return a.T
-
     def data_recovery(self, x):
         mean = np.nanmean(self.x, axis=1)
         for i in np.argwhere(np.isnan(x)):
             x[i[0], i[1]] = mean[i[0]]
         return x
 
+    @staticmethod
+    def linear_model(x, w):
+        a = w[0] + np.dot(x.T, w[1:])
+        return a.T
+
     def make_train_test_split(self, k):
         train_ind = [v[0] for v in np.argwhere(self.fold_num != k)]
         valid_ind = [v[0] for v in np.argwhere(self.fold_num == k)]
         self.train_x = self.x[:, train_ind]
         self.train_y = self.y[:, train_ind]
-
         self.valid_x = self.x[:, valid_ind]
         self.valid_y = self.y[:, valid_ind]
-
-    def decent_ini(self):
-        self.w_0 = 0.1 * np.random.randn(self.x.shape[0] + 1, 1)
 
     def gradient_descent(self, g, x, y, alpha_choice, max_its, batch_size):
         w = self.w_0
@@ -87,27 +84,17 @@ class multi_class_ml_function(Setup):
         alpha = 0
 
         for k in range(max_its):
-            # check if diminishing steplength rule used
             if alpha_choice == 'diminishing':
                 alpha = 1 / float(k + 1)
             else:
                 alpha = alpha_choice
-
             for b in range(num_batches):
-                # collect indices of current mini-batch
                 batch_inds = np.arange(b * batch_size, min((b + 1) * batch_size, num_train))
-
-                # plug in value into func and derivative
                 cost_eval, grad_eval = grad(w, x, y, batch_inds)
                 grad_eval.shape = np.shape(w)
-
-                # take descent step with momentum
                 w = w - alpha * grad_eval
 
-            # update training and validation cost
             train_cost = g_flat(w, x, y, np.arange(num_train))
-
-            # record weight update, train and val costs
             w_hist.append(unflatten(w))
             train_hist.append(train_cost)
         return w_hist, train_hist
@@ -128,7 +115,8 @@ class multi_class_ml_function(Setup):
         all_train_counts = []
         all_valid_counts = []
         for k in range(self.K_fold):
-            print("-------fold" + str(k + 1) + "-------")
+            print("---------fold" + str(k + 1) + "---------")
+            print("---------*****---------")
             # self.data_normalization(self.x)
             self.choose_normalizer(name='standard')
             self.make_train_test_split(k)
@@ -171,24 +159,26 @@ class multi_class_ml_function(Setup):
         self.best_lam = lams[bset_ind]
         self.best_weights = self.weights[bset_ind]
 
-    def count_mis_class_total(self, all_train_counts, all_valid_counts):
+    @staticmethod
+    def count_mis_class_total(all_train_counts, all_valid_counts):
         all_train_counts = np.array(all_train_counts)
         train_totals = np.sum(all_train_counts, 0)
         all_valid_counts = np.array(all_valid_counts)
         valid_totals = np.sum(all_valid_counts, 0)
         best_valid_ind = np.where(valid_totals == valid_totals.min())[0][-1]
-        best_lam = lams[best_valid_ind]
+        best_lam = lamda[best_valid_ind]
         return best_lam
 
 
 if __name__ == "__main__":
-    lams = np.linspace(0, 20, 10)
+    k_fold = 10
+    lamda = np.linspace(0, 20, 50)
     file_path = '../mlrefined_datasets/nonlinear_superlearn_datasets/new_gene_data.csv'
-    diabetes = multi_class_ml_function(file_path=file_path, K_fold=5)
-    lamda_chose = diabetes.train(lams, max_its=100, study_rate='diminishing')
-    print("best lam find!" + str(lamda_chose))
+    diabetes = Diabetes_Classification(file_path=file_path, K_fold=k_fold)
+    lamda_chose = diabetes.train(lamda, max_its=100, study_rate='diminishing')
+    print("best lambda is:" + str(lamda_chose))
     clear_output()
-    diabetes2 = multi_class_ml_function(file_path=file_path, K_fold=5)
+    diabetes2 = Diabetes_Classification(file_path=file_path, K_fold=k_fold)
     diabetes2.single_trail(lams=np.array([lamda_chose]), max_its=200, study_rate='diminishing')
     plt.plot(np.abs(diabetes2.best_weights[1:]))
     plt.show()

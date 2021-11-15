@@ -4,7 +4,7 @@ from mlrefined_libraries.nonlinear_superlearn_library.classification_bagging_vis
 from mlrefined_libraries.nonlinear_superlearn_library.reg_lib.super_setup import Setup
 
 
-class multi_class_ml_function(Visualizer):
+class Bagging_Two_Class_Classification(Visualizer):
     def __init__(self, file_path):
         data = np.loadtxt(file_path, delimiter=',')
         Visualizer.__init__(self, file_path)
@@ -60,6 +60,6 @@ class multi_class_ml_function(Visualizer):
 
 if __name__ == "__main__":
     file_path = '../mlrefined_datasets/nonlinear_superlearn_datasets/new_circle_data.csv'
-    bagging8 = multi_class_ml_function(file_path=file_path)
-    trained_model = bagging8.train(num_bag=5, train_portion=0.7, degree=4)
+    bagging8 = Bagging_Two_Class_Classification(file_path=file_path)
+    trained_model = bagging8.train(num_bag=5, train_portion=0.67, degree=8)
     bagging8.show_runs(trained_model)

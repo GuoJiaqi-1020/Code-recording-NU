@@ -5,11 +5,10 @@ import autograd.numpy as np
 Visualizer = ncv.Visualizer
 
 
-class multi_class_ml_function(Visualizer):
+class Engineering_Feature_Transformation(Visualizer):
     def __init__(self, file_path):
         super().__init__(file_path)
         self.decent_initializer(2)
-
 
     def decent_initializer(self, scale):
         self.w0 = [scale * np.random.randn(3, 1), scale * np.random.randn(2, 1)]
@@ -27,12 +26,12 @@ class multi_class_ml_function(Visualizer):
         self.model = model
 
     def visulizer(self):
-        self.static_N2_simple(self.w_best, self.model, view=[30, 155])
+        self.static_N2_simple(self.w_best, self.model, view=[30, 160])
 
 
 if __name__ == "__main__":
     file_path = '../mlrefined_datasets/nonlinear_superlearn_datasets/diagonal_stripes.csv'
-    Eng_trans = multi_class_ml_function(file_path)
+    Eng_trans = Engineering_Feature_Transformation(file_path)
     Eng_trans.plot_data()
     Eng_trans.train(loss_fun='softmax', study_rate=0.1, iters=2000, normalize='standard')
     Eng_trans.visulizer()
