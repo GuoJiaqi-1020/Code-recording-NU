@@ -1067,7 +1067,7 @@ function Draw_axis(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_Model
 function draw_Scene(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix) {
 	modelMatrix.setIdentity();
 	Draw_axis(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix)
- 	pushMatrix(modelMatrix);     // SAVE point1
+ 	pushMatrix(modelMatrix);
 ///////////////////////////////////////////////////
 	modelMatrix = popMatrix(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix);  
 	pushMatrix(modelMatrix);
@@ -1198,7 +1198,7 @@ function Draw_planet(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_Mod
 	stack.push(new Matrix4(modelMatrix));  
 	modelMatrix.scale(0.13, 0.13, 0.13);
 	Set_ModelMatrix(gl, ModelMatrix, u_ModelMatrix, projMatrix, viewMatrix, modelMatrix);
-	gl.drawArrays(gl.TRIANGLE_STRIP,				// use this drawing primitive, and
+	gl.drawArrays(gl.TRIANGLE_STRIP,	// use this drawing primitive, and
 		sphStart/floatsPerVertex,	// start at this vertex number, and 
 		sphVerts.length/floatsPerVertex);	// draw this many vertices.
 	
@@ -1208,7 +1208,7 @@ function Draw_planet(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_Mod
 	modelMatrix.rotate(g_planet, 1, 0, 1); 
 	modelMatrix.scale(0.23, 0.23, 0.23);
 	Set_ModelMatrix(gl, ModelMatrix, u_ModelMatrix, projMatrix, viewMatrix, modelMatrix);
-	gl.drawArrays(gl.TRIANGLE_STRIP, 				// use this drawing primitive, and
+	gl.drawArrays(gl.TRIANGLE_STRIP, 	// use this drawing primitive, and
 		torStart/floatsPerVertex,	// start at this vertex number, and
 		torVerts.length/floatsPerVertex);	// draw this many vertices.
 
@@ -1219,7 +1219,7 @@ function Draw_planet(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_Mod
 	modelMatrix.rotate(g_planet, 0, 1, 1); 
 	modelMatrix.scale(0.23, 0.23, 0.23);
 	Set_ModelMatrix(gl, ModelMatrix, u_ModelMatrix, projMatrix, viewMatrix, modelMatrix);
-	gl.drawArrays(gl.TRIANGLE_STRIP, 				// use this drawing primitive, and
+	gl.drawArrays(gl.TRIANGLE_STRIP, 	// use this drawing primitive, and
 		torStart/floatsPerVertex,	// start at this vertex number, and
 		torVerts.length/floatsPerVertex);	// draw this many vertices.
 
@@ -1377,15 +1377,19 @@ function Draw_claw_left(x,y,z,gl, modelMatrix, viewMatrix, projMatrix, ModelMatr
 
 function Draw_moon(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix){
 	let stack4 = []
-	modelMatrix.translate(-0.75, -0.6, 0.0); 					// convert to left-handed coord sys													// to match WebGL display canvas.
-	modelMatrix.rotate(g_Theta + 90, 0.0, 0.0, 1.0);
-	quatMatrix.setFromQuat(qTot.x, qTot.y, qTot.z, qTot.w);	// Quaternion-->Matrix
+	modelMatrix.translate(-0.75, -0.6, 0.0); 											// to match WebGL display canvas.
+	// modelMatrix.rotate(g_Theta + 90, 0.0, 0.0, 1.0);
+
+	quatMatrix.setFromQuat(qTot.x*Math.cos(Angle2Rad(g_Theta+90))-qTot.y*Math.sin(Angle2Rad(g_Theta+90)), 
+							qTot.x*Math.sin(Angle2Rad(g_Theta+90))+qTot.y*Math.cos(Angle2Rad(g_Theta+90)),
+							qTot.z, 
+							qTot.w);	
+
 	modelMatrix.concat(quatMatrix);
 	Draw_axis(gl, modelMatrix, viewMatrix, projMatrix, ModelMatrix, u_ModelMatrix)
 	modelMatrix.scale(0.35, 0.35, 0.35);
 	Set_ModelMatrix(gl, ModelMatrix, u_ModelMatrix, projMatrix, viewMatrix, modelMatrix);
 
-	
 	
 	gl.drawArrays(gl.TRIANGLES, 
 		WhitecubeStart/floatsPerVertex ,
