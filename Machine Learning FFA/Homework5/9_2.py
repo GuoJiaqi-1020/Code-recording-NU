@@ -1,10 +1,13 @@
 import sys
-import edge_extract
+from skimage.feature import hog
+from skimage import io
 from mlrefined_libraries.math_optimization_library import static_plotter
 import autograd.numpy as np
 from autograd.misc.flatten import flatten_func
 from autograd import grad as gradient
 from timeit import default_timer as timer
+import edge_extract
+import pickle
 from sklearn.datasets import fetch_openml
 
 sys.path.append('..')
@@ -12,33 +15,53 @@ sys.path.append('..')
 plotter = static_plotter.Visualizer()
 
 
+
 def linear_model(x, w):
     a = w[0] + np.dot(x.T, w[1:])
     return a.T
 
 
-def multiclass_perceptron(w, x, y, iter):
-    # get subset of points
+def multiclass_softmax(w, x, y, iter):
     x_p = x[:, iter]
     y_p = y[:, iter]
+
     # pre-compute predictions on all points
     all_evals = linear_model(x_p, w)
-    # compute maximum across data points
-    a = np.max(all_evals, axis=0)
+
+    # compute softmax across data points
+    a = np.log(np.sum(np.exp(all_evals), axis=0))
+
     # compute cost in compact form using numpy broadcasting
     b = all_evals[y_p.astype(int).flatten(), np.arange(np.size(y_p))]
     cost = np.sum(a - b)
+
     # return average
     return cost / float(np.size(y_p))
+
+
+# def multiclass_perceptron(w, x, y, iter):
+#     # get subset of points
+#     x_p = x[:, iter]
+#     y_p = y[:, iter]
+#     # pre-compute predictions on all points
+#     all_evals = linear_model(x_p, w)
+#     # compute maximum across data points
+#     a = np.max(all_evals, axis=0)
+#     # compute cost in compact form using numpy broadcasting
+#     b = all_evals[y_p.astype(int).flatten(), np.arange(np.size(y_p))]
+#     cost = np.sum(a - b)
+#     # return average
+#     return cost / float(np.size(y_p))
 
 
 class MNIST_Classification(object):
     def __init__(self, x, y, n_sample):
         self.x = np.array(x.T)
+        io.imshow(self.x)
         self.y = np.array([int(value) for value in y])[np.newaxis, :]
         self.shuffle_data(n_sample)
         self.data_initialization()
-        self.x_edge = self.edge_feature_extract(self.x)
+        self.x_edge = self.hog_extractor(self.x)
         self.mismatching_his = None
 
     def decent_initializer(self, x):
@@ -46,42 +69,55 @@ class MNIST_Classification(object):
         return w
 
     @staticmethod
-    def edge_feature_extract(x):
-        kernels = np.array([
-            [[-1, -1, -1],
-             [0, 0, 0],
-             [1, 1, 1]],
+    def hog_extractor(img):
+        feature, hog_image = hog(img, orientations=8, pixels_per_cell=(1, 1), cells_per_block=(3, 3),
+                                 block_norm='L2-Hys', visualize=True, transform_sqrt=False,
+                                 feature_vector=False, multichannel=None)  # 70000， 784
+        return hog_image
 
-            [[-1, -1, 0],
-             [-1, 0, 1],
-             [0, 1, 1]],
+    # @staticmethod
+    # def hog_extractor(x):
+    #     HOG_extractor = Hog_descriptor(img=x, cell_size=8, bin_size=8)
+    #     vector, img = HOG_extractor.extract()
+    #     return img
 
-            [[-1, 0, 1],
-             [-1, 0, 1],
-             [-1, 0, 1]],
-
-            [[0, 1, 1],
-             [-1, 0, 1],
-             [-1, -1, 0]],
-
-            [[1, 0, -1],
-             [1, 0, -1],
-             [1, 0, -1]],
-
-            [[0, -1, -1],
-             [1, 0, -1],
-             [1, 1, 0]],
-
-            [[1, 1, 1],
-             [0, 0, 0],
-             [-1, -1, -1]],
-
-            [[1, 1, 0],
-             [1, 0, -1],
-             [0, -1, -1]]])
-        extractor = edge_extract.tensor_conv_layer()
-        x_transformed = extractor.conv_layer(x.T, kernels).T
-        return x_transformed
+    # @staticmethod
+    # def hog_extractor(x):
+    #     kernels = np.array([
+    #         [[-1, -1, -1],
+    #          [0, 0, 0],
+    #          [1, 1, 1]],
+    #
+    #         [[-1, -1, 0],
+    #          [-1, 0, 1],
+    #          [0, 1, 1]],
+    #
+    #         [[-1, 0, 1],
+    #          [-1, 0, 1],
+    #          [-1, 0, 1]],
+    #
+    #         [[0, 1, 1],
+    #          [-1, 0, 1],
+    #          [-1, -1, 0]],
+    #
+    #         [[1, 0, -1],
+    #          [1, 0, -1],
+    #          [1, 0, -1]],
+    #
+    #         [[0, -1, -1],
+    #          [1, 0, -1],
+    #          [1, 1, 0]],
+    #
+    #         [[1, 1, 1],
+    #          [0, 0, 0],
+    #          [-1, -1, -1]],
+    #
+    #         [[1, 1, 0],
+    #          [1, 0, -1],
+    #          [0, -1, -1]]])
+    #     extractor = edge_extract.tensor_conv_layer()
+    #     x_transformed = extractor.conv_layer(x.T, kernels).T
+    #     return x_transformed
 
     def shuffle_data(self, n_sample):
         inds = np.random.permutation(y.shape[0])[:n_sample]
@@ -184,17 +220,17 @@ class MNIST_Classification(object):
 if __name__ == "__main__":
     x, y = fetch_openml('mnist_784', version=1, return_X_y=True)
     mnist = MNIST_Classification(x, y, n_sample=50000)
-    weight_his, cost_his = mnist.gradient_descent(multiclass_perceptron, mnist.x, mnist.y, alpha=0.01,
-                                                  max_its=75,
-                                                  x=mnist.x, batch_size=200, verbose=True)
-    weight_edge_his, cost_edge_his = mnist.gradient_descent(multiclass_perceptron, mnist.x_edge, mnist.y,
+    # weight_his, cost_his = mnist.gradient_descent(multiclass_softmax, mnist.x, mnist.y, alpha=0.01,
+    #                                               max_its=75,
+    #                                               x=mnist.x, batch_size=200, verbose=True)
+    weight_edge_his, cost_edge_his = mnist.gradient_descent(multiclass_softmax, mnist.x_edge, mnist.y,
                                                             alpha=0.01, max_its=75,
                                                             x=mnist.x_edge, batch_size=200, verbose=True)
-    mis1 = mnist.counting_mis_classification(mnist.x, weight_his)
-    mis2 = mnist.counting_mis_classification(mnist.x_edge, weight_edge_his)
-    plotter.plot_mismatching_histories(histories=[mis1, mis2], start=0,
-                                       labels=['raw', 'edge-based'],
-                                       title="Training Mis-classification History of 75 Iterations")
-    plotter.plot_cost_histories(histories=[cost_his, cost_edge_his], start=0,
-                                labels=['raw', 'edge-based'],
-                                title="Cost History of 75 Iterations")
+    # mis1 = mnist.counting_mis_classification(mnist.x, weight_his)
+    # mis2 = mnist.counting_mis_classification(mnist.x_edge, weight_edge_his)
+    # plotter.plot_mismatching_histories(histories=[mis1, mis2], start=0,
+    #                                    labels=['raw', 'edge-based'],
+    #                                    title="Training Mis-classification History of 75 Iterations")
+    # plotter.plot_cost_histories(histories=[cost_his, cost_edge_his], start=0,
+    #                             labels=['raw', 'edge-based'],
+    #                             title="Cost History of 75 Iterations")

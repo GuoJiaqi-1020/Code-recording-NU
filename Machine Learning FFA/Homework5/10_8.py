@@ -33,5 +33,5 @@ if __name__ == "__main__":
     file_path = '../mlrefined_datasets/nonlinear_superlearn_datasets/diagonal_stripes.csv'
     Eng_trans = Engineering_Feature_Transformation(file_path)
     Eng_trans.plot_data()
-    Eng_trans.train(loss_fun='softmax', study_rate=0.1, iters=2000, normalize='standard')
+    Eng_trans.train(loss_fun='softmax', study_rate=0.1, iters=2000)
     Eng_trans.visulizer()

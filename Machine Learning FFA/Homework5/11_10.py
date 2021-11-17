@@ -115,7 +115,7 @@ class Diabetes_Classification(Setup):
         all_train_counts = []
         all_valid_counts = []
         for k in range(self.K_fold):
-            print("---------fold" + str(k + 1) + "---------")
+            print("---------fold" + str(k + 1) + "------")
             print("---------*****---------")
             # self.data_normalization(self.x)
             self.choose_normalizer(name='standard')

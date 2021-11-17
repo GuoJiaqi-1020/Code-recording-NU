@@ -34,9 +34,7 @@ class Bagging_Two_Class_Classification(Visualizer):
             for d in range(1, degree + 1):
                 model_11_7.choose_cost(name='softmax')
                 model_11_7.choose_features(name='polys', degree=d)
-                model_11_7.fit(algo='newtons_method', max_its=10, verbose=False, lam=10 ** (-8))
-
-            # keep only the best degree, based on lowest validation cost
+                model_11_7.fit(algo='newtons_method', max_its=50, verbose=False, lam=10 ** (-8))
             val_costs = [np.min(model_11_7.valid_count_histories[i]) for i in range(degree)]
             min_ind = np.argmin(val_costs)
             min_val = val_costs[min_ind]
