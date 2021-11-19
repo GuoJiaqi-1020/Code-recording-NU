@@ -4,15 +4,13 @@ from autograd.misc.flatten import flatten_func
 import autograd.numpy as np
 import matplotlib.pyplot as plt
 from IPython.display import clear_output
-from mlrefined_libraries.nonlinear_superlearn_library.kfolds_reg_lib.superlearn_setup import Setup
 
 
-class Diabetes_Classification(Setup):
+class Diabetes_Classification:
     def __init__(self, file_path, K_fold):
         data = np.loadtxt(file_path, delimiter=',')
         self.x = data[:-1, :]
         self.y = data[-1:, :]
-        super().__init__(self.x, self.y)
         self.fold_num = self.fold_assigning(self.y.size, K_fold)
         self.x_mean = np.nanmean(self.x, axis=1)[:, np.newaxis]
         self.x_std = np.nanstd(self.x, axis=1)[:, np.newaxis]
@@ -64,7 +62,7 @@ class Diabetes_Classification(Setup):
         a = w[0] + np.dot(x.T, w[1:])
         return a.T
 
-    def make_train_test_split(self, k):
+    def split_dataset(self, k):
         train_ind = [v[0] for v in np.argwhere(self.fold_num != k)]
         valid_ind = [v[0] for v in np.argwhere(self.fold_num == k)]
         self.train_x = self.x[:, train_ind]
@@ -117,9 +115,8 @@ class Diabetes_Classification(Setup):
         for k in range(self.K_fold):
             print("---------fold" + str(k + 1) + "------")
             print("---------*****---------")
-            # self.data_normalization(self.x)
-            self.choose_normalizer(name='standard')
-            self.make_train_test_split(k)
+            self.data_normalization(self.x)
+            self.split_dataset(k)
             self.find_best_reg(lams, max_its, study_rate)
             all_train_counts.append(copy.deepcopy(self.train_count_misclass))
             all_valid_counts.append(copy.deepcopy(self.valid_count_misclass))
