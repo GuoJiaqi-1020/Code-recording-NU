@@ -33,14 +33,14 @@ class Decision_Tree(object):
             right_stump.right_y = right_stump.left_y
             left_stump.number_mis_class_left = 0
             left_stump.number_mis_class_right = 0
-            left_stump.all_miss = 0
+
         if np.size(np.unique(right_y)) > 1:
             right_stump = ClassificationStump.Stump(right_x, right_y)
         else:
             right_stump.left_y = right_stump.right_y
             right_stump.number_mis_class_left = 0
             right_stump.number_mis_class_right = 0
-            right_stump.all_miss = 0
+
         return left_stump, right_stump
 
     def build_tree(self, stump, node, depth):
@@ -52,10 +52,10 @@ class Decision_Tree(object):
             node.step = stump.step
             node.number_mis_class_left = stump.number_mis_class_left
             node.number_mis_class_right = stump.number_mis_class_right
-            node.all_miss = stump.all_miss
             left_stump, right_stump = self.build_subtree(stump)
             depth -= 1
-            if left_stump.all_miss == 0 and right_stump.all_miss == 0:
+            if left_stump.number_mis_class_right+left_stump.number_mis_class_left == 0 \
+                    and right_stump.number_mis_class_right+right_stump.number_mis_class_left == 0:
                 depth = 1
             node.left = Tree()
             node.right = Tree()
@@ -68,9 +68,9 @@ class Decision_Tree(object):
             node.step = stump.step
             node.number_mis_class_left = stump.number_mis_class_left
             node.number_mis_class_right = stump.number_mis_class_right
-            node.all_miss = stump.all_miss
             self.misclassification.append(node.number_mis_class_left)
             self.misclassification.append(node.number_mis_class_right)
+            print("miss_c is:" + str(self.misclassification))
 
 
     # tree evaluator
@@ -128,8 +128,9 @@ if __name__ == "__main__":
     depth = 7
     mis_history = []
     file_path = '../mlrefined_datasets/nonlinear_superlearn_datasets/3_layercake_data.csv'
+    # decision_tree = Decision_Tree(file_path, depth)
+    # mis_history.append(sum(decision_tree.misclassification))
     for d in range(1, depth+1):
         decision_tree = Decision_Tree(file_path, d)
         mis_history.append(sum(decision_tree.misclassification))
-    print(mis_history)
     plot(mis_history, depth)

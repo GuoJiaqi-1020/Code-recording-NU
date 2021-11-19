@@ -61,6 +61,7 @@ class Stump:
         best_step = []
         c_vals, c_counts = np.unique(self.y, return_counts=True)
         self.c_counts = c_counts
+
         for n in range(N):
             # make a copy of the n^th dimension of the input data (we will sort after this)
             x_n = copy.deepcopy(self.x[n, :])
@@ -71,11 +72,10 @@ class Stump:
             # 将元素从小到大排列，提取对应得index
             x_n = x_n[sorted_inds]
             y_n = y_n[:, sorted_inds]
-
             # loop over points and create stump in between each 
             # in dimension n
             for p in range(P - 1):
-                if y_n[:, p] != y_n[:, p + 1]:
+                if y_n[:, p] != y_n[:, p + 1] and x_n[p] != x_n[p + 1]:
                     # compute split point
                     split = (x_n[p] + x_n[p + 1]) / float(2)
 
@@ -167,7 +167,6 @@ class Stump:
         self.right_y = self.y[:, right_inds]
         self.number_mis_class_left = self.caculate_mis_class(acc_matrix_right, acc_matrix_left)[0]
         self.number_mis_class_right = self.caculate_mis_class(acc_matrix_right, acc_matrix_left)[1]
-        self.all_miss = self.number_mis_class_left
         right_his.append(self.number_mis_class_right)
         left_his.append(self.number_mis_class_left)
         print(right_his)
