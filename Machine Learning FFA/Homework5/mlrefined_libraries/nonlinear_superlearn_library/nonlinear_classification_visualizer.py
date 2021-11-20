@@ -506,7 +506,6 @@ class Visualizer:
             ax2.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
             ax2.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
 
-            plt.show()
 
         if np.shape(self.x)[1] == 2:
             # construct figure
@@ -543,6 +542,7 @@ class Visualizer:
             ax1.set_xlabel(r'$x_1$', fontsize=12, labelpad=5)
             ax1.set_ylabel(r'$x_2$', rotation=0, fontsize=12, labelpad=5)
             ax1.set_zlabel(r'$y$', rotation=0, fontsize=12, labelpad=-3)
+        plt.show()
 
     # scatter points
     def scatter_pts(self, ax, x):
