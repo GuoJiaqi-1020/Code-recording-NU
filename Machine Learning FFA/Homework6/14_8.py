@@ -225,6 +225,7 @@ def plot(y, label):
     plt.show()
 
 
+
 if __name__ == "__main__":
     file_path = '../mlrefined_datasets/nonlinear_superlearn_datasets/new_circle_data.csv'
     trees = []
@@ -232,7 +233,7 @@ if __name__ == "__main__":
     valid_acc = []
     num_trees = 5
     depth = 7
-    train_portion = 0.67
+    train_portion = 0.66
     for i in range(num_trees):
         print("training fold: "+ str(i) )
         tree = Random_Forest_Algorithm(file_path, depth, train_portion=train_portion)
@@ -240,9 +241,6 @@ if __name__ == "__main__":
         train_acc.append(tree.train_accuracies)
         valid_acc.append(tree.valid_accuracies)
     plot(train_acc, label='Training set accuracy')
-    plt.savefig('14_8_1.png')
     plot(valid_acc, label='Validation set accuracy')
-    plt.savefig('14_8_2.png')
     tree = Random_Forest_Algorithm(file_path, depth, train_portion=1)
-    plt.savefig('14_8_3.png')
     tree.draw_fused_model(runs=trees)
