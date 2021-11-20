@@ -1,6 +1,6 @@
 # import custom JS animator
 from mlrefined_libraries.JSAnimation_slider_only import IPython_display_slider_only
-
+from matplotlib.ticker import MaxNLocator
 # import standard plotting and animation
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -361,7 +361,7 @@ class Visualizer:
                 anchor = kwargs['anchor']
             plt.legend(loc='upper right', bbox_to_anchor=anchor)
             # leg = ax.legend(loc='upper left', bbox_to_anchor=(1.02, 1), borderaxespad=0)
-
+        plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
         ax.set_xlim([start - 0.5, len(history) - 0.5])
         plt.title(title, fontsize=16)
         plt.show()
@@ -370,27 +370,16 @@ class Visualizer:
 
     @staticmethod
     def plot_cost_histories(histories=list, start=int, title='', **kwargs):
-        # plotting colors
         colors = ['k', 'magenta', 'aqua', 'blueviolet', 'chocolate']
-
-        # initialize figure
         fig = plt.figure(figsize=(10, 5))
-
-        # create subplot with 1 panel
         gs = gridspec.GridSpec(1, 1)
         ax = plt.subplot(gs[0])
-
-        # any labels to add?        
         labels = [' ', ' ', ' ']
         if 'labels' in kwargs:
             labels = kwargs['labels']
-
-        # plot points on cost function plot too?
         points = False
         if 'points' in kwargs:
             points = kwargs['points']
-
-        # run through input histories, plotting each beginning at 'start' iteration
         for c in range(len(histories)):
             history = histories[c]
             label = 0
@@ -400,20 +389,16 @@ class Visualizer:
                 label = labels[1]
             else:
                 label = labels[2]
-
-            # check if a label exists, if so add it to the plot
             if np.size(label) == 0:
                 ax.plot(np.arange(start, len(history), 1), history[start:], linewidth=3 * 0.8 ** c, color=colors[c])
             else:
                 ax.plot(np.arange(start, len(history), 1), history[start:], linewidth=3 * 0.8 ** c, color=colors[c],
                         label=label)
 
-                # check if points should be plotted for visualization purposes
             if points:
                 ax.scatter(np.arange(start, len(history), 1), history[start:], s=90, color=colors[c], edgecolor='w',
                            linewidth=2, zorder=3)
 
-                # clean up panel
         xlabel = 'step $k$'
         if 'xlabel' in kwargs:
             xlabel = kwargs['xlabel']
@@ -428,7 +413,7 @@ class Visualizer:
                 anchor = kwargs['anchor']
             plt.legend(loc='upper right', bbox_to_anchor=anchor)
             # leg = ax.legend(loc='upper left', bbox_to_anchor=(1.02, 1), borderaxespad=0)
-
+        plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
         ax.set_xlim([start - 0.5, len(history) - 0.5])
         plt.title(title, fontsize=16)
         plt.show()
@@ -792,7 +777,6 @@ class Visualizer:
         ax.set_ylabel('$w_1$', fontsize=14, rotation=0)
         ax.set_title('$g(w_0,w_1)$', fontsize=14)
 
-    ### plot points and connectors in input space in 3d plot      colorspec[k]   
     def show_inputspace_path(self, w_hist, ax):
         # make colors for plot
         colorspec = self.make_colorspec(w_hist)
