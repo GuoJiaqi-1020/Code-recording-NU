@@ -1,7 +1,6 @@
 from autograd import numpy as np
 import copy
 
-from matplotlib import pyplot as plt
 
 left_his = []
 right_his = []
@@ -9,7 +8,6 @@ right_his = []
 
 # class for building regression stump
 class Stump:
-    ### load in data ###
     def __init__(self, x, y):
         # globals
         self.x = x
@@ -17,7 +15,6 @@ class Stump:
         # find best stump given input data
         self.make_stump()
 
-    ### an implementation of the least squares cost function for linear regression
     def counter(self, step, x, y):
         # compute predictions
         y_hat = step(x)[np.newaxis, :]
@@ -92,8 +89,6 @@ class Stump:
                         val = c_vals[i]
                         count = c_counts[i]
 
-                        # check left side
-                        # 找到
                         val_ind = np.argwhere(c_left_vals == val)
                         val_count = 0
                         if np.size(val_ind) > 0:
@@ -169,10 +164,10 @@ class Stump:
         self.number_mis_class_right = self.caculate_mis_class(acc_matrix_right, acc_matrix_left)[1]
         right_his.append(self.number_mis_class_right)
         left_his.append(self.number_mis_class_left)
-        print(right_his)
-        print(left_his)
-        print('Num of mis-classification on left leaf is:' + str(self.number_mis_class_left)
-              + '    Num of mis-classification on right leaf is:' + str(self.number_mis_class_right))
+        # print(right_his)
+        # print(left_his)
+        # print('Num of mis-classification on left leaf is:' + str(self.number_mis_class_left)
+        #       + '    Num of mis-classification on right leaf is:' + str(self.number_mis_class_right))
 
     def caculate_mis_class(self, prop_right, prop_left):
         leaf_label_ind_left = np.argmax(prop_left)
@@ -182,4 +177,3 @@ class Stump:
         mis_class_left = self.left_x.shape[1] - round(left_label_count * prop_left[leaf_label_ind_left])
         mis_class_right = self.right_x.shape[1] - round(right_label_count * prop_right[leaf_label_ind_right])
         return mis_class_left, mis_class_right
-
