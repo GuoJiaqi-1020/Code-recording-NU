@@ -3,7 +3,8 @@ import sys
 from matplotlib import pyplot as plt
 from mlrefined_libraries.nonlinear_superlearn_library.recursive_tree_lib.ClassificationTree import ClassificationStump
 import autograd.numpy as np
-from mlrefined_libraries.nonlinear_superlearn_library.recursive_tree_lib_crossval.classification_ensembler import Visualizer
+from mlrefined_libraries.nonlinear_superlearn_library.recursive_tree_lib_crossval.classification_ensembler import \
+    Visualizer
 import copy
 
 
@@ -182,7 +183,7 @@ class Random_Forest_Algorithm:
         plt.scatter(self.x[0, ind1], self.x[1, ind1], s=60, color=self.colors[1], edgecolor='k', linewidth=1, zorder=3)
         plt.xlim([xmin1, xmax1])
         plt.ylim([xmin2, xmax2])
-        plt.title("Final Model of "+str(num_trees) + " Bagged Models")
+        plt.title("Final Model of " + str(num_trees) + " Bagged Models")
         plt.xlabel(r'$x_1$', fontsize=14)
         plt.ylabel(r'$x_2$', rotation=0, fontsize=14, labelpad=10)
         s1 = np.linspace(xmin1, xmax1, 50)
@@ -225,7 +226,6 @@ def plot(y, label):
     plt.show()
 
 
-
 if __name__ == "__main__":
     file_path = '../mlrefined_datasets/nonlinear_superlearn_datasets/new_circle_data.csv'
     trees = []
@@ -235,12 +235,14 @@ if __name__ == "__main__":
     depth = 7
     train_portion = 0.66
     for i in range(num_trees):
-        print("training fold: "+ str(i) )
+        print("training fold: " + str(i))
         tree = Random_Forest_Algorithm(file_path, depth, train_portion=train_portion)
         trees.append(tree)
         train_acc.append(tree.train_accuracies)
         valid_acc.append(tree.valid_accuracies)
+    # Compare the acc of training_set and validation_set
     plot(train_acc, label='Training set accuracy')
     plot(valid_acc, label='Validation set accuracy')
+    # Draw 5+1 models all in one
     tree = Random_Forest_Algorithm(file_path, depth, train_portion=1)
     tree.draw_fused_model(runs=trees)
