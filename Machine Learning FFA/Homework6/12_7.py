@@ -151,11 +151,6 @@ def plot_mismatching_histories(histories, start, title='', **kwargs):
         ylabel = kwargs['ylabel']
     ax.set_xlabel(xlabel, fontsize=14)
     ax.set_ylabel(ylabel, fontsize=10, rotation=90, labelpad=25)
-    if np.size(label) > 0:
-        anchor = (1, 1)
-        if 'anchor' in kwargs:
-            anchor = kwargs['anchor']
-        # plt.legend(loc='upper right', bbox_to_anchor=anchor)
     plt.xticks(range(0, len(history), int(len(history) / 10)))
     ax.set_xlim([start - 0.5, len(history) - 0.5])
     plt.title(title, fontsize=16)
@@ -177,5 +172,5 @@ if __name__ == "__main__":
         plot_mismatching_histories(histories=[RBF.mis_class], start=0, title='Mis-classification  ' + str(label[ind]))
         ind += 1
 
-    result = Visualizer(file_path)
-    result.show_twoclass_runs(models, labels=label)
+    result_vis = Visualizer(file_path)
+    result_vis.show_twoclass_runs(models, labels=label)

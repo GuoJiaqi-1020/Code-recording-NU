@@ -3,7 +3,6 @@ from mlrefined_libraries.nonlinear_superlearn_library.recursive_tree_lib.Classif
 import copy
 import autograd.numpy as np
 
-
 depth_count = 1
 
 
@@ -54,8 +53,8 @@ class Decision_Tree(object):
             node.number_mis_class_right = stump.number_mis_class_right
             left_stump, right_stump = self.build_subtree(stump)
             depth -= 1
-            if left_stump.number_mis_class_right+left_stump.number_mis_class_left == 0 \
-                    and right_stump.number_mis_class_right+right_stump.number_mis_class_left == 0:
+            if left_stump.number_mis_class_right + left_stump.number_mis_class_left == 0 \
+                    and right_stump.number_mis_class_right + right_stump.number_mis_class_left == 0:
                 depth = 1
             node.left = Tree()
             node.right = Tree()
@@ -74,7 +73,7 @@ class Decision_Tree(object):
 
     def evaluate_tree(self, val, depth):
         if depth > self.depth:
-            return ('desired depth greater than depth of tree')
+            return 'desired depth greater than depth of tree'
         tree = copy.deepcopy(self.tree)
         d = 0
         while d < depth:
@@ -121,14 +120,13 @@ def plot(y, depth):
     plt.show()
 
 
-
 if __name__ == "__main__":
     depth = 7
     mis_history = []
     file_path = '../mlrefined_datasets/nonlinear_superlearn_datasets/3_layercake_data.csv'
     # decision_tree = Decision_Tree(file_path, depth)
     # mis_history.append(sum(decision_tree.misclassification))
-    for d in range(1, depth+1):
+    for d in range(1, depth + 1):
         decision_tree = Decision_Tree(file_path, d)
         mis_history.append(sum(decision_tree.misclassification))
     plot(mis_history, depth)
