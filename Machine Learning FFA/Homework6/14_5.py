@@ -72,13 +72,9 @@ class Decision_Tree(object):
             self.misclassification.append(node.number_mis_class_right)
             print("miss_c is:" + str(self.misclassification))
 
-
-    # tree evaluator
     def evaluate_tree(self, val, depth):
         if depth > self.depth:
             return ('desired depth greater than depth of tree')
-
-        # search tree
         tree = copy.deepcopy(self.tree)
         d = 0
         while d < depth:
@@ -108,7 +104,6 @@ class Tree:
         self.right = None
         self.left_leaf = None
         self.right_leaf = None
-
         self.number_mis_class_left = 0
         self.number_mis_class_right = 0
         self.all_miss = 0
@@ -120,8 +115,11 @@ def plot(y, depth):
     plt.xticks(x, rotation=0)
     plt.xlabel("Depth of Decision Tree")
     plt.ylabel("Num of Mis-classification")
+    for a, b in zip(x, y):
+        plt.text(a, b, '%.0f' % b, fontsize=11, ha='left', va='bottom')
     plt.title("Mis-classification VS Depth")
     plt.show()
+
 
 
 if __name__ == "__main__":

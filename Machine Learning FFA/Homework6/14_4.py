@@ -3,7 +3,6 @@ from mlrefined_libraries.nonlinear_superlearn_library.recursive_tree_lib.Classif
 import copy
 import autograd.numpy as np
 
-
 depth_count = 1
 
 
@@ -33,14 +32,12 @@ class Decision_Tree(object):
             right_stump.right_y = right_stump.left_y
             left_stump.number_mis_class_left = 0
             left_stump.number_mis_class_right = 0
-            left_stump.all_miss = 0
         if np.size(np.unique(right_y)) > 1:
             right_stump = ClassificationStump.Stump(right_x, right_y)
         else:
             right_stump.left_y = right_stump.right_y
             right_stump.number_mis_class_left = 0
             right_stump.number_mis_class_right = 0
-            right_stump.all_miss = 0
         return left_stump, right_stump
 
     def build_tree(self, stump, node, depth):
@@ -52,10 +49,11 @@ class Decision_Tree(object):
             node.step = stump.step
             node.number_mis_class_left = stump.number_mis_class_left
             node.number_mis_class_right = stump.number_mis_class_right
-            node.all_miss = stump.all_miss
+            # node.all_miss = stump.all_miss
             left_stump, right_stump = self.build_subtree(stump)
             depth -= 1
-            if left_stump.all_miss == 0 and right_stump.all_miss == 0:
+            if left_stump.number_mis_class_right + left_stump.number_mis_class_left == 0 \
+                    and right_stump.number_mis_class_right + right_stump.number_mis_class_left == 0:
                 depth = 1
             node.left = Tree()
             node.right = Tree()
@@ -68,10 +66,9 @@ class Decision_Tree(object):
             node.step = stump.step
             node.number_mis_class_left = stump.number_mis_class_left
             node.number_mis_class_right = stump.number_mis_class_right
-            node.all_miss = stump.all_miss
+            # node.all_miss = stump.all_miss
             self.misclassification.append(node.number_mis_class_left)
             self.misclassification.append(node.number_mis_class_right)
-
 
     # tree evaluator
     def evaluate_tree(self, val, depth):
@@ -111,7 +108,7 @@ class Tree:
 
         self.number_mis_class_left = 0
         self.number_mis_class_right = 0
-        self.all_miss = 0
+        # self.all_miss = 0
 
 
 def plot(y, depth):
@@ -120,6 +117,8 @@ def plot(y, depth):
     plt.xticks(x, rotation=0)
     plt.xlabel("Depth of Decision Tree")
     plt.ylabel("Num of Mis-classification")
+    for a, b in zip(x, y):
+        plt.text(a, b, '%.0f' % b, fontsize=11, ha='left', va='bottom')
     plt.title("Mis-classification VS Depth")
     plt.show()
 
@@ -128,8 +127,7 @@ if __name__ == "__main__":
     depth = 7
     mis_history = []
     file_path = '../mlrefined_datasets/nonlinear_superlearn_datasets/new_circle_data.csv'
-    for d in range(1, depth+1):
+    for d in range(1, depth + 1):
         decision_tree = Decision_Tree(file_path, d)
         mis_history.append(sum(decision_tree.misclassification))
     plot(mis_history, depth)
-
