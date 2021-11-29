@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Project C - Isaac Henry</title>
+  </head>
+
+  <body onload="main()">
+    <canvas id="webgl" width="600" height="600">
+    Please use a browser that supports "canvas"
+    </canvas>
+    <p>
+      <button type="button" onclick="VBO0toggle()">Ground Grid</button>
+      <button type="button" onclick="VBO1toggle()">Gouraud Shading</button>
+      <button type="button" onclick="VBO2toggle()">Phong Shading</button>
+    </p>
+    <script src="../lib/webgl-utils.js"></script>
+    <script src="../lib/webgl-debug.js"></script>
+    <script src="../lib/cuon-utils.js"></script>
+    <script src="../lib/cuon-matrix-quat03.js"></script>
+    <script src="../lib/lights-JT.js"></script>
+    <script src="../lib/materials_Ayerdi04.js"></script>
+<!-- YOU SHOULD UPGRADE to Brandon Jones' far-faster, 
+      far more complete vector/matrix/quaternion library: (Google it!)
+		<script src="../lib/glmatrix.js"></script>
+--> 
+		<script src="VBObox-Lib.js"></script>
+    <script src="ProjectC.js"></script>
+  </body>
+</html>
