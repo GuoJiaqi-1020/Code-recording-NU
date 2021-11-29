@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Control Diffuse04</title>
+  </head>
+	<!--	Create the HTML5 'canvas' element in which we will run WebGL
+	-->
+  <body onload="main()">
+    <canvas id="webgl" width="500" height="500">
+    Please use a browser that supports "canvas"
+    </canvas>
+	<p>
+		<!--BUTTONS: create HTML push-buttons with labels
+				Spin <<, runStop, and Spin >>.  
+		When clicked, these HTML buttons call JavaScript functions named
+			"spinDown()", "runStop()" and "spinUp()"   -->
+      <button type="button" onclick="spinDown()">Spin << </button>
+	  <button type="button" onclick="runStop()">Run/Stop</button>
+      <button type="button" onclick="spinUp()">Spin >> </button>
+    </p>
+	Open the JavaScript Console, please: 
+	(right-click-->'Inspect Element'-->'Console' tab). 
+		<br>
+	Click-and-drag the mouse on the canvas (black area above). What happens?
+	<div id=MouseText> 
+		Mouse Drag totals (CVV x,y coords): 0,0
+	</div>
+	<button type="button" onClick="clearMouse()">Clear</button>
+	<br>
+	Current Quaternion: w + xi + yj + zk where (i,j,k) are 3-way imaginary numbers:
+	<div id=QuatValue>  X=0i, Y=0j, Z=0k, W=1. <br> length=1. </div>
+	<button type="button" onClick="resetQuat()">Reset</button>
+	<!--	Load in the JavaScript libraries supplied by our textbook 
+			(Matsuda et al., 2013 WebGL Programming Guide) that help us
+			with WebGL programming:
+	-->
+    <script src="../lib/webgl-utils.js"></script>
+    <script src="../lib/webgl-debug.js"></script>
+    <script src="../lib/cuon-utils.js"></script>
+    <script src="../lib/cuon-matrix-quat03.js"></script>
+	<!--	Finally, load in our own JavaScript program file.
+	-->
+    <script src="ControlDiffuse04.js"></script>
+  </body>
+</html>

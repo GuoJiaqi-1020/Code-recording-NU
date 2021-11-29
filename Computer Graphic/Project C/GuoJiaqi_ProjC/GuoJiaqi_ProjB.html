@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Flying Around the Moon: Butterflies, Little Robot & His Spaceship </title>
+  </head>
+  <body onload="main()">
+<canvas id="webgl" width="600" height="600">
+Please use a browser that supports "canvas"
+</canvas>
+<h1>CS-351 Project B:</h1>
+Author: <a href="https://github.com/GuoJiaqi-1020?tab=repositories"> Jiaqi Guo </a>
+<h2>Instructions:</h2>
+
+<div id= ShapeName></div> 
+<hr> <!-- Draw a horizontal-line separator------------->
+<b>FUNCTION 1： Use the "Spin <<" and "Spin >>" buttons to change the speed and direction of the animation. 
+	</b><br>
+	<p style="color:red;">(Stop/restart the animation with the "Run/Stop" button)</p>
+	<button type="button" onclick="spinDown()">Spin << </button>
+	<button type="button" onclick="runStop()">Run/Stop</button>
+	<button type="button" onclick="spinUp()">Spin >> </button>
+</p>
+<p>
+<hr> <!-- Draw a horizontal-line separator------------->
+<b>FUNCTION 2： Drag the mouse to rotate the moon, you can also move the camera and rotate the moon from different perspectives. 
+	</b>
+</p>
+<span id='MouseAtResult'  >   Mouse At: </span> <!-- myMouseMove() modifies this span object -->
+	<br>
+<span id='MouseDragResult'> Mouse Drag: </span> <!-- myMouseUp() modifies this span object -->
+<hr>
+<b>FUNCTION 3： Use the arrow keys to control your aiming direction (Viewing angle). Use the keys "A,W,S,D" to control the camera's position.
+</b><br>
+	<p style="color:red;">(Reset the position of camera and its aiming direction with "R")</p>	
+		<span id='KeyDownResult'  > KeyDown:    </span> <!-- myKeyDown() modifies this span object -->		
+		<br>
+		<span id='KeyModResult'   > KeyMod :<br><br>   </span> <!-- myKeyDown() modifies this span object -->
+<hr>
+
+<b>FUNCTION 4: Enter the Angle range of rotation of the little robot arm.(should be a interger between 0-45)
+	<p style="color:red;">(If you enter a number greater than 45 or less than 0, the robot's arm swing Angle will not change)</p>	
+</b>
+<p>
+<!-- Next, make an HTML 'input' box element, a text-box 10 chars wide where users
+	can type in text.  Give it an ID name so that our JavaScript program
+	(e.g. ControlMulti.js, loaded near the end of this file) can access this
+	HTML element by name in the 'tick' function.
+--><input id='angel_limit' size=10> 
+	<button type="button" onClick='num_stars()'>Submit the number</button><BR> 
+	<div id= EditBoxOut></div>
+</p>
+
+
+    <script src="../GuoJiaqi_ProjB/lib/webgl-utils.js"></script>
+    <script src="../GuoJiaqi_ProjB/lib/webgl-debug.js"></script>
+    <script src="../GuoJiaqi_ProjB/lib/cuon-utils.js"></script>
+    <script src="../GuoJiaqi_ProjB/lib/cuon-matrix-quat03.js"></script>
+	<!--	Finally, load in our own JavaScript program file.
+	-->
+    <script src="GuoJiaqi_ProjB.js"></script>
+  </body>
+</html>

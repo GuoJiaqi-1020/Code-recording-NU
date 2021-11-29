@@ -1,0 +1,1 @@
+Depth testing enabled; clears color buffer AND depth buffer at start of drawAll();.
