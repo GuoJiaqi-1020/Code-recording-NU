@@ -277,13 +277,6 @@ function initVertexBuffer(gl) {
 	return nn;
 }
 
-function makeDiamond() {
-//==============================================================================
-// Make a diamond-like shape from two adjacent tetrahedra, aligned with Z axis.
-
-	// YOU write this one...
-	
-}
 
 function makeConcaveHex() {
 	const s30 = 0.5;										 // == sin(30deg) == 1 / 2
@@ -494,8 +487,6 @@ function makeCylinder() {
 					cylVerts[j+6]=botColr[2];			
 			}
 		}
-		// Create the cylinder bottom cap, made of 2*capVerts -1 vertices.
-		// v counts the vertices in the cap; j continues to count array elements
 		for(v=0; v < (2*capVerts -1); v++, j+= floatsPerVertex) {
 			if(v%2==0) {	// position even #'d vertices around bot cap's outer edge
 				cylVerts[j  ] = botRadius * Math.cos(Math.PI*(v)/capVerts);		// x
@@ -535,7 +526,6 @@ function makeSphere() {
 	var isLast = 0;
 	var isFirst = 1;
 	for(s=0; s<slices; s++) {	// for each slice of the sphere,
-		// find sines & cosines for top and bottom of this slice
 		if(s==0) {
 			isFirst = 1;	// skip 1st vertex of 1st slice.
 			cos0 = 1.0; 	// initialize: start at north pole.
