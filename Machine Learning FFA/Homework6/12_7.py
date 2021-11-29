@@ -1,5 +1,4 @@
 from matplotlib import pyplot as plt, gridspec
-
 from mlrefined_libraries.nonlinear_superlearn_library.kernel_visualizer import Visualizer
 from mlrefined_libraries.nonlinear_superlearn_library.kernel_lib.kernels import Setup as K_setup
 import autograd.numpy as np

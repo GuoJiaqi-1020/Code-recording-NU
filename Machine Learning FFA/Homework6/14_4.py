@@ -49,7 +49,6 @@ class Decision_Tree(object):
             node.step = stump.step
             node.number_mis_class_left = stump.number_mis_class_left
             node.number_mis_class_right = stump.number_mis_class_right
-            # node.all_miss = stump.all_miss
             left_stump, right_stump = self.build_subtree(stump)
             depth -= 1
             if left_stump.number_mis_class_right + left_stump.number_mis_class_left == 0 \

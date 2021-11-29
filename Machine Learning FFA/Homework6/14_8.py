@@ -1,10 +1,6 @@
-import sys
-
 from matplotlib import pyplot as plt
 from mlrefined_libraries.nonlinear_superlearn_library.recursive_tree_lib.ClassificationTree import ClassificationStump
 import autograd.numpy as np
-from mlrefined_libraries.nonlinear_superlearn_library.recursive_tree_lib_crossval.classification_ensembler import \
-    Visualizer
 import copy
 
 
