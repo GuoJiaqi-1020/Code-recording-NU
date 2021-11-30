@@ -53,6 +53,9 @@ var g_angleLink3Rate = 20.0;
 var g_angleHead = 0.0;
 var g_angleHeadRate = 20.0;
 
+var g_angleTail = 0.0;
+var g_angleTailRate = 20.0;
+
 // For mouse/keyboard:------------------------
 var g_show0 = 1;								// 0==Show, 1==Hide VBO0 contents on-screen.
 var g_show1 = 1;								// 	"					"			VBO1		"				"				" 
@@ -95,20 +98,7 @@ var g_lightSpecR;
 var g_lightSpecG;
 var g_lightSpecB;
 
-
-
-// ? -------------- Copied from ProjectB.js ---------------
-
-const UP_ARROW    = 38;
-const LEFT_ARROW  = 37;
-const RIGHT_ARROW = 39;
-const DOWN_ARROW  = 40;
-
-const W = 87;
-const A = 65;
-const S = 83;
-const D = 68;
-
+// Perspective Camera Setting
 var g_camXInit = 6.5, g_camYInit = 5.5, g_camZInit = 5.0;
 var g_lookXInit = 1.0, g_lookYInit = 1.0, g_lookZInit = 4.5;
 
@@ -118,10 +108,8 @@ var g_camX = g_camXInit, g_camY = g_camYInit, g_camZ = g_camZInit; //! Location 
 var g_lookX = g_lookXInit, g_lookY = g_lookYInit, g_lookZ = g_lookZInit; //! Where our camera is looking
 
 var g_aimTheta = g_aimThetaInit;
-
 var g_aimZDiff = g_lookZ - g_camZ;
-
-var g_moveRate = 3.0;
+var g_moveRate = 2.0;
 
 // ? --------------------- End copy -----------------------
 
@@ -134,22 +122,7 @@ function main() {
 //=============================================================================
   // Retrieve the HTML-5 <canvas> element where webGL will draw our pictures:
   g_canvasID = document.getElementById('webgl');	
-  // Create the the WebGL rendering context: one giant JavaScript object that
-  // contains the WebGL state machine adjusted by large sets of WebGL functions,
-  // built-in variables & parameters, and member data. Every WebGL function call
-  // will follow this format:  gl.WebGLfunctionName(args);
-
-  // Create the the WebGL rendering context: one giant JavaScript object that
-  // contains the WebGL state machine, adjusted by big sets of WebGL functions,
-  // built-in variables & parameters, and member data. Every WebGL func. call
-  // will follow this format:  gl.WebGLfunctionName(args);
-  //SIMPLE VERSION:  gl = getWebGLContext(g_canvasID); 
-  // Here's a BETTER version:
   gl = g_canvasID.getContext("webgl", { preserveDrawingBuffer: true});
-	// This fancier-looking version disables HTML-5's default screen-clearing, so 
-	// that our drawMain() 
-	// function will over-write previous on-screen results until we call the 
-	// gl.clear(COLOR_BUFFER_BIT); function. )
   if (!gl) {
     console.log('Failed to get the rendering context for WebGL');
     return;
@@ -157,40 +130,17 @@ function main() {
 
   window.addEventListener('keydown', keyDown, false); // add event listener for the keyboard
 
-  gl.clearColor(0.2, 0.1, 0.3, 1);	  // RGBA color for clearing <canvas>
-
+  gl.clearColor(0.2, 0.2, 0.2, 1);	  // RGBA color for clearing <canvas>
   gl.enable(gl.DEPTH_TEST);
 
-  // Initialize each of our 'vboBox' objects: 
-  worldBox.init(gl);		// VBO + shaders + uniforms + attribs for our 3D world,
-                        // including ground-plane,                       
+  worldBox.init(gl);		// VBO + shaders + uniforms + attribs for our 3D world,               
   GouraudBox.init(gl);		//  "		"		"  for 1st kind of shading & lighting
   PhongBox.init(gl);    //  "   "   "  for 2nd kind of shading & lighting
-  
-  // ==============ANIMATION=============
-  // Quick tutorials on synchronous, real-time animation in JavaScript/HTML-5: 
-  //    https://webglfundamentals.org/webgl/lessons/webgl-animation.html
-  //  or
-  //  	http://creativejs.com/resources/requestanimationframe/
-  //		--------------------------------------------------------
-  // Why use 'requestAnimationFrame()' instead of the simpler-to-use
-  //	fixed-time setInterval() or setTimeout() functions?  Because:
-  //		1) it draws the next animation frame 'at the next opportunity' instead 
-  //			of a fixed time interval. It allows your browser and operating system
-  //			to manage its own processes, power, & computing loads, and to respond 
-  //			to on-screen window placement (to skip battery-draining animation in 
-  //			any window that was hidden behind others, or was scrolled off-screen)
-  //		2) it helps your program avoid 'stuttering' or 'jittery' animation
-  //			due to delayed or 'missed' frames.  Your program can read and respond 
-  //			to the ACTUAL time interval between displayed frames instead of fixed
-  //		 	fixed-time 'setInterval()' calls that may take longer than expected.
-  //------------------------------------
   var tick = function() {		    // locally (within main() only), define our 
     g_canvasID = Resized_Web(g_canvasID); 
-    requestAnimationFrame(tick, g_canvasID); // browser callback request; wait
-                                // til browser is ready to re-draw canvas, then
-    animate();  // Update all time-varying params, and
-    drawAll();                // Draw all the VBObox contents
+    requestAnimationFrame(tick, g_canvasID); 
+    animate(); 
+    drawAll();
     };
   //------------------------------------
   tick();                       // do it again!
@@ -319,11 +269,6 @@ var b4Wait = b4Draw - g_lastMS;
   	PhongBox.adjust();		  // Send new values for uniforms to the GPU, and
   	PhongBox.draw();			  // draw our VBO's contents using our shaders.
   	}
-/* // ?How slow is our own code?  	
-var aftrDraw = Date.now();
-var drawWait = aftrDraw - b4Draw;
-console.log("wait b4 draw: ", b4Wait, "drawWait: ", drawWait, "mSec");
-*/
 }
 
 function VBO0toggle() {
@@ -375,7 +320,7 @@ function setCamera() {
     g_canvasID.height);			// viewport height in pixels.
 
   
-  g_worldMat.perspective(42.0, // FOV
+  g_worldMat.perspective(30.0, // FOV
     g_canvasID.width/g_canvasID.height, // Aspect ratio
     1.0, // z-near
     100.0,); // z-far
@@ -385,74 +330,188 @@ function setCamera() {
                      0.0,     0.0,     1.0,);// up vector
 }
 
-function keyDown(ev) {
-  var xd = g_camX - g_lookX;
+///////////////////////////////////////
+function keyDown(kev) {
+	//added need to modify
+	var xd = g_camX - g_lookX;
 	var yd = g_camY - g_lookY;
-	var zd = g_camZ - g_lookZ;
-
+	var zd = g_camZ - g_lookX;
 	var len = Math.sqrt(Math.pow(xd, 2) + Math.pow(yd, 2) + Math.pow(zd, 2));
 
-	var moveRateRad = toRadians(g_moveRate);
+  var moveRateRad = toRadians(g_moveRate);
+	// console.log(  "--kev.code:", kev.code,   "\t\t--kev.key:", kev.key, 
+	// 			"\n--kev.ctrlKey:", kev.ctrlKey,  "\t--kev.shiftKey:",kev.shiftKey,
+	// 			"\n--kev.altKey:",  kev.altKey,   "\t--kev.metaKey:", kev.metaKey);
 	
-	switch(ev.keyCode) {
-		case LEFT_ARROW:
-			g_aimTheta += g_moveRate;
+	// // and report EVERYTHING on webpage:
+	// document.getElementById('KeyDownResult').innerHTML = ''; // clear old results
+	// document.getElementById('KeyModResult' ).innerHTML = ''; 
+	// document.getElementById('KeyModResult' ).innerHTML = 
+	// 		"   --kev.code:"+kev.code   +"      --kev.key:"+kev.key+
+	// 	"<br>--kev.ctrlKey:"+kev.ctrlKey+" --kev.shiftKey:"+kev.shiftKey+
+	// 	"<br>--kev.altKey:"+kev.altKey +"  --kev.metaKey:"+kev.metaKey;
+	
+		switch(kev.code) {
+			case "KeyP":
+				console.log("Pause/unPause!\n");                // print on console,
+				document.getElementById('KeyDownResult').innerHTML =  
+				'myKeyDown() found p/P key. Pause/unPause!';   // print on webpage
+				if(g_isRun==true) {
+				g_isRun = false;    // STOP animation
+				}
+				else {
+				g_isRun = true;     // RESTART animation
+				tick();
+				}
+				break;
+			//------------------WASD navigation-----------------
+			case "KeyW":
+				console.log("w/W key: Move FWD!\n");
+				g_lookX -= (xd / len);
+				g_lookY -= (yd / len);
+				g_lookX -= (zd / len);
+				g_camX -= (xd / len);
+				g_camY -= (yd / len);
+				g_camZ -= (zd / len);
+				break;
 
-			if(g_aimTheta > 360) g_aimTheta -= 360.0;
-			if(g_aimTheta < 0) g_aimTheta += 360.0;
+			case "KeyA":
+				var xStrafe = Math.cos(toRadians(g_aimTheta + 45));
+				var yStrafe = Math.sin(toRadians(g_aimTheta + 45));
+				g_camX += xStrafe / len;
+				g_camY += yStrafe / len;
+				break;
 
-			break;
-		case RIGHT_ARROW: 
-			g_aimTheta -= g_moveRate;
+			case "KeyD":
+				console.log("d/D key: Strafe RIGHT!\n");
+				var xStrafe = Math.cos(toRadians(g_aimTheta + 45));
+				var yStrafe = Math.sin(toRadians(g_aimTheta + 45));
+				g_camX -= xStrafe / len;
+				g_camY -= yStrafe / len;
+				break;
 
-			if(g_aimTheta > 360) g_aimTheta -= 360.0;
-			if(g_aimTheta < 0) g_aimTheta += 360.0;
+			case "KeyS":
+				console.log("s/S key: Move BACK!\n");
+				g_lookX += (xd / len);
+				g_lookY += (yd / len);
+				g_lookX += (zd / len);
+				g_camX += (xd / len);
+				g_camY += (yd / len);
+				g_camZ += (zd / len);
+				break;
 
-			break;
-		case UP_ARROW:
-			g_aimZDiff += moveRateRad;
-			break;
-		case DOWN_ARROW:
-			g_aimZDiff -= moveRateRad;
-			break;
-		case W: 
-			g_lookX -= (xd / len);
-			g_lookY -= (yd / len);
-			g_lookZ -= (zd / len);
+			case "KeyR":
+				console.log("a/A key: Reset the shifting!\n");
+				document.getElementById('KeyDownResult').innerHTML =  
+				'myKeyDown() found a/A key. Reset the robot shifting!';
+				hori_shift = 0;
+				vert_shift = 0;
+				g_aimTheta = ini_Theta;
+				g_aimZDiff = ini_Gz;
+				g_camX = g_camXInit, g_camY = g_camYInit, g_camZ = g_camZInit; 
+				g_lookX = g_lookXInit, g_lookY = g_lookYInit, g_lookX = g_lookZInit;
+				break;
 
-			g_camX -= (xd / len);
-			g_camY -= (yd / len);
-			g_camZ -= (zd / len);
-
-			break;
-		case S: 
-			g_lookX += (xd / len);
-			g_lookY += (yd / len);
-			g_lookZ += (zd / len);
-
-			g_camX += (xd / len);
-			g_camY += (yd / len);
-			g_camZ += (zd / len);
-
-			break;
-		case A:
-			var xStrafe = Math.cos(toRadians(g_aimTheta + 90));
-			var yStrafe = Math.sin(toRadians(g_aimTheta + 90));
-
-			g_camX += xStrafe / len;
-			g_camY += yStrafe / len;
-
-			break;
-		case D:
-			var xStrafe = Math.cos(toRadians(g_aimTheta + 90));
-			var yStrafe = Math.sin(toRadians(g_aimTheta + 90));
-
-			g_camX -= xStrafe / len;
-			g_camY -= yStrafe / len;
-
-			break;
-	}
+			//----------------Arrow keys------------------------
+			case "ArrowLeft": 	
+				console.log(' left-arrow.');
+				g_aimTheta += g_moveRate;
+				if(g_aimTheta > 360) g_aimTheta -= 360.0;
+				if(g_aimTheta < 0) g_aimTheta += 360.0;
+				break;
+			case "ArrowRight":
+				console.log(' right-arrow.');	
+				g_aimTheta -= g_moveRate;
+				if(g_aimTheta > 360) g_aimTheta -= 360.0;
+				if(g_aimTheta < 0) g_aimTheta += 360.0;
+				break;
+			case "ArrowUp":	
+				console.log(' up-arrow.');	
+				g_aimZDiff += moveRateRad;
+				break;
+			case "ArrowDown":
+				console.log(' down-arrow.');
+				g_aimZDiff -= moveRateRad;
+			break;	
+		default:
+		console.log("UNUSED!");
+			document.getElementById('KeyDownResult').innerHTML =
+				'myKeyDown(): UNUSED!';
+		break;
+		}
 }
+
+// function keyDown(ev) {
+//   var xd = g_camX - g_lookX;
+// 	var yd = g_camY - g_lookY;
+// 	var zd = g_camZ - g_lookZ;
+
+// 	var len = Math.sqrt(Math.pow(xd, 2) + Math.pow(yd, 2) + Math.pow(zd, 2));
+
+// 	var moveRateRad = toRadians(g_moveRate);
+	
+// 	switch(ev.keyCode) {
+// 		case LEFT_ARROW:
+// 			g_aimTheta += g_moveRate;
+
+// 			if(g_aimTheta > 360) g_aimTheta -= 360.0;
+// 			if(g_aimTheta < 0) g_aimTheta += 360.0;
+
+// 			break;
+// 		case RIGHT_ARROW: 
+// 			g_aimTheta -= g_moveRate;
+
+// 			if(g_aimTheta > 360) g_aimTheta -= 360.0;
+// 			if(g_aimTheta < 0) g_aimTheta += 360.0;
+
+// 			break;
+// 		case UP_ARROW:
+// 			g_aimZDiff += moveRateRad;
+// 			break;
+// 		case DOWN_ARROW:
+// 			g_aimZDiff -= moveRateRad;
+// 			break;
+// 		case W: 
+// 			g_lookX -= (xd / len);
+// 			g_lookY -= (yd / len);
+// 			g_lookZ -= (zd / len);
+
+// 			g_camX -= (xd / len);
+// 			g_camY -= (yd / len);
+// 			g_camZ -= (zd / len);
+
+// 			break;
+// 		case S: 
+// 			g_lookX += (xd / len);
+// 			g_lookY += (yd / len);
+// 			g_lookZ += (zd / len);
+
+// 			g_camX += (xd / len);
+// 			g_camY += (yd / len);
+// 			g_camZ += (zd / len);
+
+// 			break;
+// 		case A:
+// 			var xStrafe = Math.cos(toRadians(g_aimTheta + 90));
+// 			var yStrafe = Math.sin(toRadians(g_aimTheta + 90));
+
+// 			g_camX += xStrafe / len;
+// 			g_camY += yStrafe / len;
+
+// 			break;
+// 		case D:
+// 			var xStrafe = Math.cos(toRadians(g_aimTheta + 90));
+// 			var yStrafe = Math.sin(toRadians(g_aimTheta + 90));
+
+// 			g_camX -= xStrafe / len;
+// 			g_camY -= yStrafe / len;
+
+// 			break;
+// 	}
+// }
+
+
+
 
 function toRadians(angle) {
 	return angle * (Math.PI/180);

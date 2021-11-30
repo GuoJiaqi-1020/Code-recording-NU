@@ -1863,6 +1863,7 @@ function myKeyDown(kev) {
 		}
 }
 
+
 function myKeyUp(kev) {
 	console.log('myKeyUp()--keyCode='+kev.keyCode+' released.');
 }	
