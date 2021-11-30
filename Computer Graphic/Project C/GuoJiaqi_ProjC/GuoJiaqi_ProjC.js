@@ -42,7 +42,7 @@ var g_angle02 = 0.0;
 var g_angle02Rate = 20.0;
 
 var g_angleLink1 = 0.0;
-var g_angleLink1Rate = 10.0;
+var g_angleLink1Rate = 20.0;
 
 var g_angleLink2 = 0.0;
 var g_angleLink2Rate = 15.0;
@@ -186,22 +186,25 @@ function main() {
   //		 	fixed-time 'setInterval()' calls that may take longer than expected.
   //------------------------------------
   var tick = function() {		    // locally (within main() only), define our 
-                                // self-calling animation function. 
-    g_canvasID.width = innerWidth;
-    g_canvasID.height = innerHeight *0.75;
+    g_canvasID = Resized_Web(g_canvasID); 
     requestAnimationFrame(tick, g_canvasID); // browser callback request; wait
                                 // til browser is ready to re-draw canvas, then
-    timerAll();  // Update all time-varying params, and
+    animate();  // Update all time-varying params, and
     drawAll();                // Draw all the VBObox contents
     };
   //------------------------------------
   tick();                       // do it again!
 }
 
-function timerAll() {
-//=============================================================================
-// Find new values for all time-varying parameters used for on-screen drawing
-  // use local variables to find the elapsed time.
+function Resized_Web(g_canvas) {
+      g_canvas.width = innerWidth -16;
+      //Make canvas fill the top 70% of our browser height
+      g_canvas.height = (innerHeight*0.7);
+      // IMPORTANT!  Need a fresh drawing in the re-sized viewports.
+      return g_canvas
+  }
+
+function animate() {
   var nowMS = Date.now();             // current time (in milliseconds)
   var elapsed = nowMS - g_lastMS;   // 
   g_lastMS = nowMS;                   // update for next webGL drawing.
@@ -253,20 +256,19 @@ function timerAll() {
   var g_angle01min = -60.0;
 	var g_angle01max =  60.0;
 
-	var angleLink1min = -60.0;
-	var angleLink1max =  60.0;
+	var angleLink1min = -15.0;
+	var angleLink1max =  15.0;
 
-	var angleLink2min = -50.0;
-	var angleLink2max =  50.0;
+	var angleLink2min = -15.0;
+	var angleLink2max =  15.0;
 
-	var angleLink3min = -40.0;
-	var angleLink3max =  40.0; 
+	var angleLink3min = -20.0;
+	var angleLink3max =  20.0; 
 
 	var angleHeadmin = -45.0;
 	var angleHeadmax =  45.0;
 
-	// Update the current rotation angle (adjusted by the elapsed time)
-  //  limit the angle to move smoothly between +120 and -120 degrees:
+
   if(g_angle01 >  g_angle01max && g_angle01Rate > 0) g_angle01Rate = -g_angle01Rate;
 	if(g_angle01 <  g_angle01min && g_angle01Rate < 0) g_angle01Rate = -g_angle01Rate;
 
