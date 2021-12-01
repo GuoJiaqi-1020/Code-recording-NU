@@ -321,7 +321,6 @@ const D = 68;
 const W = 87;
 const S = 83;
 const R = 82;
-
 const UP_ARROW    = 38;
 const LEFT_ARROW  = 37;
 const RIGHT_ARROW = 39;
