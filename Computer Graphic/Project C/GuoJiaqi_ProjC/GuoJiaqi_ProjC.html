@@ -3,113 +3,244 @@
   <head>
     <meta charset="utf-8" />
     <title>Project C: Adding light to the 3D World</title>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
   </head>
-
+  <h1>CS351 - Project C: Tree, Alien fish, Flower and Rotating Sphere</h1>
+  <p>
+  Author: <a href="https://github.com/GuoJiaqi-1020?tab=repositories"> Jiaqi Guo </a>
+  </p>
   <body onload="main()">
-  <h1>CS351 - Project C</h1>
+    <canvas id="webgl" >
+      Please use a browser that supports "canvas"
+    </canvas>
+
     <p class="instructions">
       <h2>Instructions:</h2>
       <ol>
-        <li>
-          Use the 'w', 'a', 's', and 'd' keys to move around the scene.
-        </li>
-        <li>
-          Use the arrow keys to adjust the viewing angle of the camera.
-        </li>
-        <li>
-          You may select which Material you'd like to use using the dropdown below.
-        </li>
-        <li>
-          You may input different 'R' (red), 'G' (green), 'B' (blue), value to change the color of the ambient, diffuse, and specular light.
-        </li>
-        <li>
-          You can also adjust the 'X', 'Y', and 'Z' coordinates of the light source using the input boxes.
-        </li>
-        <li>
-          You can toggle back and forth between Phong Shading and Gouraud Shading, as well as between Phong lighting and Blinn-Phong lighting.
-        </li>
-      </ol>
-    </p>
-    <canvas id="webgl">
-      Please use a browser that supports "canvas"
-    </canvas>
-    <p>
-      <select name="materials" id="materials">
-        <option value="1">Red plastic</option>
-        <option value="2">Green plastic</option>
-        <option value="3">Blue plastic</option>
-        <option value="4">Black plastic</option>
-        <option value="5">Black rubber</option>
-        <option value="6">Brass</option>
-        <option value="7">Dull bronze</option>
-        <option value="8">Shiny bronze</option>
-        <option value="9">Chrome</option>
-        <option value="10">Dull copper</option>
-        <option value="11">Shiny copper</option>
-        <option value="12">Dull gold</option>
-        <option value="13">Shiny gold</option>
-        <option value="14">Pewter</option>
-        <option value="15">Dull silver</option>
-        <option value="16">Shiny silver</option>
-        <option value="17">Emerald</option>
-        <option value="18">Jade</option>
-        <option value="19">Obsidian</option>
-        <option value="20">Pearl</option>
-        <option value="21">Ruby</option>
-        <option value="22">Turquoise</option>
-      </select>
-      <button type="button" onclick="VBO0toggle()">Toggle Ground Grid</button>
-      <button type="button" id="toggleShading" onclick="VBO1toggle()">Toggle Phong Shading</button>
-      <button type="button" onclick="toggleBlinn()">
-        Toggle Blinn-Phong Lighting
-      </button>
-    </p>
-    <p>
-      Shininess:
-      <input
-        type="range"
-        onkeydown="return false;"
-        name="shininess"
-        id="shiny"
-        min="1"
-        max="128"
-        value="10"
-        class="slider"
-      />
-      <button type="button" onclick="resetShiny()">Reset</button>
-    </p>
-    <table>
-      <tr>
-        <td>Position:</td>
-        <td>X: <input type="text" id="posX" value="0.0" /></td>
-        <td>Y: <input type="text" id="posY" value="0.0" /></td>
-        <td>Z: <input type="text" id="posZ" value="10.0" /></td>
-        <td><button type="button" onclick="resetLightPos()">Reset</button></td>
-      </tr>
-      <tr>
-        <td>Ambient:</td>
-        <td>R: <input type="text" id="ambiR" value="0.4" /></td>
-        <td>G: <input type="text" id="ambiG" value="0.4" /></td>
-        <td>B: <input type="text" id="ambiB" value="0.4" /></td>
-        <td><button type="button" onclick="resetLightAmbi()">Reset</button></td>
-      </tr>
-      <tr>
-        <td>Diffuse:</td>
-        <td>R: <input type="text" id="diffR" value="1.0" /></td>
-        <td>G: <input type="text" id="diffG" value="1.0" /></td>
-        <td>B: <input type="text" id="diffB" value="1.0" /></td>
-        <td><button type="button" onclick="resetLightDiff()">Reset</button></td>
-      </tr>
-      <tr>
-        <td>Specular:</td>
-        <td>R: <input type="text" id="specR" value="1.0" /></td>
-        <td>G: <input type="text" id="specG" value="1.0" /></td>
-        <td>B: <input type="text" id="specB" value="1.0" /></td>
-        <td><button type="button" onclick="resetLightSpec()">Reset</button></td>
-      </tr>
-    </table>
+      <details class="menu" open>
+        <summary>
+          <b>
+            Function 1: Users can switch between Phong Shading and Gouraud Shading, 
+            as well as between Phong lighting and Blinn-Phong lighting, 4 different combinations.
+          </b>
+        </summary>
+        <p>
+        <button type="button" id="toggleShading" onclick="VBO1toggle()">Switch Gouraud Shading</button>
+        &#160&#160&#160&#160&#160&#160&#160&#160&#160&#160&#160&#160&#160&#160&#160&#160&#160&#160
+        <button type="button" onclick="toggleBlinn()">Switch Blinn-Phong Lighting</button>
+        &#160&#160&#160&#160&#160&#160&#160&#160&#160&#160&#160&#160&#160&#160&#160&#160&#160&#160
+        <button type="button" onclick="VBO0toggle()">Hide Ground Grid</button>
+        
+        </p>
+        </detail>
+        
+          <hr>
+        <details class="menu" open>
+        <summary>
+          <b>
+          Function 2: Users can select their favorite material for these four 3D objects from the drop-down bar, 
+          or drag the slider to adjust the "brightness (Shininess)" of the material.
+          </b>
+        </summary>
+        <p>
+        Shininess: 
+          <input
+            type="range"
+            onkeydown="return false;"
+            name="shininess"
+            id="shiny"
+            min="1"
+            max="128"
+            value="10"
+            class="slider"
+          />
+          <button type="button" onclick="resetShiny()">Reset</button>
+        <br><br>
+        Sphere Material: 
+        <select name="Spherematerials" id="Spherematerials">
+          <option value="1">Red plastic</option>
+          <option value="2">Green plastic</option>
+          <option value="3">Blue plastic</option>
+          <option value="4">Black plastic</option>
+          <option value="5">Black rubber</option>
+          <option value="6">Brass</option>
+          <option value="7">Dull bronze</option>
+          <option value="8">Shiny bronze</option>
+          <option value="9">Chrome</option>
+          <option value="10">Dull copper</option>
+          <option value="11">Shiny copper</option>
+          <option value="12">Dull gold</option>
+          <option value="13">Shiny gold</option>
+          <option value="14">Pewter</option>
+          <option value="15">Dull silver</option>
+          <option value="16">Shiny silver</option>
+          <option value="17">Emerald</option>
+          <option value="18">Jade</option>
+          <option value="19">Obsidian</option>
+          <option value="20">Pearl</option>
+          <option value="21">Ruby</option>
+          <option value="22">Turquoise</option>
+        </select>
 
+        &#160 &#160 &#160 &#160 &#160   Alien Fish Material: 
+        <select name="Fishmaterials" id="Fishmaterials">
+          <option value="20">Pearl</option>
+          <option value="1">Red plastic</option>
+          <option value="2">Green plastic</option>
+          <option value="3">Blue plastic</option>
+          <option value="4">Black plastic</option>
+          <option value="5">Black rubber</option>
+          <option value="6">Brass</option>
+          <option value="7">Dull bronze</option>
+          <option value="8">Shiny bronze</option>
+          <option value="9">Chrome</option>
+          <option value="10">Dull copper</option>
+          <option value="11">Shiny copper</option>
+          <option value="12">Dull gold</option>
+          <option value="13">Shiny gold</option>
+          <option value="14">Pewter</option>
+          <option value="15">Dull silver</option>
+          <option value="16">Shiny silver</option>
+          <option value="17">Emerald</option>
+          <option value="18">Jade</option>
+          <option value="19">Obsidian</option>
+          <option value="21">Ruby</option>
+          <option value="22">Turquoise</option>
+        </select>
+
+
+        &#160 &#160 &#160 &#160 &#160   Tree Material: 
+        <select name="Treematerials" id="Treematerials">
+          <option value="2">Green plastic</option>
+          <option value="1">Red plastic</option>
+          <option value="3">Blue plastic</option>
+          <option value="4">Black plastic</option>
+          <option value="5">Black rubber</option>
+          <option value="6">Brass</option>
+          <option value="7">Dull bronze</option>
+          <option value="8">Shiny bronze</option>
+          <option value="9">Chrome</option>
+          <option value="10">Dull copper</option>
+          <option value="11">Shiny copper</option>
+          <option value="12">Dull gold</option>
+          <option value="13">Shiny gold</option>
+          <option value="14">Pewter</option>
+          <option value="15">Dull silver</option>
+          <option value="16">Shiny silver</option>
+          <option value="17">Emerald</option>
+          <option value="18">Jade</option>
+          <option value="19">Obsidian</option>
+          <option value="20">Pearl</option>
+          <option value="21">Ruby</option>
+          <option value="22">Turquoise</option>
+        </select>
+
+        &#160 &#160 &#160 &#160 &#160   Flower Material: 
+        <select name="materials" id="materials">
+          <option value="6">Brass</option>
+          <option value="1">Red plastic</option>
+          <option value="2">Green plastic</option>
+          <option value="3">Blue plastic</option>
+          <option value="4">Black plastic</option>
+          <option value="5">Black rubber</option>
+          <option value="7">Dull bronze</option>
+          <option value="8">Shiny bronze</option>
+          <option value="9">Chrome</option>
+          <option value="10">Dull copper</option>
+          <option value="11">Shiny copper</option>
+          <option value="12">Dull gold</option>
+          <option value="13">Shiny gold</option>
+          <option value="14">Pewter</option>
+          <option value="15">Dull silver</option>
+          <option value="16">Shiny silver</option>
+          <option value="17">Emerald</option>
+          <option value="18">Jade</option>
+          <option value="19">Obsidian</option>
+          <option value="20">Pearl</option>
+          <option value="21">Ruby</option>
+          <option value="22">Turquoise</option>
+        </select>
+
+        </p>
+      </details>
+      <hr>
+      <details class="menu" open>
+        <summary>
+        <b>
+          Function 3: Enter 'R' (red), 'G' (green), 'B' (blue) values to modify the Ambient, Diffuse, and Specular light.
+          </b> </summary>
+        <p>
+          <table>
+            <tr>
+              <td>Ambient:</td>
+              <td><font size ="3" color = "red">R</font>: <input type="text" id="ambiR" value="0.4" /></td>
+              <td><font size ="3" color = "green">G</font>: <input type="text" id="ambiG" value="0.4" /></td>
+              <td><font size ="3" color = "blue">B</font>: <input type="text" id="ambiB" value="0.4" /></td>
+              <td><button type="button" onclick="resetLightAmbi()">Reset</button></td>
+            </tr>
+            <tr>
+              <td>Diffuse:</td>
+              <td><font size ="3" color = "red">R</font>: <input type="text" id="diffR" value="1.0" /></td>
+              <td><font size ="3" color = "green">G</font>: <input type="text" id="diffG" value="1.0" /></td>
+              <td><font size ="3" color = "blue">B</font>: <input type="text" id="diffB" value="1.0" /></td>
+              <td><button type="button" onclick="resetLightDiff()">Reset</button></td>
+            </tr>
+            <tr>
+              <td>Specular:</td>
+              <td><font size ="3" color = "red">R</font>: <input type="text" id="specR" value="1.0" /></td>
+              <td><font size ="3" color = "green">G</font>: <input type="text" id="specG" value="1.0" /></td>
+              <td><font size ="3" color = "blue">B</font>: <input type="text" id="specB" value="1.0" /></td>
+              <td><button type="button" onclick="resetLightSpec()">Reset</button></td>
+            </tr>
+          </table>
+        </p>
+        </details>
+        <hr>
+
+        <details class="menu" open>
+        <summary>
+          <b>
+            Function 4: Users can control the position of the light source by entering a set of 
+            coordinate (initial status: x = 0, y = 0, z = 10).
+          </b>
+        </summary>
+        <p>
+        <table>
+          <tr>
+            <td>Position:&#160</td> 
+            <td>X: <input type="text" id="posX" value="0.0" /></td>
+            <td>Y: <input type="text" id="posY" value="0.0" /></td>
+            <td>Z: <input type="text" id="posZ" value="10.0" /></td>
+            <td><button type="button" onclick="resetLightPos()">Reset</button></td>
+          </tr>
+        </table>
+      </p>
+      </details>
+      <hr>
+      <details class="menu" open>
+        <summary>
+          <b>
+          Function 5: Use the 'W, A, S, D' on your keyboard to control the position of the camera and use the 'arrow keys' to adjust the aiming direction. 
+          Besides, users can also change the aiming directionby by dragging the mouse. 
+          </b></summary>
+        <font size ="3" color = "red"> 
+        <p> 
+          1. Press 'R' to reset
+        </p> 
+        <p> 
+          2. The drag action takes effect only when the mouse moves within the canvas
+        </p> 
+
+        </font>
+      </ol>
+      </details>
+
+
+
+    <p>
+      <!-- <button type="button" onclick="VBO0toggle()">Toggle Ground Grid</button> -->
+
+
+ 
     <script src="lib/webgl-utils.js"></script>
     <script src="lib/webgl-debug.js"></script>
     <script src="lib/cuon-utils.js"></script>
@@ -118,16 +249,6 @@
     <script src="lib/materials_Ayerdi04.js"></script>
     <script src="VBObox-Lib.js"></script>
     <script src="GuoJiaqi_ProjC.js"></script>
-    <style>
-      body {
-        font-family: 'Lato', sans-serif;
-      }
 
-      canvas{
-        padding:0px;
-      }
-    
-
-    </style>
   </body>
 </html>

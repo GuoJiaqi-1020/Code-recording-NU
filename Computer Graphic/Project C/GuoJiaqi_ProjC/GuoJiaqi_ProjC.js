@@ -1,6 +1,6 @@
 var gl;													// WebGL rendering context -- the 'webGL' object
 																// in JavaScript with all its member fcns & data
-var g_canvasID;									// HTML-5 'canvas' element ID#
+var g_canvas;									// HTML-5 'canvas' element ID#
 
 // For multiple VBOs & Shaders:-----------------
 worldBox = new VBObox0();		  // Holds VBO & shaders for 3D 'world' ground-plane grid, etc;
@@ -8,11 +8,14 @@ GouraudBox = new VBObox1();		  // "  "  for first set of custom-shaded 3D parts
 PhongBox = new VBObox2();     // "  "  for second set of custom-shaded 3D parts
 
 // For animation:---------------------
-var g_lastMS = Date.now();			// Timestamp (in milliseconds) for our 
-                                // most-recently-drawn WebGL screen contents.  
-                                // Set & used by moveAll() fcn to update all
-                                // time-varying params for our webGL drawings.
-  // All time-dependent params (you can add more!)
+var g_last = Date.now();
+// For mouse click:---------------------
+var g_isDrag=false;		// mouse-drag: true when user holds down mouse button
+var g_xMclik=0.0;			// last mouse button-down position (in CVV coords)
+var g_yMclik=0.0;   
+var g_digits = 3.0
+
+// All time-dependent params (you can add more!)
 var g_angleNow0  =  0.0; 			  // Current rotation angle, in degrees.
 var g_angleRate0 = 45.0;				// Rotation angle rate, in degrees/second.
                                 //---------------
@@ -41,17 +44,17 @@ var g_angle01Rate = 45.0;           // rotation speed, in degrees/second
 var g_angle02 = 0.0;
 var g_angle02Rate = 20.0;
 
-var g_angleLink1 = 0.0;
-var g_angleLink1Rate = 20.0;
+var g_angle03 = 0.0;
+var g_angle03Rate = 20.0;
 
-var g_angleLink2 = 0.0;
-var g_angleLink2Rate = 15.0;
+var g_angle04 = 0.0;
+var g_angle04Rate = 15.0;
 
-var g_angleLink3 = 0.0;
-var g_angleLink3Rate = 20.0;
+var g_angle05 = 0.0;
+var g_angle05Rate = 20.0;
 
-var g_angleHead = 0.0;
-var g_angleHeadRate = 20.0;
+var g_angle06 = 0.0;
+var g_angle06Rate = 20.0;
 
 var g_angleTail = 0.0;
 var g_angleTailRate = 20.0;
@@ -61,7 +64,10 @@ var g_show0 = 1;								// 0==Show, 1==Hide VBO0 contents on-screen.
 var g_show1 = 1;								// 	"					"			VBO1		"				"				" 
 var g_show2 = 1;                //  "         "     VBO2    "       "       "
 
-var g_currMatl;
+var g_currMatl1;
+var g_currMatl2;
+var g_currMatl3;
+var g_currMatl4;
 var g_isBlinn = false;
 var g_shiny;
 var g_shinyInit;
@@ -70,75 +76,75 @@ var g_lightPosXInit = document.getElementById('posX').value;
 var g_lightPosYInit = document.getElementById('posY').value;
 var g_lightPosZInit = document.getElementById('posZ').value;
 
-var g_lightDiffRInit = document.getElementById('diffR').value;
-var g_lightDiffGInit = document.getElementById('diffG').value;
-var g_lightDiffBInit = document.getElementById('diffB').value;
+var g_diffuseRInit = document.getElementById('diffR').value;
+var g_diffuseGInit = document.getElementById('diffG').value;
+var g_diffuseBInit = document.getElementById('diffB').value;
 
-var g_lightAmbiRInit = document.getElementById('ambiR').value;
-var g_lightAmbiGInit = document.getElementById('ambiG').value;
-var g_lightAmbiBInit = document.getElementById('ambiB').value;
+var g_ambientRInit = document.getElementById('ambiR').value;
+var g_ambientGInit = document.getElementById('ambiG').value;
+var g_ambientBInit = document.getElementById('ambiB').value;
 
-var g_lightSpecRInit = document.getElementById('specR').value;
-var g_lightSpecGInit = document.getElementById('specG').value;
-var g_lightSpecBInit = document.getElementById('specB').value;
+var g_specularRInit = document.getElementById('specR').value;
+var g_specularGInit = document.getElementById('specG').value;
+var g_specularBInit = document.getElementById('specB').value;
 
 var g_lightPosX;
 var g_lightPosY;
 var g_lightPosZ;
 
-var g_lightDiffR;
-var g_lightDiffG;
-var g_lightDiffB;
+var g_diffuseR;
+var g_diffuseG;
+var g_diffuseB;
 
-var g_lightAmbiR;
-var g_lightAmbiG;
-var g_lightAmbiB;
+var g_ambientR;
+var g_ambientG;
+var g_ambientB;
 
-var g_lightSpecR;
-var g_lightSpecG;
-var g_lightSpecB;
+var g_specularR;
+var g_specularG;
+var g_specularB;
 
 // Perspective Camera Setting
 var g_camXInit = 6.5, g_camYInit = 5.5, g_camZInit = 5.0;
 var g_lookXInit = 1.0, g_lookYInit = 1.0, g_lookZInit = 4.5;
-
+var g_aimZDiffInit = g_lookZInit - g_camZInit
 var g_aimThetaInit = 215.0
-
-var g_camX = g_camXInit, g_camY = g_camYInit, g_camZ = g_camZInit; //! Location of our camera
-var g_lookX = g_lookXInit, g_lookY = g_lookYInit, g_lookZ = g_lookZInit; //! Where our camera is looking
-
-var g_aimTheta = g_aimThetaInit;
-var g_aimZDiff = g_lookZ - g_camZ;
+// initialize the camera's position
+var g_camX = g_camXInit, g_camY = g_camYInit, g_camZ = g_camZInit;  
+var g_lookX = g_lookXInit, g_lookY = g_lookYInit, g_lookZ = g_lookZInit; 
+var g_Theta = g_aimThetaInit;
+var g_D = g_lookZ - g_camZ;
 var g_moveRate = 2.0;
-
-// ? --------------------- End copy -----------------------
-
 
 
 // ! Global camera control
 g_worldMat = new Matrix4();
 
 function main() {
-//=============================================================================
-  // Retrieve the HTML-5 <canvas> element where webGL will draw our pictures:
-  g_canvasID = document.getElementById('webgl');	
-  gl = g_canvasID.getContext("webgl", { preserveDrawingBuffer: true});
+  g_canvas = document.getElementById('webgl');	
+  gl = g_canvas.getContext("webgl", { preserveDrawingBuffer: true});
   if (!gl) {
     console.log('Failed to get the rendering context for WebGL');
     return;
   }
 
-  window.addEventListener('keydown', keyDown, false); // add event listener for the keyboard
+	// Event Listerner: keyboard and mouse
+  window.addEventListener('keydown', mykeyDown, false);
+	window.addEventListener("mousedown", myMouseDown); 
+  window.addEventListener("mousemove", myMouseMove); 
+	window.addEventListener("mouseup", myMouseUp);	
+
 
   gl.clearColor(0.2, 0.2, 0.2, 1);	  // RGBA color for clearing <canvas>
   gl.enable(gl.DEPTH_TEST);
-
+  // Initialization of three shaders
   worldBox.init(gl);		// VBO + shaders + uniforms + attribs for our 3D world,               
   GouraudBox.init(gl);		//  "		"		"  for 1st kind of shading & lighting
   PhongBox.init(gl);    //  "   "   "  for 2nd kind of shading & lighting
+
   var tick = function() {		    // locally (within main() only), define our 
-    g_canvasID = Resized_Web(g_canvasID); 
-    requestAnimationFrame(tick, g_canvasID); 
+    g_canvas = Resized_Web(g_canvas); 
+    requestAnimationFrame(tick, g_canvas); 
     animate(); 
     drawAll();
     };
@@ -147,41 +153,29 @@ function main() {
 }
 
 function Resized_Web(g_canvas) {
-      g_canvas.width = innerWidth -16;
-      //Make canvas fill the top 70% of our browser height
-      g_canvas.height = (innerHeight*0.7);
-      // IMPORTANT!  Need a fresh drawing in the re-sized viewports.
-      return g_canvas
+  // Set aside 16 pixels to avoid scorll bars 
+  g_canvas.width = innerWidth - 19;
+  // Make canvas fill the top 70% of our browser height
+  g_canvas.height = (innerHeight*0.7);
+   return g_canvas
   }
 
 function animate() {
-  var nowMS = Date.now();             // current time (in milliseconds)
-  var elapsed = nowMS - g_lastMS;   // 
-  g_lastMS = nowMS;                   // update for next webGL drawing.
+  var now = Date.now();
+  var elapsed = now - g_last; 
+  g_last = now; 
+
   if(elapsed > 1000.0) {            
-    // Browsers won't re-draw 'canvas' element that isn't visible on-screen 
-    // (user chose a different browser tab, etc.); when users make the browser
-    // window visible again our resulting 'elapsedMS' value has gotten HUGE.
-    // Instead of allowing a HUGE change in all our time-dependent parameters,
-    // let's pretend that only a nominal 1/30th second passed:
     elapsed = 1000.0/30.0;
     }
-  // Find new time-dependent parameters using the current or elapsed time:
-  // Continuous rotation:
+ 
   g_angleNow0 = g_angleNow0 + (g_angleRate0 * elapsed) / 1000.0;
   g_angleNow1 = g_angleNow1 + (g_angleRate1 * elapsed) / 1000.0;
   g_angleNow2 = g_angleNow2 + (g_angleRate2 * elapsed) / 1000.0;
-  g_angleNow0 %= 360.0;   // keep angle >=0.0 and <360.0 degrees  
+  g_angleNow0 %= 360.0;
   g_angleNow1 %= 360.0;   
   g_angleNow2 %= 360.0;
-  // if(g_angleNow1 > g_angleMax1) { // above the max?
-  //   g_angleNow1 = g_angleMax1;    // move back down to the max, and
-  //   g_angleRate1 = -g_angleRate1; // reverse direction of change.
-  //   }
-  // else if(g_angleNow1 < g_angleMin1) {  // below the min?
-  //   g_angleNow1 = g_angleMin1;    // move back up to the min, and
-  //   g_angleRate1 = -g_angleRate1;
-  //   }
+
   // Continuous movement:
   g_posNow0 += g_posRate0 * elapsed / 1000.0;
   g_posNow1 += g_posRate1 * elapsed / 1000.0;
@@ -203,42 +197,24 @@ function animate() {
     g_posRate1 = -g_posRate1;   // reverse direction of change.
     }
 
-  var g_angle01min = -60.0;
-	var g_angle01max =  60.0;
+  if(g_angle01 >  60 && g_angle01Rate > 0) g_angle01Rate = -g_angle01Rate;
+	if(g_angle01 <  -60 && g_angle01Rate < 0) g_angle01Rate = -g_angle01Rate;
 
-	var angleLink1min = -15.0;
-	var angleLink1max =  15.0;
-
-	var angleLink2min = -15.0;
-	var angleLink2max =  15.0;
-
-	var angleLink3min = -20.0;
-	var angleLink3max =  20.0; 
-
-	var angleHeadmin = -45.0;
-	var angleHeadmax =  45.0;
-
-
-  if(g_angle01 >  g_angle01max && g_angle01Rate > 0) g_angle01Rate = -g_angle01Rate;
-	if(g_angle01 <  g_angle01min && g_angle01Rate < 0) g_angle01Rate = -g_angle01Rate;
-
-	if(g_angleLink1 >  angleLink1max && g_angleLink1Rate > 0) g_angleLink1Rate = -g_angleLink1Rate;
-	if(g_angleLink1 <  angleLink1min && g_angleLink1Rate < 0) g_angleLink1Rate = -g_angleLink1Rate;
-
-	if(g_angleLink2 >  angleLink2max && g_angleLink2Rate > 0) g_angleLink2Rate = -g_angleLink2Rate;
-	if(g_angleLink2 <  angleLink2min && g_angleLink2Rate < 0) g_angleLink2Rate = -g_angleLink2Rate;
-
-	if(g_angleLink3 >  angleLink3max && g_angleLink3Rate > 0) g_angleLink3Rate = -g_angleLink3Rate;
-	if(g_angleLink3 <  angleLink3min && g_angleLink3Rate < 0) g_angleLink3Rate = -g_angleLink3Rate;
-	
-	if(g_angleLink3 >  angleHeadmax && g_angleHeadRate > 0) g_angleHeadRate = -g_angleHeadRate;
-	if(g_angleLink3 <  angleHeadmin && g_angleHeadRate < 0) g_angleHeadRate = -g_angleHeadRate;
-	
-	g_angleLink1 = (g_angleLink1 + (g_angleLink1Rate * elapsed) / 1000.0)  % 360;
-	g_angleLink2 = (g_angleLink2 + (g_angleLink2Rate * elapsed) / 1000.0)  % 360;
-	g_angleLink3 = (g_angleLink3 + (g_angleLink3Rate * elapsed) / 1000.0)  % 360;	
-	g_angleHead  = (g_angleHead  + (g_angleHeadRate  * elapsed) / 1000.0)  % 360;
-
+  g_angle03 = (g_angle03 + (g_angle03Rate * elapsed) / 1000.0)  % 360;
+	if(g_angle03 >  15 && g_angle03Rate > 0) g_angle03Rate = -g_angle03Rate;
+	if(g_angle03 <  -15 && g_angle03Rate < 0) g_angle03Rate = -g_angle03Rate;
+  
+  g_angle04 = (g_angle04 + (g_angle04Rate * elapsed) / 1000.0)  % 360;
+	if(g_angle04 >  15 && g_angle04Rate > 0) g_angle04Rate = -g_angle04Rate;
+	if(g_angle04 <  -15 && g_angle04Rate < 0) g_angle04Rate = -g_angle04Rate;
+  
+  g_angle05 = (g_angle05 + (g_angle05Rate * elapsed) / 1000.0)  % 360;	
+	if(g_angle05 >  20 && g_angle05Rate > 0) g_angle05Rate = -g_angle05Rate;
+	if(g_angle05 <  -20 && g_angle05Rate < 0) g_angle05Rate = -g_angle05Rate;
+  
+	g_angle06  = (g_angle06  + (g_angle06Rate  * elapsed) / 1000.0)  % 360;
+	if(g_angle06 >  45 && g_angle06Rate > 0) g_angle06Rate = -g_angle06Rate;
+	if(g_angle06 <  -45 && g_angle06Rate < 0) g_angle06Rate = -g_angle06Rate;
 }
 
 function drawAll() {
@@ -246,13 +222,13 @@ function drawAll() {
   // Clear on-screen HTML-5 <canvas> object:
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-  g_currMatl = getMatl();
+  g_currMatl1 = getMaterial_S();
+  g_currMatl2 = getMaterial_A();
+  g_currMatl3 = getMaterial_T();
+  g_currMatl4 = getMaterial_F();
   g_shiny = document.getElementById("shiny").value;
   setCamera();
   getUsrValues();
-
-var b4Draw = Date.now();
-var b4Wait = b4Draw - g_lastMS;
 
 	if(g_show0 == 1) {	// IF user didn't press HTML button to 'hide' VBO0:
 	  worldBox.switchToMe();  // Set WebGL to render from this VBObox.
@@ -260,12 +236,14 @@ var b4Wait = b4Draw - g_lastMS;
 		worldBox.draw();			  // draw our VBO's contents using our shaders.
   }
   if(g_show1 == 1) { // IF user didn't press HTML button to 'hide' VBO1:
-    GouraudBox.switchToMe();  // Set WebGL to render from this VBObox.
+    GouraudBox.switchToMe(); 
+    GouraudBox.isReady(); 
   	GouraudBox.adjust();		  // Send new values for uniforms to the GPU, and
   	GouraudBox.draw();			  // draw our VBO's contents using our shaders.
 	  }
 	if(g_show2 == 1) { // IF user didn't press HTML button to 'hide' VBO2:
 	  PhongBox.switchToMe();  // Set WebGL to render from this VBObox.
+    PhongBox.isReady();
   	PhongBox.adjust();		  // Send new values for uniforms to the GPU, and
   	PhongBox.draw();			  // draw our VBO's contents using our shaders.
   	}
@@ -282,24 +260,31 @@ function VBO0toggle() {
 function VBO1toggle() {
 //=============================================================================
 // Called when user presses HTML-5 button 'Show/Hide VBO1'.
-  if(g_show1 != 1) {
-    g_show1 = 1;			// show,
-    document.getElementById('toggleShading').innerText = "Toggle Phong Shading";
+  if(g_show1 == 1) {
+    g_show1 = 0;			// show,
+    console.log('Hide shader VBO1');
+    g_show2 = 1;
+    console.log('Show shader VBO2');
+    document.getElementById('toggleShading').innerText = "Switch Phong Shading";
   } else {
-    g_show1 = 0;
-    document.getElementById('toggleShading').innerText= "Toggle Gouraud Shading";
+    g_show1 = 1;
+    console.log('Show shader VBO1');
+    g_show2 = 0;
+    console.log('Hide shader VBO2');
+    document.getElementById('toggleShading').innerText= "Switch Gouraud Shading";
   }									// hide.
-  
-  console.log('g_show1: '+g_show1);
+
+  // console.log('g_show1: '+g_show1);
+  // console.log('g_show2: '+g_show2);
 }
 
-function VBO2toggle() {
-//=============================================================================
-// Called when user presses HTML-5 button 'Show/Hide VBO2'.
-  if(g_show2 != 1) g_show2 = 1;			// show,
-  else g_show2 = 0;									// hide.
-  console.log('g_show2: '+g_show2);
-}
+// function VBO2toggle() {
+// //=============================================================================
+// // Called when user presses HTML-5 button 'Show/Hide VBO2'.
+//   if(g_show2 != 1) g_show2 = 1;			// show,
+//   else g_show2 = 0;									// hide.
+//   console.log('g_show2: '+g_show2);
+// }
 
 function toggleBlinn() {
   if(!g_isBlinn) g_isBlinn = true;
@@ -310,18 +295,18 @@ function toggleBlinn() {
 function setCamera() {
   g_worldMat.setIdentity();
 
-  g_lookX = g_camX + Math.cos(toRadians(g_aimTheta));
-	g_lookY = g_camY + Math.sin(toRadians(g_aimTheta));
-  g_lookZ = g_camZ + g_aimZDiff;
+  g_lookX = g_camX + Math.cos(Angle2Radians(g_Theta));
+	g_lookY = g_camY + Math.sin(Angle2Radians(g_Theta));
+  g_lookZ = g_camZ + g_D;
 
   gl.viewport(0,											 				// Viewport lower-left corner
     0, 			// location(in pixels)
-    g_canvasID.width, 					// viewport width,
-    g_canvasID.height);			// viewport height in pixels.
+    g_canvas.width, 					// viewport width,
+    g_canvas.height);			// viewport height in pixels.
 
   
   g_worldMat.perspective(30.0, // FOV
-    g_canvasID.width/g_canvasID.height, // Aspect ratio
+    g_canvas.width/g_canvas.height, // Aspect ratio
     1.0, // z-near
     100.0,); // z-far
     
@@ -330,202 +315,152 @@ function setCamera() {
                      0.0,     0.0,     1.0,);// up vector
 }
 
-///////////////////////////////////////
-function keyDown(kev) {
-	//added need to modify
-	var xd = g_camX - g_lookX;
+// define the key number
+const A = 65;
+const D = 68;
+const W = 87;
+const S = 83;
+const R = 82;
+
+const UP_ARROW    = 38;
+const LEFT_ARROW  = 37;
+const RIGHT_ARROW = 39;
+const DOWN_ARROW  = 40;
+
+function mykeyDown(ev) {
+  var xd = g_camX - g_lookX;
 	var yd = g_camY - g_lookY;
-	var zd = g_camZ - g_lookX;
+	var zd = g_camZ - g_lookZ;
 	var len = Math.sqrt(Math.pow(xd, 2) + Math.pow(yd, 2) + Math.pow(zd, 2));
-
-  var moveRateRad = toRadians(g_moveRate);
-	// console.log(  "--kev.code:", kev.code,   "\t\t--kev.key:", kev.key, 
-	// 			"\n--kev.ctrlKey:", kev.ctrlKey,  "\t--kev.shiftKey:",kev.shiftKey,
-	// 			"\n--kev.altKey:",  kev.altKey,   "\t--kev.metaKey:", kev.metaKey);
+	var moveRateRad = Angle2Radians(g_moveRate);
 	
-	// // and report EVERYTHING on webpage:
-	// document.getElementById('KeyDownResult').innerHTML = ''; // clear old results
-	// document.getElementById('KeyModResult' ).innerHTML = ''; 
-	// document.getElementById('KeyModResult' ).innerHTML = 
-	// 		"   --kev.code:"+kev.code   +"      --kev.key:"+kev.key+
-	// 	"<br>--kev.ctrlKey:"+kev.ctrlKey+" --kev.shiftKey:"+kev.shiftKey+
-	// 	"<br>--kev.altKey:"+kev.altKey +"  --kev.metaKey:"+kev.metaKey;
-	
-		switch(kev.code) {
-			case "KeyP":
-				console.log("Pause/unPause!\n");                // print on console,
-				document.getElementById('KeyDownResult').innerHTML =  
-				'myKeyDown() found p/P key. Pause/unPause!';   // print on webpage
-				if(g_isRun==true) {
-				g_isRun = false;    // STOP animation
-				}
-				else {
-				g_isRun = true;     // RESTART animation
-				tick();
-				}
-				break;
-			//------------------WASD navigation-----------------
-			case "KeyW":
-				console.log("w/W key: Move FWD!\n");
-				g_lookX -= (xd / len);
-				g_lookY -= (yd / len);
-				g_lookX -= (zd / len);
-				g_camX -= (xd / len);
-				g_camY -= (yd / len);
-				g_camZ -= (zd / len);
-				break;
+	switch(ev.keyCode) {
+		case LEFT_ARROW:
+      console.log(' left-arrow.');
+			g_Theta += g_moveRate;
 
-			case "KeyA":
-				var xStrafe = Math.cos(toRadians(g_aimTheta + 45));
-				var yStrafe = Math.sin(toRadians(g_aimTheta + 45));
-				g_camX += xStrafe / len;
-				g_camY += yStrafe / len;
-				break;
+			if(g_Theta > 360) g_Theta -= 360.0;
+			if(g_Theta < 0) g_Theta += 360.0;
 
-			case "KeyD":
-				console.log("d/D key: Strafe RIGHT!\n");
-				var xStrafe = Math.cos(toRadians(g_aimTheta + 45));
-				var yStrafe = Math.sin(toRadians(g_aimTheta + 45));
-				g_camX -= xStrafe / len;
-				g_camY -= yStrafe / len;
-				break;
+			break;
+		case RIGHT_ARROW: 
+      console.log('right-arrow.');
+			g_Theta -= g_moveRate;
 
-			case "KeyS":
-				console.log("s/S key: Move BACK!\n");
-				g_lookX += (xd / len);
-				g_lookY += (yd / len);
-				g_lookX += (zd / len);
-				g_camX += (xd / len);
-				g_camY += (yd / len);
-				g_camZ += (zd / len);
-				break;
+			if(g_Theta > 360) g_Theta -= 360.0;
+			if(g_Theta < 0) g_Theta += 360.0;
 
-			case "KeyR":
-				console.log("a/A key: Reset the shifting!\n");
-				document.getElementById('KeyDownResult').innerHTML =  
-				'myKeyDown() found a/A key. Reset the robot shifting!';
-				hori_shift = 0;
-				vert_shift = 0;
-				g_aimTheta = ini_Theta;
-				g_aimZDiff = ini_Gz;
-				g_camX = g_camXInit, g_camY = g_camYInit, g_camZ = g_camZInit; 
-				g_lookX = g_lookXInit, g_lookY = g_lookYInit, g_lookX = g_lookZInit;
-				break;
+			break;
+		case UP_ARROW:
+      console.log('up-arrow.');
+			g_D += moveRateRad;
+			break;
+		case DOWN_ARROW:
+      console.log('down-arrow.');
+			g_D -= moveRateRad;
+			break;
+    case A:
+      console.log("d/D key: Strafe LEFT!\n");
+      var xStrafe = Math.cos(Angle2Radians(g_Theta + 90));
+      var yStrafe = Math.sin(Angle2Radians(g_Theta + 90));
+      g_camX += xStrafe / len;
+      g_camY += yStrafe / len;
 
-			//----------------Arrow keys------------------------
-			case "ArrowLeft": 	
-				console.log(' left-arrow.');
-				g_aimTheta += g_moveRate;
-				if(g_aimTheta > 360) g_aimTheta -= 360.0;
-				if(g_aimTheta < 0) g_aimTheta += 360.0;
-				break;
-			case "ArrowRight":
-				console.log(' right-arrow.');	
-				g_aimTheta -= g_moveRate;
-				if(g_aimTheta > 360) g_aimTheta -= 360.0;
-				if(g_aimTheta < 0) g_aimTheta += 360.0;
-				break;
-			case "ArrowUp":	
-				console.log(' up-arrow.');	
-				g_aimZDiff += moveRateRad;
-				break;
-			case "ArrowDown":
-				console.log(' down-arrow.');
-				g_aimZDiff -= moveRateRad;
-			break;	
-		default:
-		console.log("UNUSED!");
-			document.getElementById('KeyDownResult').innerHTML =
-				'myKeyDown(): UNUSED!';
-		break;
-		}
+      break;
+    case D:
+      console.log("d/D key: Strafe RIGHT!\n");
+      var xStrafe = Math.cos(Angle2Radians(g_Theta + 90));
+      var yStrafe = Math.sin(Angle2Radians(g_Theta + 90));
+
+      g_camX -= xStrafe / len;
+      g_camY -= yStrafe / len;
+
+      break;
+		case W: 
+      console.log("w/W key: Move FWD!\n");
+			g_lookX -= (xd / len);
+			g_lookY -= (yd / len);
+			g_lookZ -= (zd / len);
+			g_camX -= (xd / len);
+			g_camY -= (yd / len);
+			g_camZ -= (zd / len);
+
+			break;
+		case S: 
+    console.log("s/S key: Move BACK!\n");
+			g_lookX += (xd / len);
+			g_lookY += (yd / len);
+			g_lookZ += (zd / len);
+			g_camX += (xd / len);
+			g_camY += (yd / len);
+			g_camZ += (zd / len);
+
+			break;
+      
+    case R: 
+    console.log("r/R key: Reset\n");
+      g_lookX = g_lookXInit;
+      g_lookY = g_lookYInit;
+      g_lookZ = g_lookZInit;
+      g_camX = g_camXInit;
+      g_camY = g_camYInit;
+      g_camZ = g_camZInit;
+      g_Theta = g_aimThetaInit
+      g_D = g_aimZDiffInit
+
+      break;
+    default:
+      console.log("UNUSED!");
+      break;
+	}
 }
 
-// function keyDown(ev) {
-//   var xd = g_camX - g_lookX;
-// 	var yd = g_camY - g_lookY;
-// 	var zd = g_camZ - g_lookZ;
-
-// 	var len = Math.sqrt(Math.pow(xd, 2) + Math.pow(yd, 2) + Math.pow(zd, 2));
-
-// 	var moveRateRad = toRadians(g_moveRate);
-	
-// 	switch(ev.keyCode) {
-// 		case LEFT_ARROW:
-// 			g_aimTheta += g_moveRate;
-
-// 			if(g_aimTheta > 360) g_aimTheta -= 360.0;
-// 			if(g_aimTheta < 0) g_aimTheta += 360.0;
-
-// 			break;
-// 		case RIGHT_ARROW: 
-// 			g_aimTheta -= g_moveRate;
-
-// 			if(g_aimTheta > 360) g_aimTheta -= 360.0;
-// 			if(g_aimTheta < 0) g_aimTheta += 360.0;
-
-// 			break;
-// 		case UP_ARROW:
-// 			g_aimZDiff += moveRateRad;
-// 			break;
-// 		case DOWN_ARROW:
-// 			g_aimZDiff -= moveRateRad;
-// 			break;
-// 		case W: 
-// 			g_lookX -= (xd / len);
-// 			g_lookY -= (yd / len);
-// 			g_lookZ -= (zd / len);
-
-// 			g_camX -= (xd / len);
-// 			g_camY -= (yd / len);
-// 			g_camZ -= (zd / len);
-
-// 			break;
-// 		case S: 
-// 			g_lookX += (xd / len);
-// 			g_lookY += (yd / len);
-// 			g_lookZ += (zd / len);
-
-// 			g_camX += (xd / len);
-// 			g_camY += (yd / len);
-// 			g_camZ += (zd / len);
-
-// 			break;
-// 		case A:
-// 			var xStrafe = Math.cos(toRadians(g_aimTheta + 90));
-// 			var yStrafe = Math.sin(toRadians(g_aimTheta + 90));
-
-// 			g_camX += xStrafe / len;
-// 			g_camY += yStrafe / len;
-
-// 			break;
-// 		case D:
-// 			var xStrafe = Math.cos(toRadians(g_aimTheta + 90));
-// 			var yStrafe = Math.sin(toRadians(g_aimTheta + 90));
-
-// 			g_camX -= xStrafe / len;
-// 			g_camY -= yStrafe / len;
-
-// 			break;
-// 	}
-// }
-
-
-
-
-function toRadians(angle) {
+function Angle2Radians(angle) {
 	return angle * (Math.PI/180);
 }
 
-function getMatl() {
-  matlSelect = document.getElementById('materials').value;
-  if (g_currMatl != matlSelect){
+function getMaterial_S() {
+  matlSelect = document.getElementById('Spherematerials').value;
+  if (g_currMatl1 != matlSelect){
     var matl = new Material(parseInt(matlSelect));
     g_shinyInit = matl.K_shiny;
     document.getElementById('shiny').value = g_shinyInit;
     return matlSelect;
   }
-  return g_currMatl;
+  return g_currMatl1;
+}
+
+function getMaterial_A() {
+  matlSelect = document.getElementById('Fishmaterials').value;
+  if (g_currMatl2 != matlSelect){
+    var matl = new Material(parseInt(matlSelect));
+    g_shinyInit = matl.K_shiny;
+    document.getElementById('shiny').value = g_shinyInit;
+    return matlSelect;
+  }
+  return g_currMatl2;
+}
+
+function getMaterial_T() {
+  matlSelect = document.getElementById('Treematerials').value;
+  if (g_currMatl3 != matlSelect){
+    var matl = new Material(parseInt(matlSelect));
+    g_shinyInit = matl.K_shiny;
+    document.getElementById('shiny').value = g_shinyInit;
+    return matlSelect;
+  }
+  return g_currMatl3;
+}
+
+function getMaterial_F() {
+  matlSelect = document.getElementById('materials').value;
+  if (g_currMatl4 != matlSelect){
+    var matl = new Material(parseInt(matlSelect));
+    g_shinyInit = matl.K_shiny;
+    document.getElementById('shiny').value = g_shinyInit;
+    return matlSelect;
+  }
+  return g_currMatl4;
 }
 
 function getUsrValues() {
@@ -534,8 +469,6 @@ function getUsrValues() {
       usrDiffR, usrDiffG, usrDiffB, 
       usrSpecR, usrSpecG, usrSpecB;
 
-
-  // * Light position in world coords
   
   usrPosX = document.getElementById('posX').value;
   if(!isNaN(usrPosX)) g_lightPosX = usrPosX;
@@ -549,35 +482,33 @@ function getUsrValues() {
   // * Ambient light color
 
   usrAmbiR = document.getElementById('ambiR').value;
-  if(!isNaN(usrAmbiR)) g_lightAmbiR = usrAmbiR;
+  if(!isNaN(usrAmbiR)) g_ambientR = usrAmbiR;
 
   usrAmbiG = document.getElementById('ambiG').value;
-  if(!isNaN(usrAmbiG)) g_lightAmbiG = usrAmbiG;
+  if(!isNaN(usrAmbiG)) g_ambientG = usrAmbiG;
 
   usrAmbiB = document.getElementById('ambiB').value;
-  if(!isNaN(usrAmbiB)) g_lightAmbiB = usrAmbiB;
+  if(!isNaN(usrAmbiB)) g_ambientB = usrAmbiB;
 
   // * Diffuse light color
 
   usrDiffR = document.getElementById('diffR').value;
-  if(!isNaN(usrDiffR)) g_lightDiffR = usrDiffR;
+  if(!isNaN(usrDiffR)) g_diffuseR = usrDiffR;
 
   usrDiffG = document.getElementById('diffG').value;
-  if(!isNaN(usrDiffG)) g_lightDiffG = usrDiffG;
+  if(!isNaN(usrDiffG)) g_diffuseG = usrDiffG;
 
   usrDiffB = document.getElementById('diffB').value;
-  if(!isNaN(usrDiffB)) g_lightDiffB = usrDiffB;
-
-  // * Specular light color
+  if(!isNaN(usrDiffB)) g_diffuseB = usrDiffB;
 
   usrSpecR = document.getElementById('specR').value;
-  if(!isNaN(usrSpecR)) g_lightSpecR = usrSpecR;
+  if(!isNaN(usrSpecR)) g_specularR = usrSpecR;
 
   usrSpecG = document.getElementById('specG').value;
-  if(!isNaN(usrSpecG)) g_lightSpecG = usrSpecG;
+  if(!isNaN(usrSpecG)) g_specularG = usrSpecG;
 
   usrSpecB = document.getElementById('specB').value;
-  if(!isNaN(usrSpecB)) g_lightSpecB = usrSpecB;
+  if(!isNaN(usrSpecB)) g_specularB = usrSpecB;
 }
 
 function resetLightPos() {
@@ -587,23 +518,75 @@ function resetLightPos() {
 }
 
 function resetLightAmbi() {
-  document.getElementById('ambiR').value = g_lightAmbiRInit;
-  document.getElementById('ambiG').value = g_lightAmbiGInit;
-  document.getElementById('ambiB').value = g_lightAmbiBInit;
+  document.getElementById('ambiR').value = g_ambientRInit;
+  document.getElementById('ambiG').value = g_ambientGInit;
+  document.getElementById('ambiB').value = g_ambientBInit;
 }
 
 function resetLightDiff() {
-  document.getElementById('diffR').value = g_lightDiffRInit;
-  document.getElementById('diffG').value = g_lightDiffGInit;
-  document.getElementById('diffB').value = g_lightDiffBInit;
+  document.getElementById('diffR').value = g_diffuseRInit;
+  document.getElementById('diffG').value = g_diffuseGInit;
+  document.getElementById('diffB').value = g_diffuseBInit;
 }
 
 function resetLightSpec() {
-  document.getElementById('specR').value = g_lightSpecRInit;
-  document.getElementById('specG').value = g_lightSpecGInit;
-  document.getElementById('specB').value = g_lightSpecBInit;
+  document.getElementById('specR').value = g_specularRInit;
+  document.getElementById('specG').value = g_specularGInit;
+  document.getElementById('specB').value = g_specularBInit;
 }
 
 function resetShiny() {
   document.getElementById('shiny').value = g_shinyInit;
 }
+
+function myMouseDown(ev) {
+    var rect = ev.target.getBoundingClientRect();	// get canvas corners in pixels
+    var xp = ev.clientX - rect.left;									// x==0 at canvas left edge
+    var yp = g_canvas.height - (ev.clientY - rect.top);	// y==0 at canvas bottom edge
+
+    var x = (xp - g_canvas.width/2)  / 		// move origin to center of canvas and
+                 (g_canvas.width/2);			// normalize canvas to -1 <= x < +1,
+    var y = (yp - g_canvas.height/2) /		//										 -1 <= y < +1.
+                 (g_canvas.height/2);
+    if (ev.clientY >1554)
+      g_isDrag = false
+    else
+      g_isDrag = true;											// set our mouse-dragging flag
+    
+    g_xMclik = x;	
+    g_yMclik = y;   
+}
+  
+function myMouseMove(ev) {
+  var Amp = 15.0 // set the mouse drag sensitivity
+  if(g_isDrag==false) return;				// IGNORE all mouse-moves except 'dragging'
+  var rect = ev.target.getBoundingClientRect();	// get canvas corners in pixels
+  var xp = ev.clientX - rect.left;									// x==0 at canvas left edge
+  var yp = g_canvas.height - (ev.clientY - rect.top);	// y==0 at canvas bottom edge
+  var x = (xp - g_canvas.width/2)  / 		// move origin to center of canvas and
+                (g_canvas.width/2);		// normalize canvas to -1 <= x < +1,
+  var y = (yp - g_canvas.height/2) /		//									-1 <= y < +1.
+                (g_canvas.height/2);
+  g_Theta += (x-g_xMclik)*Amp;
+  g_D -= Angle2Radians(y - g_yMclik)*Amp;
+      if(g_Theta > 360) g_Theta -= 360.0;
+      if(g_Theta < 0) g_Theta += 360.0;
+
+  g_xMclik = x;											// Make next drag-measurement from here.
+	g_yMclik = y;
+}
+
+function myMouseUp(ev) {
+  var rect = ev.target.getBoundingClientRect();	// get canvas corners in pixels
+  var xp = ev.clientX - rect.left;									// x==0 at canvas left edge
+  var yp = g_canvas.height - (ev.clientY - rect.top);	// y==0 at canvas bottom edge
+  var x = (xp - g_canvas.width/2)  / 		// move origin to center of canvas and
+                (g_canvas.width/2);			// normalize canvas to -1 <= x < +1,
+  var y = (yp - g_canvas.height/2) /		//										 -1 <= y < +1.
+                (g_canvas.height/2);
+  g_isDrag = false;											// CLEAR our mouse-dragging flag, and
+}
+  
+function myMouseClick(ev) {
+  console.log("myMouseClick() on button: ", ev.button); 
+}	

@@ -1856,10 +1856,9 @@ function myKeyDown(kev) {
 				vert_shift -=0.05
 			break;	
 		default:
-		console.log("UNUSED!");
-			document.getElementById('KeyDownResult').innerHTML =
-				'myKeyDown(): UNUSED!';
-		break;
+			console.log("UNUSED!");
+
+			break;
 		}
 }
 

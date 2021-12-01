@@ -185,6 +185,29 @@ var FSHADER_SOURCE =
   													// Ambient? Emissive? Specular? almost
   													// NEVER change per-vertex: I use 'uniform' values
 
+
+    //   float e64 = 0.0;
+
+    //   vec3 R = reflect(-lightDirection, normal);
+    //   vec3 H = normalize(lightDirection + eyeDirection);
+
+    //   if(!u_isBlinn) {
+    //     float specAngle = max(dot(R, eyeDirection), 0.0);
+    //     e64 = pow(specAngle, float(u_MatlSet[0].shiny));
+    //   } else {
+        
+    //     float nDotH = max(dot(H, normal), 0.0);
+    //     e64 = pow(nDotH, float(u_MatlSet[0].shiny));
+    //   }
+
+    
+    //   vec3 emissive = u_MatlSet[0].emit;
+    //   vec3 ambient = u_LampSet[0].ambi * u_MatlSet[0].ambi;
+    //   vec3 diffuse = u_LampSet[0].diff * v_Kd * nDotL;
+    //   vec3 spec = u_LampSet[0].spec * u_MatlSet[0].spec * e64;
+    //   gl_FragColor = vec4(emissive + ambient + diffuse + spec, 1.0);
+
+
   'void main() { \n' +
      	// Normalize! !!IMPORTANT!! TROUBLE if you don't! 
      	// normals interpolated for each pixel aren't 1.0 in length any more!
@@ -213,11 +236,11 @@ var FSHADER_SOURCE =
 	'  float e64 = pow(nDotH, float(u_MatlSet[0].shiny));\n' +
  	// Calculate the final color from diffuse reflection and ambient reflection
 //  '	 vec3 emissive = u_Ke;' +
- '	 vec3 emissive = 										u_MatlSet[0].emit;' +
+ '	 vec3 emissive = u_MatlSet[0].emit;' +
   '  vec3 ambient = u_LampSet[0].ambi * u_MatlSet[0].ambi;\n' +
   '  vec3 diffuse = u_LampSet[0].diff * v_Kd * nDotL;\n' +
-  '	 vec3 speculr = u_LampSet[0].spec * u_MatlSet[0].spec * e64;\n' +
-  '  gl_FragColor = vec4(emissive + ambient + diffuse + speculr , 1.0);\n' +
+  '	 vec3 spec = u_LampSet[0].spec * u_MatlSet[0].spec * e64;\n' +
+  '  gl_FragColor = vec4(emissive + ambient + diffuse + spec , 1.0);\n' +
   '}\n';
 //=============================================================================
 // REMAINING GLOBAL VARIABLES   (absorb them into objects, please!)
