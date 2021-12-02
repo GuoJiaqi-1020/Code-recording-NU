@@ -31,84 +31,124 @@
         <button type="button" onclick="VBO0toggle()">Hide Ground Grid</button>
         
         </p>
-        </detail>
+      </details>
         
           <hr>
-        <details class="menu" open>
+      <details class="menu" open>
         <summary>
           <b>
           Function 2: Users can select their favorite material for these four 3D objects from the drop-down bar, 
           or drag the slider to adjust the "brightness (Shininess)" of the material.
           </b>
         </summary>
+        
         <p>
+          <table>
+            <tr>
+              <td>Shininess: 
+                <input
+                  type="range"
+                  onkeydown="return false;"
+                  name="shininess"
+                  id="shiny1"
+                  min="1"
+                  max="128"
+                  value="10"
+                  class="slider"
+                />&#160 &#160 &#160
+              </td>
+              <td>
+                
+                Sphere Material: &#160
+              </td>
+              <td>
+                <select name="Spherematerials" id="Spherematerials">
+                  <option value="1">Red plastic</option>
+                  <option value="2">Green plastic</option>
+                  <option value="3">Blue plastic</option>
+                  <option value="4">Black plastic</option>
+                  <option value="5">Black rubber</option>
+                  <option value="6">Brass</option>
+                  <option value="7">Dull bronze</option>
+                  <option value="8">Shiny bronze</option>
+                  <option value="9">Chrome</option>
+                  <option value="10">Dull copper</option>
+                  <option value="11">Shiny copper</option>
+                  <option value="12">Dull gold</option>
+                  <option value="13">Shiny gold</option>
+                  <option value="14">Pewter</option>
+                  <option value="15">Dull silver</option>
+                  <option value="16">Shiny silver</option>
+                  <option value="17">Emerald</option>
+                  <option value="18">Jade</option>
+                  <option value="19">Obsidian</option>
+                  <option value="20">Pearl</option>
+                  <option value="21">Ruby</option>
+                  <option value="22">Turquoise</option>
+                </select>
+                </td>
+                <td>
+                  &#160 &#160 &#160 &#160 &#160 &#160 &#160
+                  Shininess: 
+                  <input
+                    type="range"
+                    onkeydown="return false;"
+                    name="shininess"
+                    id="shiny2"
+                    min="1"
+                    max="128"
+                    value="10"
+                    class="slider"
+                  />&#160 &#160 &#160
+                </td>
+                <td>
+                    Alien Fish Material:&#160
+                  </td>
+                  <td>
+                  <select name="Fishmaterials" id="Fishmaterials">
+                    <option value="20">Pearl</option>
+                    <option value="1">Red plastic</option>
+                    <option value="2">Green plastic</option>
+                    <option value="3">Blue plastic</option>
+                    <option value="4">Black plastic</option>
+                    <option value="5">Black rubber</option>
+                    <option value="6">Brass</option>
+                    <option value="7">Dull bronze</option>
+                    <option value="8">Shiny bronze</option>
+                    <option value="9">Chrome</option>
+                    <option value="10">Dull copper</option>
+                    <option value="11">Shiny copper</option>
+                    <option value="12">Dull gold</option>
+                    <option value="13">Shiny gold</option>
+                    <option value="14">Pewter</option>
+                    <option value="15">Dull silver</option>
+                    <option value="16">Shiny silver</option>
+                    <option value="17">Emerald</option>
+                    <option value="18">Jade</option>
+                    <option value="19">Obsidian</option>
+                    <option value="21">Ruby</option>
+                    <option value="22">Turquoise</option>
+                  </select>
+                </td>
+        </tr>
+        
+        <tr><td>
         Shininess: 
           <input
             type="range"
             onkeydown="return false;"
             name="shininess"
-            id="shiny"
+            id="shiny3"
             min="1"
             max="128"
             value="10"
             class="slider"
-          />
-          <button type="button" onclick="resetShiny()">Reset</button>
-        <br><br>
-        Sphere Material: 
-        <select name="Spherematerials" id="Spherematerials">
-          <option value="1">Red plastic</option>
-          <option value="2">Green plastic</option>
-          <option value="3">Blue plastic</option>
-          <option value="4">Black plastic</option>
-          <option value="5">Black rubber</option>
-          <option value="6">Brass</option>
-          <option value="7">Dull bronze</option>
-          <option value="8">Shiny bronze</option>
-          <option value="9">Chrome</option>
-          <option value="10">Dull copper</option>
-          <option value="11">Shiny copper</option>
-          <option value="12">Dull gold</option>
-          <option value="13">Shiny gold</option>
-          <option value="14">Pewter</option>
-          <option value="15">Dull silver</option>
-          <option value="16">Shiny silver</option>
-          <option value="17">Emerald</option>
-          <option value="18">Jade</option>
-          <option value="19">Obsidian</option>
-          <option value="20">Pearl</option>
-          <option value="21">Ruby</option>
-          <option value="22">Turquoise</option>
-        </select>
-
-        &#160 &#160 &#160 &#160 &#160   Alien Fish Material: 
-        <select name="Fishmaterials" id="Fishmaterials">
-          <option value="20">Pearl</option>
-          <option value="1">Red plastic</option>
-          <option value="2">Green plastic</option>
-          <option value="3">Blue plastic</option>
-          <option value="4">Black plastic</option>
-          <option value="5">Black rubber</option>
-          <option value="6">Brass</option>
-          <option value="7">Dull bronze</option>
-          <option value="8">Shiny bronze</option>
-          <option value="9">Chrome</option>
-          <option value="10">Dull copper</option>
-          <option value="11">Shiny copper</option>
-          <option value="12">Dull gold</option>
-          <option value="13">Shiny gold</option>
-          <option value="14">Pewter</option>
-          <option value="15">Dull silver</option>
-          <option value="16">Shiny silver</option>
-          <option value="17">Emerald</option>
-          <option value="18">Jade</option>
-          <option value="19">Obsidian</option>
-          <option value="21">Ruby</option>
-          <option value="22">Turquoise</option>
-        </select>
-
-
-        &#160 &#160 &#160 &#160 &#160   Tree Material: 
+          />&#160 &#160 &#160
+        </td>
+        <td>
+        Tree Material: 
+      </td>
+      <td>
         <select name="Treematerials" id="Treematerials">
           <option value="2">Green plastic</option>
           <option value="1">Red plastic</option>
@@ -133,8 +173,25 @@
           <option value="21">Ruby</option>
           <option value="22">Turquoise</option>
         </select>
-
-        &#160 &#160 &#160 &#160 &#160   Flower Material: 
+        </td>
+        <td>
+        &#160 &#160 &#160 &#160 &#160 &#160 &#160
+        Shininess: 
+        <input
+          type="range"
+          onkeydown="return false;"
+          name="shininess"
+          id="shiny4"
+          min="1"
+          max="128"
+          value="10"
+          class="slider"
+        />&#160 &#160 &#160
+      </td>
+      <td>
+        Flower Material: 
+      </td>
+      <td>
         <select name="materials" id="materials">
           <option value="6">Brass</option>
           <option value="1">Red plastic</option>
@@ -159,10 +216,14 @@
           <option value="21">Ruby</option>
           <option value="22">Turquoise</option>
         </select>
-
+        </td>
+        </tr></table>
+        <button type="button" onclick="resetShiny()">Reset</button>
         </p>
       </details>
       <hr>
+
+
       <details class="menu" open>
         <summary>
         <b>
@@ -207,9 +268,9 @@
         <table>
           <tr>
             <td>Position:&#160</td> 
-            <td>X: <input type="text" id="posX" value="0.0" /></td>
-            <td>Y: <input type="text" id="posY" value="0.0" /></td>
-            <td>Z: <input type="text" id="posZ" value="10.0" /></td>
+            <td>X: <input type="text" id="posX" value="7.0" /></td>
+            <td>Y: <input type="text" id="posY" value="6.0" /></td>
+            <td>Z: <input type="text" id="posZ" value="5.0" /></td>
             <td><button type="button" onclick="resetLightPos()">Reset</button></td>
           </tr>
         </table>

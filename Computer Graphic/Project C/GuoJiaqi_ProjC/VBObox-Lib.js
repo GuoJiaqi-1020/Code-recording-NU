@@ -1,7 +1,36 @@
 
 const floatsPerVertex = 6;
 
-// ! Shape vertices
+// *************************Useful Function************************** */
+
+function setMvpMatrix(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc){
+  NormalMatrix.setInverseOf(ModelMatrix);
+  MvpMatrix.set(g_worldMat).multiply(ModelMatrix);
+  NormalMatrix.transpose();
+  gl.uniformMatrix4fv(u_NormalMatrixLoc, false, NormalMatrix.elements);
+  gl.uniformMatrix4fv(u_MvpMatrixLoc, false, MvpMatrix.elements)
+}
+
+function set_material(gl, g_currMaterial, mat, g_shiny){
+  mat.setMatl(parseInt(g_currMaterial));
+  gl.uniform3fv(mat.uLoc_Ke, mat.K_emit.slice(0,3)); 
+  gl.uniform3fv(mat.uLoc_Ka, mat.K_ambi.slice(0,3)); 
+  gl.uniform3fv(mat.uLoc_Kd, mat.K_diff.slice(0,3));
+  gl.uniform3fv(mat.uLoc_Ks, mat.K_spec.slice(0,3));
+  gl.uniform1i(mat.uLoc_Kshiny, parseInt(g_shiny, 10)); 
+}
+
+function getSurfNorm(a, b, c) {
+  var bSubA = b.sub(a);
+  var cSubA = c.sub(a);
+  var ans = new Vector3();
+  ans = bSubA.cross(cSubA);
+  ans = ans.normalize();
+
+  return ans.elements;
+}
+
+// *************************Shape vertices************************** */
 function makeGroundGrid() {
 
     var xcount = 100;			// # of lines to draw in x,y to make the grid.
@@ -54,6 +83,496 @@ function makeGroundGrid() {
     }
   }
 
+function makeCube() {
+  // +y
+  var frontNorm = new Float32Array(getSurfNorm(new Vector3([-1.0,  1.0, -1.0]),
+                                              new Vector3([-1.0,  1.0,  1.0]),
+                                              new Vector3([1.0,  1.0,  1.0])));
+  // +x
+  var rightNorm = new Float32Array(getSurfNorm(new Vector3([1.0, -1.0, -1.0]),
+                                              new Vector3([1.0,  1.0, -1.0]),
+                                              new Vector3([1.0,  1.0,  1.0])));
+  // -y
+  var backNorm = new Float32Array(getSurfNorm(new Vector3([1.0, -1.0, -1.0]),
+                                              new Vector3([1.0, -1.0,  1.0]),
+                                              new Vector3([-1.0, -1.0,  1.0])));
+  // -x
+  var leftNorm = new Float32Array(getSurfNorm(new Vector3([-1.0, -1.0,  1.0]),
+                                              new Vector3([-1.0,  1.0,  1.0]),
+                                              new Vector3([-1.0,  1.0, -1.0])));
+  // +z
+  var upperNorm = new Float32Array(getSurfNorm(new Vector3([-1.0,  1.0,  1.0]),
+                                              new Vector3([-1.0, -1.0,  1.0]),
+                                              new Vector3([1.0, -1.0,  1.0])));
+                                        
+  var downNorm = new Float32Array(getSurfNorm(new Vector3([1.0,  1.0, -1.0]),
+                                              new Vector3([1.0, -1.0, -1.0,]),
+                                              new Vector3([-1.0, -1.0, -1.0])));
+                      
+  //=============================   30   ================================
+  cube_v = new Float32Array([
+      // +x face:
+      1.0, -1.0, -1.0, 	  rightNorm[0],  rightNorm[1],  rightNorm[2],	// Node 3
+      1.0,  1.0, -1.0, 	  rightNorm[0],  rightNorm[1],  rightNorm[2],	// Node 2
+      1.0,  1.0,  1.0, 	  rightNorm[0],  rightNorm[1],  rightNorm[2],  // Node 4
+      
+      1.0,  1.0,  1.0, 	  rightNorm[0],  rightNorm[1],  rightNorm[2],	// Node 4
+      1.0, -1.0,  1.0, 	  rightNorm[0],  rightNorm[1],  rightNorm[2],	// Node 7
+      1.0, -1.0, -1.0, 	  rightNorm[0],  rightNorm[1],  rightNorm[2],	// Node 3
+    
+      // +y face:
+      -1.0,  1.0, -1.0, 	  frontNorm[0],  frontNorm[1],  frontNorm[2],	// Node 1
+      -1.0,  1.0,  1.0, 	  frontNorm[0],  frontNorm[1],  frontNorm[2],	// Node 5
+      1.0,  1.0,  1.0, 	    frontNorm[0],  frontNorm[1],  frontNorm[2],	// Node 4
+    
+      1.0,  1.0,  1.0, 	  frontNorm[0],  frontNorm[1],  frontNorm[2],	// Node 4
+      1.0,  1.0, -1.0, 	  frontNorm[0],  frontNorm[1],  frontNorm[2],	// Node 2 
+      -1.0,  1.0, -1.0,	  frontNorm[0],  frontNorm[1],  frontNorm[2],	// Node 1
+    
+      // +z face: 
+      -1.0,  1.0,  1.0, 	  upperNorm[0],  upperNorm[1],  upperNorm[2],	// Node 5
+      -1.0, -1.0,  1.0, 	  upperNorm[0],  upperNorm[1],  upperNorm[2],	// Node 6
+      1.0, -1.0,  1.0,  	  upperNorm[0],  upperNorm[1],  upperNorm[2],	// Node 7
+    
+      1.0, -1.0,  1.0, 	  upperNorm[0],  upperNorm[1],  upperNorm[2],	// Node 7
+      1.0,  1.0,  1.0, 	  upperNorm[0],  upperNorm[1],  upperNorm[2],	// Node 4
+      -1.0,  1.0,  1.0,	  upperNorm[0],  upperNorm[1],  upperNorm[2],	// Node 5
+    
+      // -x face: 
+      -1.0, -1.0,  1.0, 	  leftNorm[0],  leftNorm[1],  leftNorm[2],	// Node 6	
+      -1.0,  1.0,  1.0, 	  leftNorm[0],  leftNorm[1],  leftNorm[2],	// Node 5 
+      -1.0,  1.0, -1.0, 	  leftNorm[0],  leftNorm[1],  leftNorm[2],	// Node 1
+      
+      -1.0,  1.0, -1.0, 	  leftNorm[0],  leftNorm[1],  leftNorm[2],	// Node 1
+      -1.0, -1.0, -1.0,	    leftNorm[0],  leftNorm[1],  leftNorm[2],	// Node 0  
+      -1.0, -1.0,  1.0, 	  leftNorm[0],  leftNorm[1],  leftNorm[2],	// Node 6  
+      
+      // -y face: 
+      1.0, -1.0, -1.0, 	  backNorm[0],  backNorm[1],  backNorm[2],	// Node 3
+      1.0, -1.0,  1.0, 	  backNorm[0],  backNorm[1],  backNorm[2],	// Node 7
+      -1.0, -1.0,  1.0, 	 backNorm[0],  backNorm[1],  backNorm[2],	// Node 6
+    
+      -1.0, -1.0,  1.0, 	  backNorm[0],  backNorm[1],  backNorm[2],	// Node 6
+      -1.0, -1.0, -1.0, 	  backNorm[0],  backNorm[1],  backNorm[2],	// Node 0
+      1.0, -1.0, -1.0, 	  backNorm[0],  backNorm[1],  backNorm[2],	// Node 3
+    
+      // -z face: 
+      1.0,  1.0, -1.0, 	  downNorm[0],  downNorm[1],  downNorm[2],	// Node 2
+      1.0, -1.0, -1.0, 	  downNorm[0],  downNorm[1],  downNorm[2],	// Node 3
+      -1.0, -1.0, -1.0, 	  downNorm[0],  downNorm[1],  downNorm[2],	// Node 0		
+    
+      -1.0, -1.0, -1.0, 	  downNorm[0],  downNorm[1],  downNorm[2],	// Node 0
+      -1.0,  1.0, -1.0,	  downNorm[0],  downNorm[1],  downNorm[2],	// Node 1
+      1.0,  1.0, -1.0, 	  downNorm[0],  downNorm[1],  downNorm[2],
+    ]);
+}
+
+function makeConcaveHex() {
+    //==============================================================================
+      const s30 = 0.5;										 // == sin(30deg) == 1 / 2
+      const c30 = Math.sqrt(3.0)/2.0;			 // == cos(30deg) == sqrt(3) / 2
+    
+      // ! THIS IS A TERRIBLE WAY TO DO THIS!! I will make it better in the future, I'm just short on time.
+      
+      var fNorm = new Float32Array(getSurfNorm(new Vector3([-0.1, 0.1, 0.5]),
+                                                new Vector3([0.0, -0.1, 0.5]),
+                                                new Vector3([0.1,  0.1, 0.5])));
+    
+      var bNorm = new Float32Array(getSurfNorm(new Vector3([-0.1, 0.1, 0.0]),
+                                                new Vector3([0.0, -0.1, 0.0]),
+                                                new Vector3([0.1,  0.1, 0.0])));             
+    // ? ----------------------------------------------------------------------
+      var ftpNorm = new Float32Array(getSurfNorm(new Vector3([-0.1, 0.1, 0.5]),
+                                                  new Vector3([0.1,  0.1, 0.5]),
+                                                  new Vector3([0.0,  1.0, 0.25])));
+    
+      var ltpNorm = new Float32Array(getSurfNorm(new Vector3([-0.1, 0.1, 0.5]),
+                                                  new Vector3([-0.1, 0.1, 0.0]),
+                                                  new Vector3([0.0,  1.0, 0.25])));
+    
+      var btpNorm = new Float32Array(getSurfNorm(new Vector3([-0.1, 0.1, 0.0]),
+                                                  new Vector3([0.1,  0.1, 0.0]),
+                                                  new Vector3([0.0,  1.0, 0.25])));
+    
+      var rtpNorm = new Float32Array(getSurfNorm(new Vector3([0.1, 0.1, 0.5]),
+                                                  new Vector3([0.1, 0.1, 0.0]),
+                                                  new Vector3([0.0, 1.0, 0.25])));
+    // ? ----------------------------------------------------------------------
+      var flpNorm = new Float32Array(getSurfNorm(new Vector3([-0.1, 0.1, 0.5]),
+                                                  new Vector3([0.0, -0.1, 0.5]),
+                                                  new Vector3([-c30, -s30, 0.25]),));
+    
+      var llpNorm = new Float32Array(getSurfNorm(new Vector3([-0.1, 0.1, 0.5]),
+                                                  new Vector3([-0.1,  0.1, 0.0]),
+                                                  new Vector3([-c30, -s30, 0.25])));
+    
+      var blpNorm = new Float32Array(getSurfNorm(new Vector3([-0.1, 0.1, 0.0]),
+                                                  new Vector3([0.0, -0.1, 0.0]),
+                                                  new Vector3([-c30, -s30, 0.25])));
+    
+      var rlpNorm = new Float32Array(getSurfNorm(new Vector3([0.0, -0.1, 0.5]),
+                                                  new Vector3([0.0, -0.1, 0.0]),
+                                                  new Vector3([-c30, -s30, 0.25])));
+    // ? ----------------------------------------------------------------------
+      var frpNorm = new Float32Array(getSurfNorm(new Vector3([0.0, -0.1, 0.5]),
+                                                  new Vector3([0.1,  0.1, 0.5]),
+                                                  new Vector3([c30,  -s30, 0.25])));
+    
+      var lrpNorm = new Float32Array(getSurfNorm(new Vector3([0.0, -0.1, 0.5]),
+                                                  new Vector3([0.0, -0.1, 0.0]),
+                                                  new Vector3([c30,  -s30, 0.25])));
+    
+      var brpNorm = new Float32Array(getSurfNorm(new Vector3([0.0, -0.1, 0.0]),
+                                                  new Vector3([0.1, 0.1, 0.0]),
+                                                  new Vector3([c30,  -s30, 0.25])));
+    
+      var rrpNorm = new Float32Array(getSurfNorm(new Vector3([0.1, 0.1, 0.5]),
+                                                  new Vector3([0.1, 0.1, 0.0]),
+                                                  new Vector3([c30, -s30, 0.25])));
+    
+    
+      concaveHexVerts = new Float32Array([
+        //! --------------------- 3D Concave Hexagon ----------------------
+        /*
+          Nodes:
+          * Front Facing Triangle
+          -0.1,  0.1,  0.5,  1.0,    1.0,  0.0,  0.0,  // Node 0 RED
+            0.0, -0.1,  0.5,  1.0,    1.0,  1.0,  1.0,  // Node 1 WHITE
+            0.1,  0.1,  0.5,  1.0,    0.0,  0.0,  1.0,  // Node 2 BLUE
+          * Back Facing Triangle
+          -0.1,  0.1,  0.0,  1.0,    1.0,  0.0,  0.0,  // Node 3 RED
+            0.0, -0.1,  0.0,  1.0,    1.0,  1.0,  1.0,  // Node 4 WHITE
+            0.1,  0.1,  0.0,  1.0,    0.0,  0.0,  1.0,  // Node 5 BLUE
+          * Points of Star
+            0.0,  1.0,  0.25, 1.0,    1.0,  0.0,  0.0,  // Node 6 RED
+          -c30, -s30,  0.25, 1.0,    1.0,  1.0,  1.0,  // Node 7 WHITE
+            c30, -s30,  0.25, 1.0,    0.0,  0.0,  1.0,  // Node 8 BLUE 
+        */
+        // * Front
+          -0.1,  0.1,  0.5,     fNorm[0],  fNorm[1],  fNorm[2],  // Node 0 RED
+            0.0, -0.1,  0.5,     fNorm[0],  fNorm[1],  fNorm[2],  // Node 1 WHITE
+            0.1,  0.1,  0.5,     fNorm[0],  fNorm[1],  fNorm[2],  // Node 2 BLUE
+        // * Back
+          -0.1,  0.1,  0.0,     bNorm[0],  bNorm[1],  bNorm[2],  // Node 3 RED
+            0.0, -0.1,  0.0,     bNorm[0],  bNorm[1],  bNorm[2],  // Node 4 WHITE
+            0.1,  0.1,  0.0,     bNorm[0],  bNorm[1],  bNorm[2],  // Node 5 BLUE
+        // ! ------------------- Top Point -------------------------
+        // * Front Top Point Face
+          -0.1,  0.1,  0.5,     ftpNorm[0],  ftpNorm[1],  ftpNorm[2],  // Node 0 RED
+            0.1,  0.1,  0.5,     ftpNorm[0],  ftpNorm[1],  ftpNorm[2],  // Node 2 BLUE
+            0.0,  1.0,  0.25,    ftpNorm[0],  ftpNorm[1],  ftpNorm[2],  // Node 6 RED
+        // * Left Top Point Face
+          -0.1,  0.1,  0.5,     ltpNorm[0],  ltpNorm[1],  ltpNorm[2],  // Node 0 RED
+          -0.1,  0.1,  0.0,     ltpNorm[0],  ltpNorm[1],  ltpNorm[2],  // Node 3 RED
+            0.0,  1.0,  0.25,    ltpNorm[0],  ltpNorm[1],  ltpNorm[2],  // Node 6 RED
+        // * Back Top Point Face
+          -0.1,  0.1,  0.0,     btpNorm[0],  btpNorm[1],  btpNorm[2],  // Node 3 RED
+            0.1,  0.1,  0.0,     btpNorm[0],  btpNorm[1],  btpNorm[2],  // Node 5 BLUE
+            0.0,  1.0,  0.25,    btpNorm[0],  btpNorm[1],  btpNorm[2],  // Node 6 RED
+        // * Right Top Point Face
+            0.1,  0.1,  0.5,     rtpNorm[0],  rtpNorm[1],  rtpNorm[2],  // Node 2 BLUE
+            0.1,  0.1,  0.0,     rtpNorm[0],  rtpNorm[1],  rtpNorm[2],  // Node 5 BLUE
+            0.0,  1.0,  0.25,    rtpNorm[0],  rtpNorm[1],  rtpNorm[2],  // Node 6 RED
+        // ! ------------------- Left Point -------------------------
+        // * Front Left Point Face
+          -0.1,  0.1,  0.5,     flpNorm[0],  flpNorm[1],  flpNorm[2],  // Node 0 RED
+            0.0, -0.1,  0.5,     flpNorm[0],  flpNorm[1],  flpNorm[2],  // Node 1 WHITE
+          -c30, -s30,  0.25,    flpNorm[0],  flpNorm[1],  flpNorm[2],  // Node 7 WHITE
+        // * Left Left Point Face
+          -0.1,  0.1,  0.5,     llpNorm[0],  llpNorm[1],  llpNorm[2],  // Node 0 RED
+          -0.1,  0.1,  0.0,     llpNorm[0],  llpNorm[1],  llpNorm[2],  // Node 3 RED
+          -c30, -s30,  0.25,    llpNorm[0],  llpNorm[1],  llpNorm[2],  // Node 7 WHITE
+        // * Back Left Point Face
+          -0.1,  0.1,  0.0,     blpNorm[0],  blpNorm[1],  blpNorm[2],  // Node 3 RED
+            0.0, -0.1,  0.0,     blpNorm[0],  blpNorm[1],  blpNorm[2],  // Node 4 WHITE
+          -c30, -s30,  0.25,    blpNorm[0],  blpNorm[1],  blpNorm[2],  // Node 7 WHITE
+        // * Right Left Point Face
+            0.0, -0.1,  0.5,     rlpNorm[0],  rlpNorm[1],  rlpNorm[2],  // Node 1 WHITE
+            0.0, -0.1,  0.0,     rlpNorm[0],  rlpNorm[1],  rlpNorm[2],  // Node 4 WHITE
+          -c30, -s30,  0.25,    rlpNorm[0],  rlpNorm[1],  rlpNorm[2],  // Node 7 WHITE
+        // ! -------------------- Right Point ------------------------
+        // * Front Right Point Face 
+          0.0, -0.1,  0.5,     frpNorm[0],  frpNorm[1],  frpNorm[2],  // Node 1 WHITE
+          0.1,  0.1,  0.5,     frpNorm[0],  frpNorm[1],  frpNorm[2],  // Node 2 BLUE
+          c30, -s30,  0.25,    frpNorm[0],  frpNorm[1],  frpNorm[2],  // Node 8 BLUE
+        // * Left Right Point Face
+          0.0, -0.1,  0.5,     lrpNorm[0],  lrpNorm[1],  lrpNorm[2],  // Node 1 WHITE
+          0.0, -0.1,  0.0,     lrpNorm[0],  lrpNorm[1],  lrpNorm[2],  // Node 4 WHITE
+          c30, -s30,  0.25,    lrpNorm[0],  lrpNorm[1],  lrpNorm[2],  // Node 8 BLUE
+        // * Back Right Point Face
+          0.0, -0.1,  0.0,     brpNorm[0],  brpNorm[1],  brpNorm[2],  // Node 4 WHITE
+          0.1,  0.1,  0.0,     brpNorm[0],  brpNorm[1],  brpNorm[2],  // Node 5 BLUE
+          c30, -s30,  0.25,    brpNorm[0],  brpNorm[1],  brpNorm[2],  // Node 8 BLUE
+        // * Right Right Point Face
+          0.1,  0.1,  0.5,     rrpNorm[0],  rrpNorm[1],  rrpNorm[2],  // Node 2 BLUE
+          0.1,  0.1,  0.0,     rrpNorm[0],  rrpNorm[1],  rrpNorm[2], // Node 5 BLUE
+          c30, -s30,  0.25,    rrpNorm[0],  rrpNorm[1],  rrpNorm[2],  // Node 8 BLUE 
+          ]);
+}
+
+function makePyramid() {
+    var frontNorm = new Float32Array(getSurfNorm(new Vector3([0.0, 0.0, 0.0]),
+                                                  new Vector3([1.0, 0.0, 0.0]),
+                                                  new Vector3([0.5, 1.0, -0.5])));
+                                                      
+    var rightNorm = new Float32Array(getSurfNorm(new Vector3([1.0, 0.0, 0.0]),
+                                                  new Vector3([1.0, 0.0, -1.0]),
+                                                  new Vector3([0.5, 1.0, -0.5])));
+
+    var backNorm = new Float32Array(getSurfNorm(new Vector3([1.0, 0.0, -1.0]),
+                                                new Vector3([0.0, 0.0, -1.0]),
+                                                new Vector3([0.5, 1.0, -0.5])));
+
+    var leftNorm = new Float32Array(getSurfNorm(new Vector3([0.0, 0.0, -1.0]),
+                                                new Vector3([0.0, 0.0, 0.0]),
+                                                new Vector3([0.5, 1.0, -0.5])));
+  
+    pyrVerts = new Float32Array([
+      //! ------------------------ Pyramid ------------------------
+
+      //* Bottom Face
+      0.0,  0.0,  0.0,    0.0,  0.0,  -1.0, // Node 0 GREEN
+      0.0,  0.0, -1.0,    0.0,  0.0,  -1.0, // Node 1 RED
+      1.0,  0.0, -1.0,    0.0,  0.0,  -1.0, // Node 2 BLUE
+      0.0,  0.0,  0.0,    0.0,  0.0,  -1.0, // Node 0 GREEN
+      1.0,  0.0, -1.0,    0.0,  0.0,  -1.0, // Node 2 BLUE
+      1.0,  0.0,  0.0,    0.0,  0.0,  -1.0, // Node 3 MAGENTA
+      //* Front Face
+      0.0,  0.0,  0.0,    frontNorm[0],  frontNorm[1],  frontNorm[2], // Node 3 MAGENTA
+      1.0,  0.0,  0.0,    frontNorm[0],  frontNorm[1],  frontNorm[2], // Node 0 GREEN
+      0.5,  1.0, -0.5,    frontNorm[0],  frontNorm[1],  frontNorm[2], // Node 4 CYAN
+      //* Right Face
+      1.0,  0.0,  0.0,    rightNorm[0],  rightNorm[1],  rightNorm[2], // Node 0 GREEN
+      1.0,  0.0, -1.0,    rightNorm[0],  rightNorm[1],  rightNorm[2], // Node 3 MAGENTA
+      0.5,  1.0, -0.5,    rightNorm[0],  rightNorm[1],  rightNorm[2], // Node 4 CYAN
+      //* Back Face
+      1.0,  0.0, -1.0,    backNorm[0],  backNorm[1],  backNorm[2], // Node 0 GREEN
+      0.0,  0.0, -1.0,    backNorm[0],  backNorm[1],  backNorm[2], // Node 3 MAGENTA
+      0.5,  1.0, -0.5,    backNorm[0],  backNorm[1],  backNorm[2], // Node 4 CYAN
+      //* Left Face
+      0.0,  0.0, -1.0,    leftNorm[0],  leftNorm[1],  leftNorm[2], // Node 0 GREEN
+      0.0,  0.0,  0.0,    leftNorm[0],  leftNorm[1],  leftNorm[2], // Node 3 MAGENTA
+      0.5,  1.0, -0.5,    leftNorm[0],  leftNorm[1],  leftNorm[2],
+    ]);
+}
+
+function makeSphere() {
+  var slices = 15;		// # of slices of the sphere along the z axis. >=3 req'd
+  var sliceVerts = 25;	// # of vertices around the top edge of the slice
+  var sliceAngle = Math.PI / slices;	// lattitude angle spanned by one slice.
+  sphVerts = new Float32Array(((slices * 2 * sliceVerts) - 2) * floatsPerVertex);
+  var cos0 = 0.0;					// sines,cosines of slice's top, bottom edge.
+  var sin0 = 0.0;
+  var cos1 = 0.0;
+  var sin1 = 0.0;
+  var j = 0;							// initialize our array index
+  var isLast = 0;
+  var isFirst = 1;
+  for (s = 0; s < slices; s++) {	// for each slice of the sphere,
+      // find sines & cosines for top and bottom of this slice
+      if (s == 0) {
+          isFirst = 1;	// skip 1st vertex of 1st slice.
+          cos0 = 1.0; 	// initialize: start at north pole.
+          sin0 = 0.0;
+      }
+      else {					// otherwise, new top edge == old bottom edge
+          isFirst = 0;
+          cos0 = cos1;
+          sin0 = sin1;
+      }								// & compute sine,cosine for new bottom edge.
+      cos1 = Math.cos((s + 1) * sliceAngle);
+      sin1 = Math.sin((s + 1) * sliceAngle);
+      if (s == slices - 1) isLast = 1;	// skip last vertex of last slice.
+      for (v = isFirst; v < 2 * sliceVerts - isLast; v++, j += floatsPerVertex) {
+          if (v % 2 == 0) {				// put even# vertices at the the slice's top edge
+              sphVerts[j] = sin0 * Math.cos(Math.PI * (v) / sliceVerts);
+              sphVerts[j + 1] = sin0 * Math.sin(Math.PI * (v) / sliceVerts);
+              sphVerts[j + 2] = cos0;
+          }
+          else { 
+              sphVerts[j] = sin1 * Math.cos(Math.PI * (v - 1) / sliceVerts);		// x
+              sphVerts[j + 1] = sin1 * Math.sin(Math.PI * (v - 1) / sliceVerts);		// y
+              sphVerts[j + 2] = cos1;			
+          }
+          if (s == 0) {	// finally, set some interesting colors for vertices:
+
+              sphVerts[j + 3] = sin1 * Math.cos(Math.PI * (v - 1) / sliceVerts);
+              sphVerts[j + 4] = sin1 * Math.sin(Math.PI * (v - 1) / sliceVerts);
+              sphVerts[j + 5] = cos1;
+          }
+          else if (s == slices - 1) {
+              sphVerts[j + 3] = sin1 * Math.cos(Math.PI * (v - 1) / sliceVerts);
+              sphVerts[j + 4] = sin1 * Math.sin(Math.PI * (v - 1) / sliceVerts);
+              sphVerts[j + 5] = cos1;
+          }
+          else {
+              sphVerts[j + 3] = sin1 * Math.cos(Math.PI * (v - 1) / sliceVerts);
+              sphVerts[j + 4] = sin1 * Math.sin(Math.PI * (v - 1) / sliceVerts);
+              sphVerts[j + 5] = cos1;
+          }
+
+      }
+  }
+}
+
+//*******************************Draw 3D Object************************************* */
+
+function drawSphere(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc){
+  setMvpMatrix(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)								
+  gl.drawArrays(gl.TRIANGLE_STRIP, sphStart / floatsPerVertex, sphVerts.length / floatsPerVertex);
+}
+
+function drawTree(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix,u_NormalMatrixLoc){
+  ModelMatrix.setIdentity(); 
+  MvpMatrix.setIdentity();
+  ModelMatrix.translate(-2, 2.0, 0.0);
+  ModelMatrix.scale(0.2, 0.2, 0.2);
+  setMvpMatrix(gl,	MvpMatrix, 	ModelMatrix, g_worldMat, 	u_MvpMatrixLoc, 	NormalMatrix, 	u_NormalMatrixLoc)	
+  gl.drawArrays(gl.TRIANGLES, 
+    cube_vStart/floatsPerVertex, 
+    cube_v.length/floatsPerVertex);
+  ModelMatrix.translate(0, 0, 2);
+  setMvpMatrix(gl,	MvpMatrix, 	ModelMatrix, g_worldMat, 	u_MvpMatrixLoc, 	NormalMatrix, 	u_NormalMatrixLoc)							
+  gl.drawArrays(gl.TRIANGLES, 
+    cube_vStart/floatsPerVertex, 
+    cube_v.length/floatsPerVertex);
+  ModelMatrix.translate(0, 0, 2);
+  setMvpMatrix(gl,	MvpMatrix, 	ModelMatrix, g_worldMat, 	u_MvpMatrixLoc, 	NormalMatrix, 	u_NormalMatrixLoc)								
+  gl.drawArrays(gl.TRIANGLES, 
+  cube_vStart/floatsPerVertex, 
+  cube_v.length/floatsPerVertex);
+  ModelMatrix.setIdentity();
+  ModelMatrix.translate(-2.5, 1.5, 0.7);
+  ModelMatrix.rotate(g_angle03, 1, 0, 0);
+  MvpMatrix.setIdentity();
+  pushMatrix(	ModelMatrix);
+  	ModelMatrix.rotate(90, 1, 0, 0);
+  setMvpMatrix(gl,	MvpMatrix, 	ModelMatrix, g_worldMat, 	u_MvpMatrixLoc, 	NormalMatrix, 	u_NormalMatrixLoc)								
+  gl.drawArrays(gl.TRIANGLES, 
+  pyrStart/floatsPerVertex, 
+  pyrVerts.length/floatsPerVertex);
+
+  ModelMatrix = popMatrix();
+  ModelMatrix.translate(0, 0, 0.7);
+  ModelMatrix.scale(0.85, 0.85, 0.85);
+  ModelMatrix.rotate(g_angle03, 1, 0, 0);
+  pushMatrix(	ModelMatrix);
+  ModelMatrix.rotate(90, 1, 0, 0);
+  setMvpMatrix(gl,	MvpMatrix, 	ModelMatrix, g_worldMat, 	u_MvpMatrixLoc, 	NormalMatrix, 	u_NormalMatrixLoc)								
+  gl.drawArrays(gl.TRIANGLES, 
+  pyrStart/floatsPerVertex, 
+  pyrVerts.length/floatsPerVertex);
+
+  ModelMatrix = popMatrix();
+  ModelMatrix.translate(0, 0, 0.68);
+  ModelMatrix.scale(0.8, 0.8, 0.8);
+  ModelMatrix.rotate(g_angle05, 1, 0, 0);
+  pushMatrix(	ModelMatrix);
+  ModelMatrix.rotate(90, 1, 0, 0);
+  setMvpMatrix(gl,	MvpMatrix, 	ModelMatrix, g_worldMat, 	u_MvpMatrixLoc, 	NormalMatrix, 	u_NormalMatrixLoc)								
+  gl.drawArrays(gl.TRIANGLES, 
+    pyrStart/floatsPerVertex, 
+    pyrVerts.length/floatsPerVertex);
+}
+
+function drawFlower(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix,u_NormalMatrixLoc){
+  ModelMatrix.setIdentity();
+  MvpMatrix.setIdentity();
+  ModelMatrix.translate(2.5, 1.5, 1);
+  ModelMatrix.rotate(g_angle03, 1, 0, 0);
+  ModelMatrix.rotate(180, 0, 1, 0);
+  ModelMatrix.scale(0.5, 0.5, 0.5);
+  pushMatrix(ModelMatrix);
+  ModelMatrix.rotate(90, 1, 0, 0);
+  setMvpMatrix(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)								
+  gl.drawArrays(gl.TRIANGLES, concaveHexStart/floatsPerVertex, concaveHexVerts.length/floatsPerVertex);
+  
+  ModelMatrix = popMatrix();
+  pushMatrix(ModelMatrix);
+  ModelMatrix.translate(0, -0.25, -0.6);
+  ModelMatrix.scale(0.3,0.3,0.3)
+  drawSphere(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)
+
+  ModelMatrix = popMatrix();
+  ModelMatrix.translate(0, 0, 0.7);
+  ModelMatrix.scale(0.85, 0.85, 0.85);
+  ModelMatrix.rotate(g_angle03, 1, 0, 0);
+  pushMatrix(ModelMatrix);
+  ModelMatrix.rotate(90, 1, 0, 0);
+  setMvpMatrix(gl, MvpMatrix, ModelMatrix, g_worldMat, 	u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)								
+  gl.drawArrays(gl.TRIANGLES, concaveHexStart/floatsPerVertex, concaveHexVerts.length/floatsPerVertex);
+
+  ModelMatrix = popMatrix();
+  ModelMatrix.translate(0, 0, 0.68);
+  ModelMatrix.scale(0.8, 0.8, 0.8);
+  ModelMatrix.rotate(g_angle05, 1, 0, 0);
+  pushMatrix(ModelMatrix);
+  ModelMatrix.rotate(90, 1, 0, 0);
+  setMvpMatrix(gl, MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)								
+  gl.drawArrays(gl.TRIANGLES, concaveHexStart/floatsPerVertex, concaveHexVerts.length/floatsPerVertex);
+}
+
+function drawAlienfish(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix,u_NormalMatrixLoc){
+  stack = []
+  ModelMatrix.setIdentity();
+  MvpMatrix.setIdentity()
+  ModelMatrix.rotate(45, 1, 1, 0);
+  ModelMatrix.translate(-2.6, -1.5, 1);
+  ModelMatrix.scale(0.4, 0.4, 0.4);
+  pushMatrix(ModelMatrix);
+
+  ModelMatrix = popMatrix();
+  pushMatrix(ModelMatrix);
+  ModelMatrix.rotate(g_angleNow1, 0, 0, 1);
+  setMvpMatrix(gl, MvpMatrix, 	ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)	
+  gl.drawArrays(gl.TRIANGLES, 
+    cube_vStart/floatsPerVertex, 
+    cube_v.length/floatsPerVertex);
+  ModelMatrix.translate(0, 0, 2);
+  setMvpMatrix(gl, MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)							
+  gl.drawArrays(gl.TRIANGLES, 
+    cube_vStart/floatsPerVertex, 
+    cube_v.length/floatsPerVertex);
+  ModelMatrix.translate(0, 0, 1.6);
+  setMvpMatrix(gl, MvpMatrix, 	ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)								
+  drawSphere(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)
+  stack.push(new Matrix4(ModelMatrix))
+  ModelMatrix.translate(0, 0.9, 0.4);
+  ModelMatrix.scale(0.25, 0.25, 0.25);
+  drawSphere(gl, MvpMatrix, ModelMatrix, g_worldMat,	u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)
+  ModelMatrix = stack.pop();
+  stack.push(new Matrix4(ModelMatrix));
+  ModelMatrix.translate(0, -0.9, 0.4);
+  ModelMatrix.scale(0.25, 0.25, 0.25);
+  drawSphere(gl, MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)
+  ModelMatrix = popMatrix();
+  ModelMatrix.translate(0, 0.3, -1.7);
+  ModelMatrix.scale(1.3, 1.3, 1.3);
+  pushMatrix(ModelMatrix);
+  ModelMatrix.rotate(90, 1, 0, 0);
+  setMvpMatrix(gl, MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)								
+  gl.drawArrays(gl.TRIANGLES, concaveHexStart/floatsPerVertex, concaveHexVerts.length/floatsPerVertex);
+  ModelMatrix = popMatrix();
+  ModelMatrix.scale(0.8, 0.8, 0.8);
+  ModelMatrix.translate(0, 0, -0.4);
+  ModelMatrix.rotate(g_angle05, 1, 0, 0);
+  ModelMatrix.translate(0, 0, -0.4);
+  pushMatrix(ModelMatrix);
+  ModelMatrix.rotate(90, 1, 0, 0);
+  setMvpMatrix(gl, MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)								
+  gl.drawArrays(gl.TRIANGLES, concaveHexStart/floatsPerVertex, concaveHexVerts.length/floatsPerVertex);
+  ModelMatrix = popMatrix();
+  ModelMatrix.translate(0, 0, -0.68);
+  ModelMatrix.scale(0.8, 0.8, 0.8);
+  ModelMatrix.rotate(g_angle05, 1, 0, 0);
+  pushMatrix(ModelMatrix);
+  ModelMatrix.rotate(90, 1, 0, 0);
+  setMvpMatrix(gl, MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)								
+  gl.drawArrays(gl.TRIANGLES, concaveHexStart/floatsPerVertex, concaveHexVerts.length/floatsPerVertex);
+}
+
+
+// ************************Define VBObox***************************
 function VBObox0() {
 	this.VERT_SRC =	//--------------------- VERTEX SHADER source code 
   'precision highp float;\n' +				// req'd in OpenGL ES if we use 'float'
@@ -78,20 +597,8 @@ function VBObox0() {
   this.vboContents = gndVerts;
 	this.vboVerts = this.vboContents.length / floatsPerVertex;						// # of vertices held in 'vboContents' array
 	this.FSIZE = this.vboContents.BYTES_PER_ELEMENT;
-	                              // bytes req'd by 1 vboContents array element;
-																// (why? used to compute stride and offset 
-																// in bytes for vertexAttribPointer() calls)
   this.vboBytes = this.vboContents.length * this.FSIZE;               
-                                // total number of bytes stored in vboContents
-                                // (#  of floats in vboContents array) * 
-                                // (# of bytes/float).
 	this.vboStride = this.vboBytes / this.vboVerts; 
-	                              // (== # of bytes to store one complete vertex).
-	                              // From any attrib in a given vertex in the VBO, 
-	                              // move forward by 'vboStride' bytes to arrive 
-	                              // at the same attrib for the next vertex. 
-
-	            //----------------------Attribute sizes
   this.vboFcount_a_Pos0 =  3;    // # of floats in the VBO needed to store the
                                 // attribute named a_Pos0. (4: x,y,z,w values)
   this.vboFcount_a_Colr0 = 3;   // # of floats for this attrib (r,g,b values) 
@@ -99,24 +606,12 @@ function VBObox0() {
                   this.vboFcount_a_Colr0) *   // every attribute in our VBO
                   this.FSIZE == this.vboStride, // for agreeement with'stride'
                   "Uh oh! VBObox0.vboStride disagrees with attribute-size values!");
-
-              //----------------------Attribute offsets  
 	this.vboOffset_a_Pos0 = 0;    // # of bytes from START of vbo to the START
-	                              // of 1st a_Pos0 attrib value in vboContents[]
   this.vboOffset_a_Colr0 = this.vboFcount_a_Pos0 * this.FSIZE;    
-                                // (4 floats * bytes/float) 
-                                // # of bytes from START of vbo to the START
-                                // of 1st a_Colr0 attrib value in vboContents[]
-	            //-----------------------GPU memory locations:
 	this.vboLoc;									// GPU Location for Vertex Buffer Object, 
-	                              // returned by gl.createBuffer() function call
 	this.shaderLoc;								// GPU Location for compiled Shader-program  
-	                            	// set by compile/link of VERT_SRC and FRAG_SRC.
-								          //------Attribute locations in our shaders:
 	this.a_PosLoc;								// GPU location for 'a_Pos0' attribute
 	this.a_ColrLoc;								// GPU location for 'a_Colr0' attribute
-
-	            //---------------------- Uniform locations &values in our shaders
 	this.ModelMat = new Matrix4();	// Transforms CVV axes to model axes.
 	this.u_ModelMatLoc;							// GPU location for u_ModelMat uniform
 }
@@ -257,518 +752,6 @@ VBObox0.prototype.reload = function() {
 
 }
 
-function makeConcaveHex() {
-//==============================================================================
-	const s30 = 0.5;										 // == sin(30deg) == 1 / 2
-  const c30 = Math.sqrt(3.0)/2.0;			 // == cos(30deg) == sqrt(3) / 2
-
-  // ! THIS IS A TERRIBLE WAY TO DO THIS!! I will make it better in the future, I'm just short on time.
-  
-  var fNorm = new Float32Array(getSurfNorm(new Vector3([-0.1, 0.1, 0.5]),
-                                           new Vector3([0.0, -0.1, 0.5]),
-                                           new Vector3([0.1,  0.1, 0.5])));
-
-  var bNorm = new Float32Array(getSurfNorm(new Vector3([-0.1, 0.1, 0.0]),
-                                           new Vector3([0.0, -0.1, 0.0]),
-                                           new Vector3([0.1,  0.1, 0.0])));             
-// ? ----------------------------------------------------------------------
-  var ftpNorm = new Float32Array(getSurfNorm(new Vector3([-0.1, 0.1, 0.5]),
-                                             new Vector3([0.1,  0.1, 0.5]),
-                                             new Vector3([0.0,  1.0, 0.25])));
-
-  var ltpNorm = new Float32Array(getSurfNorm(new Vector3([-0.1, 0.1, 0.5]),
-                                             new Vector3([-0.1, 0.1, 0.0]),
-                                             new Vector3([0.0,  1.0, 0.25])));
-
-  var btpNorm = new Float32Array(getSurfNorm(new Vector3([-0.1, 0.1, 0.0]),
-                                             new Vector3([0.1,  0.1, 0.0]),
-                                             new Vector3([0.0,  1.0, 0.25])));
-
-  var rtpNorm = new Float32Array(getSurfNorm(new Vector3([0.1, 0.1, 0.5]),
-                                             new Vector3([0.1, 0.1, 0.0]),
-                                             new Vector3([0.0, 1.0, 0.25])));
-// ? ----------------------------------------------------------------------
-  var flpNorm = new Float32Array(getSurfNorm(new Vector3([-0.1, 0.1, 0.5]),
-                                             new Vector3([0.0, -0.1, 0.5]),
-                                             new Vector3([-c30, -s30, 0.25]),));
-
-  var llpNorm = new Float32Array(getSurfNorm(new Vector3([-0.1, 0.1, 0.5]),
-                                             new Vector3([-0.1,  0.1, 0.0]),
-                                             new Vector3([-c30, -s30, 0.25])));
-
-  var blpNorm = new Float32Array(getSurfNorm(new Vector3([-0.1, 0.1, 0.0]),
-                                             new Vector3([0.0, -0.1, 0.0]),
-                                             new Vector3([-c30, -s30, 0.25])));
-
-  var rlpNorm = new Float32Array(getSurfNorm(new Vector3([0.0, -0.1, 0.5]),
-                                             new Vector3([0.0, -0.1, 0.0]),
-                                             new Vector3([-c30, -s30, 0.25])));
-// ? ----------------------------------------------------------------------
-  var frpNorm = new Float32Array(getSurfNorm(new Vector3([0.0, -0.1, 0.5]),
-                                             new Vector3([0.1,  0.1, 0.5]),
-                                             new Vector3([c30,  -s30, 0.25])));
-
-  var lrpNorm = new Float32Array(getSurfNorm(new Vector3([0.0, -0.1, 0.5]),
-                                             new Vector3([0.0, -0.1, 0.0]),
-                                             new Vector3([c30,  -s30, 0.25])));
-
-  var brpNorm = new Float32Array(getSurfNorm(new Vector3([0.0, -0.1, 0.0]),
-                                             new Vector3([0.1, 0.1, 0.0]),
-                                             new Vector3([c30,  -s30, 0.25])));
-
-  var rrpNorm = new Float32Array(getSurfNorm(new Vector3([0.1, 0.1, 0.5]),
-                                             new Vector3([0.1, 0.1, 0.0]),
-                                             new Vector3([c30, -s30, 0.25])));
-
-
-	concaveHexVerts = new Float32Array([
-		//! --------------------- 3D Concave Hexagon ----------------------
-		/*
-			Nodes:
-			* Front Facing Triangle
-			-0.1,  0.1,  0.5,  1.0,    1.0,  0.0,  0.0,  // Node 0 RED
-			 0.0, -0.1,  0.5,  1.0,    1.0,  1.0,  1.0,  // Node 1 WHITE
-			 0.1,  0.1,  0.5,  1.0,    0.0,  0.0,  1.0,  // Node 2 BLUE
-			* Back Facing Triangle
-			-0.1,  0.1,  0.0,  1.0,    1.0,  0.0,  0.0,  // Node 3 RED
-			 0.0, -0.1,  0.0,  1.0,    1.0,  1.0,  1.0,  // Node 4 WHITE
-			 0.1,  0.1,  0.0,  1.0,    0.0,  0.0,  1.0,  // Node 5 BLUE
-			* Points of Star
-			 0.0,  1.0,  0.25, 1.0,    1.0,  0.0,  0.0,  // Node 6 RED
-			-c30, -s30,  0.25, 1.0,    1.0,  1.0,  1.0,  // Node 7 WHITE
-			 c30, -s30,  0.25, 1.0,    0.0,  0.0,  1.0,  // Node 8 BLUE 
-		*/
-		// * Front
-			-0.1,  0.1,  0.5,     fNorm[0],  fNorm[1],  fNorm[2],  // Node 0 RED
-			 0.0, -0.1,  0.5,     fNorm[0],  fNorm[1],  fNorm[2],  // Node 1 WHITE
-			 0.1,  0.1,  0.5,     fNorm[0],  fNorm[1],  fNorm[2],  // Node 2 BLUE
-		// * Back
-			-0.1,  0.1,  0.0,     bNorm[0],  bNorm[1],  bNorm[2],  // Node 3 RED
-			 0.0, -0.1,  0.0,     bNorm[0],  bNorm[1],  bNorm[2],  // Node 4 WHITE
-			 0.1,  0.1,  0.0,     bNorm[0],  bNorm[1],  bNorm[2],  // Node 5 BLUE
-		// ! ------------------- Top Point -------------------------
-		// * Front Top Point Face
-			-0.1,  0.1,  0.5,     ftpNorm[0],  ftpNorm[1],  ftpNorm[2],  // Node 0 RED
-			 0.1,  0.1,  0.5,     ftpNorm[0],  ftpNorm[1],  ftpNorm[2],  // Node 2 BLUE
-			 0.0,  1.0,  0.25,    ftpNorm[0],  ftpNorm[1],  ftpNorm[2],  // Node 6 RED
-		// * Left Top Point Face
-			-0.1,  0.1,  0.5,     ltpNorm[0],  ltpNorm[1],  ltpNorm[2],  // Node 0 RED
-			-0.1,  0.1,  0.0,     ltpNorm[0],  ltpNorm[1],  ltpNorm[2],  // Node 3 RED
-			 0.0,  1.0,  0.25,    ltpNorm[0],  ltpNorm[1],  ltpNorm[2],  // Node 6 RED
-		// * Back Top Point Face
-			-0.1,  0.1,  0.0,     btpNorm[0],  btpNorm[1],  btpNorm[2],  // Node 3 RED
-			 0.1,  0.1,  0.0,     btpNorm[0],  btpNorm[1],  btpNorm[2],  // Node 5 BLUE
-			 0.0,  1.0,  0.25,    btpNorm[0],  btpNorm[1],  btpNorm[2],  // Node 6 RED
-		// * Right Top Point Face
-			 0.1,  0.1,  0.5,     rtpNorm[0],  rtpNorm[1],  rtpNorm[2],  // Node 2 BLUE
-			 0.1,  0.1,  0.0,     rtpNorm[0],  rtpNorm[1],  rtpNorm[2],  // Node 5 BLUE
-			 0.0,  1.0,  0.25,    rtpNorm[0],  rtpNorm[1],  rtpNorm[2],  // Node 6 RED
-		// ! ------------------- Left Point -------------------------
-		// * Front Left Point Face
-			-0.1,  0.1,  0.5,     flpNorm[0],  flpNorm[1],  flpNorm[2],  // Node 0 RED
-			 0.0, -0.1,  0.5,     flpNorm[0],  flpNorm[1],  flpNorm[2],  // Node 1 WHITE
-			-c30, -s30,  0.25,    flpNorm[0],  flpNorm[1],  flpNorm[2],  // Node 7 WHITE
-		// * Left Left Point Face
-			-0.1,  0.1,  0.5,     llpNorm[0],  llpNorm[1],  llpNorm[2],  // Node 0 RED
-			-0.1,  0.1,  0.0,     llpNorm[0],  llpNorm[1],  llpNorm[2],  // Node 3 RED
-			-c30, -s30,  0.25,    llpNorm[0],  llpNorm[1],  llpNorm[2],  // Node 7 WHITE
-		// * Back Left Point Face
-			-0.1,  0.1,  0.0,     blpNorm[0],  blpNorm[1],  blpNorm[2],  // Node 3 RED
-			 0.0, -0.1,  0.0,     blpNorm[0],  blpNorm[1],  blpNorm[2],  // Node 4 WHITE
-			-c30, -s30,  0.25,    blpNorm[0],  blpNorm[1],  blpNorm[2],  // Node 7 WHITE
-		// * Right Left Point Face
-			 0.0, -0.1,  0.5,     rlpNorm[0],  rlpNorm[1],  rlpNorm[2],  // Node 1 WHITE
-			 0.0, -0.1,  0.0,     rlpNorm[0],  rlpNorm[1],  rlpNorm[2],  // Node 4 WHITE
-			-c30, -s30,  0.25,    rlpNorm[0],  rlpNorm[1],  rlpNorm[2],  // Node 7 WHITE
-		// ! -------------------- Right Point ------------------------
-		// * Front Right Point Face 
-			0.0, -0.1,  0.5,     frpNorm[0],  frpNorm[1],  frpNorm[2],  // Node 1 WHITE
-			0.1,  0.1,  0.5,     frpNorm[0],  frpNorm[1],  frpNorm[2],  // Node 2 BLUE
-			c30, -s30,  0.25,    frpNorm[0],  frpNorm[1],  frpNorm[2],  // Node 8 BLUE
-		// * Left Right Point Face
-			0.0, -0.1,  0.5,     lrpNorm[0],  lrpNorm[1],  lrpNorm[2],  // Node 1 WHITE
-			0.0, -0.1,  0.0,     lrpNorm[0],  lrpNorm[1],  lrpNorm[2],  // Node 4 WHITE
-			c30, -s30,  0.25,    lrpNorm[0],  lrpNorm[1],  lrpNorm[2],  // Node 8 BLUE
-		// * Back Right Point Face
-			0.0, -0.1,  0.0,     brpNorm[0],  brpNorm[1],  brpNorm[2],  // Node 4 WHITE
-			0.1,  0.1,  0.0,     brpNorm[0],  brpNorm[1],  brpNorm[2],  // Node 5 BLUE
-			c30, -s30,  0.25,    brpNorm[0],  brpNorm[1],  brpNorm[2],  // Node 8 BLUE
-		// * Right Right Point Face
-			0.1,  0.1,  0.5,     rrpNorm[0],  rrpNorm[1],  rrpNorm[2],  // Node 2 BLUE
-			0.1,  0.1,  0.0,     rrpNorm[0],  rrpNorm[1],  rrpNorm[2], // Node 5 BLUE
-			c30, -s30,  0.25,    rrpNorm[0],  rrpNorm[1],  rrpNorm[2],  // Node 8 BLUE 
-			]);
-}
-
-function getSurfNorm(a, b, c) {
-  var bSubA = b.sub(a);
-  var cSubA = c.sub(a);
-  var ans = new Vector3();
-  ans = bSubA.cross(cSubA);
-  ans = ans.normalize();
-
-  return ans.elements;
-}
-
-function cube() {
-  // +y
-  var frontNorm = new Float32Array(getSurfNorm(new Vector3([-1.0,  1.0, -1.0]),
-                                              new Vector3([-1.0,  1.0,  1.0]),
-                                              new Vector3([1.0,  1.0,  1.0])));
-  // +x
-  var rightNorm = new Float32Array(getSurfNorm(new Vector3([1.0, -1.0, -1.0]),
-                                              new Vector3([1.0,  1.0, -1.0]),
-                                              new Vector3([1.0,  1.0,  1.0])));
-  // -y
-  var backNorm = new Float32Array(getSurfNorm(new Vector3([1.0, -1.0, -1.0]),
-                                              new Vector3([1.0, -1.0,  1.0]),
-                                              new Vector3([-1.0, -1.0,  1.0])));
-  // -x
-  var leftNorm = new Float32Array(getSurfNorm(new Vector3([-1.0, -1.0,  1.0]),
-                                              new Vector3([-1.0,  1.0,  1.0]),
-                                              new Vector3([-1.0,  1.0, -1.0])));
-  // +z
-  var upperNorm = new Float32Array(getSurfNorm(new Vector3([-1.0,  1.0,  1.0]),
-                                              new Vector3([-1.0, -1.0,  1.0]),
-                                              new Vector3([1.0, -1.0,  1.0])));
-                                        
-  var downNorm = new Float32Array(getSurfNorm(new Vector3([1.0,  1.0, -1.0]),
-                                              new Vector3([1.0, -1.0, -1.0,]),
-                                              new Vector3([-1.0, -1.0, -1.0])));
-                      
-  //=============================   30   ================================
-  cube_v = new Float32Array([
-      // +x face:
-      1.0, -1.0, -1.0, 	  rightNorm[0],  rightNorm[1],  rightNorm[2],	// Node 3
-      1.0,  1.0, -1.0, 	  rightNorm[0],  rightNorm[1],  rightNorm[2],	// Node 2
-      1.0,  1.0,  1.0, 	  rightNorm[0],  rightNorm[1],  rightNorm[2],  // Node 4
-      
-      1.0,  1.0,  1.0, 	  rightNorm[0],  rightNorm[1],  rightNorm[2],	// Node 4
-      1.0, -1.0,  1.0, 	  rightNorm[0],  rightNorm[1],  rightNorm[2],	// Node 7
-      1.0, -1.0, -1.0, 	  rightNorm[0],  rightNorm[1],  rightNorm[2],	// Node 3
-    
-      // +y face:
-      -1.0,  1.0, -1.0, 	  frontNorm[0],  frontNorm[1],  frontNorm[2],	// Node 1
-      -1.0,  1.0,  1.0, 	  frontNorm[0],  frontNorm[1],  frontNorm[2],	// Node 5
-      1.0,  1.0,  1.0, 	    frontNorm[0],  frontNorm[1],  frontNorm[2],	// Node 4
-    
-      1.0,  1.0,  1.0, 	  frontNorm[0],  frontNorm[1],  frontNorm[2],	// Node 4
-      1.0,  1.0, -1.0, 	  frontNorm[0],  frontNorm[1],  frontNorm[2],	// Node 2 
-      -1.0,  1.0, -1.0,	  frontNorm[0],  frontNorm[1],  frontNorm[2],	// Node 1
-    
-      // +z face: 
-      -1.0,  1.0,  1.0, 	  upperNorm[0],  upperNorm[1],  upperNorm[2],	// Node 5
-      -1.0, -1.0,  1.0, 	  upperNorm[0],  upperNorm[1],  upperNorm[2],	// Node 6
-      1.0, -1.0,  1.0,  	  upperNorm[0],  upperNorm[1],  upperNorm[2],	// Node 7
-    
-      1.0, -1.0,  1.0, 	  upperNorm[0],  upperNorm[1],  upperNorm[2],	// Node 7
-      1.0,  1.0,  1.0, 	  upperNorm[0],  upperNorm[1],  upperNorm[2],	// Node 4
-      -1.0,  1.0,  1.0,	  upperNorm[0],  upperNorm[1],  upperNorm[2],	// Node 5
-    
-      // -x face: 
-      -1.0, -1.0,  1.0, 	  leftNorm[0],  leftNorm[1],  leftNorm[2],	// Node 6	
-      -1.0,  1.0,  1.0, 	  leftNorm[0],  leftNorm[1],  leftNorm[2],	// Node 5 
-      -1.0,  1.0, -1.0, 	  leftNorm[0],  leftNorm[1],  leftNorm[2],	// Node 1
-      
-      -1.0,  1.0, -1.0, 	  leftNorm[0],  leftNorm[1],  leftNorm[2],	// Node 1
-      -1.0, -1.0, -1.0,	    leftNorm[0],  leftNorm[1],  leftNorm[2],	// Node 0  
-      -1.0, -1.0,  1.0, 	  leftNorm[0],  leftNorm[1],  leftNorm[2],	// Node 6  
-      
-      // -y face: 
-      1.0, -1.0, -1.0, 	  backNorm[0],  backNorm[1],  backNorm[2],	// Node 3
-      1.0, -1.0,  1.0, 	  backNorm[0],  backNorm[1],  backNorm[2],	// Node 7
-      -1.0, -1.0,  1.0, 	 backNorm[0],  backNorm[1],  backNorm[2],	// Node 6
-    
-      -1.0, -1.0,  1.0, 	  backNorm[0],  backNorm[1],  backNorm[2],	// Node 6
-      -1.0, -1.0, -1.0, 	  backNorm[0],  backNorm[1],  backNorm[2],	// Node 0
-      1.0, -1.0, -1.0, 	  backNorm[0],  backNorm[1],  backNorm[2],	// Node 3
-    
-      // -z face: 
-      1.0,  1.0, -1.0, 	  downNorm[0],  downNorm[1],  downNorm[2],	// Node 2
-      1.0, -1.0, -1.0, 	  downNorm[0],  downNorm[1],  downNorm[2],	// Node 3
-      -1.0, -1.0, -1.0, 	  downNorm[0],  downNorm[1],  downNorm[2],	// Node 0		
-    
-      -1.0, -1.0, -1.0, 	  downNorm[0],  downNorm[1],  downNorm[2],	// Node 0
-      -1.0,  1.0, -1.0,	  downNorm[0],  downNorm[1],  downNorm[2],	// Node 1
-      1.0,  1.0, -1.0, 	  downNorm[0],  downNorm[1],  downNorm[2],
-    ]);
-  }
-
-function makePyramid() {
-    var frontNorm = new Float32Array(getSurfNorm(new Vector3([0.0, 0.0, 0.0]),
-                                                 new Vector3([1.0, 0.0, 0.0]),
-                                                 new Vector3([0.5, 1.0, -0.5])));
-                                                      
-    var rightNorm = new Float32Array(getSurfNorm(new Vector3([1.0, 0.0, 0.0]),
-                                                 new Vector3([1.0, 0.0, -1.0]),
-                                                 new Vector3([0.5, 1.0, -0.5])));
-
-    var backNorm = new Float32Array(getSurfNorm(new Vector3([1.0, 0.0, -1.0]),
-                                                new Vector3([0.0, 0.0, -1.0]),
-                                                new Vector3([0.5, 1.0, -0.5])));
-
-    var leftNorm = new Float32Array(getSurfNorm(new Vector3([0.0, 0.0, -1.0]),
-                                                new Vector3([0.0, 0.0, 0.0]),
-                                                new Vector3([0.5, 1.0, -0.5])));
- 
-  	pyrVerts = new Float32Array([
-			//! ------------------------ Pyramid ------------------------
-
-			//* Bottom Face
-			0.0,  0.0,  0.0,    0.0,  0.0,  -1.0, // Node 0 GREEN
-			0.0,  0.0, -1.0,    0.0,  0.0,  -1.0, // Node 1 RED
-			1.0,  0.0, -1.0,    0.0,  0.0,  -1.0, // Node 2 BLUE
-			0.0,  0.0,  0.0,    0.0,  0.0,  -1.0, // Node 0 GREEN
-			1.0,  0.0, -1.0,    0.0,  0.0,  -1.0, // Node 2 BLUE
-			1.0,  0.0,  0.0,    0.0,  0.0,  -1.0, // Node 3 MAGENTA
-			//* Front Face
-			0.0,  0.0,  0.0,    frontNorm[0],  frontNorm[1],  frontNorm[2], // Node 3 MAGENTA
-			1.0,  0.0,  0.0,    frontNorm[0],  frontNorm[1],  frontNorm[2], // Node 0 GREEN
-			0.5,  1.0, -0.5,    frontNorm[0],  frontNorm[1],  frontNorm[2], // Node 4 CYAN
-			//* Right Face
-			1.0,  0.0,  0.0,    rightNorm[0],  rightNorm[1],  rightNorm[2], // Node 0 GREEN
-			1.0,  0.0, -1.0,    rightNorm[0],  rightNorm[1],  rightNorm[2], // Node 3 MAGENTA
-			0.5,  1.0, -0.5,    rightNorm[0],  rightNorm[1],  rightNorm[2], // Node 4 CYAN
-			//* Back Face
-			1.0,  0.0, -1.0,    backNorm[0],  backNorm[1],  backNorm[2], // Node 0 GREEN
-			0.0,  0.0, -1.0,    backNorm[0],  backNorm[1],  backNorm[2], // Node 3 MAGENTA
-			0.5,  1.0, -0.5,    backNorm[0],  backNorm[1],  backNorm[2], // Node 4 CYAN
-			//* Left Face
-			0.0,  0.0, -1.0,    leftNorm[0],  leftNorm[1],  leftNorm[2], // Node 0 GREEN
-			0.0,  0.0,  0.0,    leftNorm[0],  leftNorm[1],  leftNorm[2], // Node 3 MAGENTA
-			0.5,  1.0, -0.5,    leftNorm[0],  leftNorm[1],  leftNorm[2],
-		]);
-}
-
-function makeSphere() {
-  var slices = 17;		// # of slices of the sphere along the z axis. >=3 req'd
-  var sliceVerts = 25;	// # of vertices around the top edge of the slice
-  var sliceAngle = Math.PI / slices;	// lattitude angle spanned by one slice.
-  sphVerts = new Float32Array(((slices * 2 * sliceVerts) - 2) * floatsPerVertex);
-  var cos0 = 0.0;					// sines,cosines of slice's top, bottom edge.
-  var sin0 = 0.0;
-  var cos1 = 0.0;
-  var sin1 = 0.0;
-  var j = 0;							// initialize our array index
-  var isLast = 0;
-  var isFirst = 1;
-  for (s = 0; s < slices; s++) {	// for each slice of the sphere,
-      // find sines & cosines for top and bottom of this slice
-      if (s == 0) {
-          isFirst = 1;	// skip 1st vertex of 1st slice.
-          cos0 = 1.0; 	// initialize: start at north pole.
-          sin0 = 0.0;
-      }
-      else {					// otherwise, new top edge == old bottom edge
-          isFirst = 0;
-          cos0 = cos1;
-          sin0 = sin1;
-      }								// & compute sine,cosine for new bottom edge.
-      cos1 = Math.cos((s + 1) * sliceAngle);
-      sin1 = Math.sin((s + 1) * sliceAngle);
-      if (s == slices - 1) isLast = 1;	// skip last vertex of last slice.
-      for (v = isFirst; v < 2 * sliceVerts - isLast; v++, j += floatsPerVertex) {
-          if (v % 2 == 0) {				// put even# vertices at the the slice's top edge
-              sphVerts[j] = sin0 * Math.cos(Math.PI * (v) / sliceVerts);
-              sphVerts[j + 1] = sin0 * Math.sin(Math.PI * (v) / sliceVerts);
-              sphVerts[j + 2] = cos0;
-          }
-          else { 
-              sphVerts[j] = sin1 * Math.cos(Math.PI * (v - 1) / sliceVerts);		// x
-              sphVerts[j + 1] = sin1 * Math.sin(Math.PI * (v - 1) / sliceVerts);		// y
-              sphVerts[j + 2] = cos1;			
-          }
-          if (s == 0) {	// finally, set some interesting colors for vertices:
-
-              sphVerts[j + 3] = sin1 * Math.cos(Math.PI * (v - 1) / sliceVerts);
-              sphVerts[j + 4] = sin1 * Math.sin(Math.PI * (v - 1) / sliceVerts);
-              sphVerts[j + 5] = cos1;
-          }
-          else if (s == slices - 1) {
-              sphVerts[j + 3] = sin1 * Math.cos(Math.PI * (v - 1) / sliceVerts);
-              sphVerts[j + 4] = sin1 * Math.sin(Math.PI * (v - 1) / sliceVerts);
-              sphVerts[j + 5] = cos1;
-          }
-          else {
-              sphVerts[j + 3] = sin1 * Math.cos(Math.PI * (v - 1) / sliceVerts);
-              sphVerts[j + 4] = sin1 * Math.sin(Math.PI * (v - 1) / sliceVerts);
-              sphVerts[j + 5] = cos1;
-          }
-
-      }
-  }
-}
-
-function setMvpMatrix(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc){
-  NormalMatrix.setInverseOf(ModelMatrix);
-  MvpMatrix.set(g_worldMat).multiply(ModelMatrix);
-  NormalMatrix.transpose();
-  gl.uniformMatrix4fv(u_NormalMatrixLoc, false, NormalMatrix.elements);
-  gl.uniformMatrix4fv(u_MvpMatrixLoc, false, MvpMatrix.elements)
-}
-
-function drawSphere(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc){
-  setMvpMatrix(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)								
-  gl.drawArrays(gl.TRIANGLE_STRIP, sphStart / floatsPerVertex, sphVerts.length / floatsPerVertex);
-}
-
-function drawTree(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix,u_NormalMatrixLoc){
-  ModelMatrix.setIdentity(); 
-  MvpMatrix.setIdentity();
-  ModelMatrix.translate(-2, 2.0, 0.0);
-  ModelMatrix.scale(0.2, 0.2, 0.2);
-  setMvpMatrix(gl,	MvpMatrix, 	ModelMatrix, g_worldMat, 	u_MvpMatrixLoc, 	NormalMatrix, 	u_NormalMatrixLoc)	
-  gl.drawArrays(gl.TRIANGLES, 
-    cube_vStart/floatsPerVertex, 
-    cube_v.length/floatsPerVertex);
-  ModelMatrix.translate(0, 0, 2);
-  setMvpMatrix(gl,	MvpMatrix, 	ModelMatrix, g_worldMat, 	u_MvpMatrixLoc, 	NormalMatrix, 	u_NormalMatrixLoc)							
-  gl.drawArrays(gl.TRIANGLES, 
-    cube_vStart/floatsPerVertex, 
-    cube_v.length/floatsPerVertex);
-  ModelMatrix.translate(0, 0, 2);
-  setMvpMatrix(gl,	MvpMatrix, 	ModelMatrix, g_worldMat, 	u_MvpMatrixLoc, 	NormalMatrix, 	u_NormalMatrixLoc)								
-  gl.drawArrays(gl.TRIANGLES, 
-  cube_vStart/floatsPerVertex, 
-  cube_v.length/floatsPerVertex);
-  ModelMatrix.setIdentity();
-  ModelMatrix.translate(-2.5, 1.5, 0.7);
-  ModelMatrix.rotate(g_angle03, 1, 0, 0);
-  MvpMatrix.setIdentity();
-  pushMatrix(	ModelMatrix);
-  	ModelMatrix.rotate(90, 1, 0, 0);
-  setMvpMatrix(gl,	MvpMatrix, 	ModelMatrix, g_worldMat, 	u_MvpMatrixLoc, 	NormalMatrix, 	u_NormalMatrixLoc)								
-  gl.drawArrays(gl.TRIANGLES, 
-  pyrStart/floatsPerVertex, 
-  pyrVerts.length/floatsPerVertex);
-
-  ModelMatrix = popMatrix();
-  ModelMatrix.translate(0, 0, 0.7);
-  ModelMatrix.scale(0.85, 0.85, 0.85);
-  ModelMatrix.rotate(g_angle03, 1, 0, 0);
-  pushMatrix(	ModelMatrix);
-  ModelMatrix.rotate(90, 1, 0, 0);
-  setMvpMatrix(gl,	MvpMatrix, 	ModelMatrix, g_worldMat, 	u_MvpMatrixLoc, 	NormalMatrix, 	u_NormalMatrixLoc)								
-  gl.drawArrays(gl.TRIANGLES, 
-  pyrStart/floatsPerVertex, 
-  pyrVerts.length/floatsPerVertex);
-
-  ModelMatrix = popMatrix();
-  ModelMatrix.translate(0, 0, 0.68);
-  ModelMatrix.scale(0.8, 0.8, 0.8);
-  ModelMatrix.rotate(g_angle05, 1, 0, 0);
-  pushMatrix(	ModelMatrix);
-  ModelMatrix.rotate(90, 1, 0, 0);
-  setMvpMatrix(gl,	MvpMatrix, 	ModelMatrix, g_worldMat, 	u_MvpMatrixLoc, 	NormalMatrix, 	u_NormalMatrixLoc)								
-  gl.drawArrays(gl.TRIANGLES, 
-    pyrStart/floatsPerVertex, 
-    pyrVerts.length/floatsPerVertex);
-}
-
-function set_material(gl, g_currMaterial, mat, g_shiny){
-  mat.setMatl(parseInt(g_currMaterial));
-  gl.uniform3fv(mat.uLoc_Ke, mat.K_emit.slice(0,3)); 
-  gl.uniform3fv(mat.uLoc_Ka, mat.K_ambi.slice(0,3)); 
-  gl.uniform3fv(mat.uLoc_Kd, mat.K_diff.slice(0,3));
-  gl.uniform3fv(mat.uLoc_Ks, mat.K_spec.slice(0,3));
-  gl.uniform1i(mat.uLoc_Kshiny, parseInt(g_shiny, 10)); 
-}
-
-function drawFlower(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix,u_NormalMatrixLoc){
-  ModelMatrix.setIdentity();
-  MvpMatrix.setIdentity();
-  ModelMatrix.translate(2.5, 1.5, 1);
-  ModelMatrix.rotate(g_angle03, 1, 0, 0);
-  ModelMatrix.rotate(180, 0, 1, 0);
-  ModelMatrix.scale(0.5, 0.5, 0.5);
-  pushMatrix(ModelMatrix);
-  ModelMatrix.rotate(90, 1, 0, 0);
-  setMvpMatrix(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)								
-  gl.drawArrays(gl.TRIANGLES, concaveHexStart/floatsPerVertex, concaveHexVerts.length/floatsPerVertex);
-  
-  ModelMatrix = popMatrix();
-  pushMatrix(ModelMatrix);
-  ModelMatrix.translate(0, -0.25, -0.6);
-  ModelMatrix.scale(0.3,0.3,0.3)
-  drawSphere(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)
-
-  ModelMatrix = popMatrix();
-  ModelMatrix.translate(0, 0, 0.7);
-  ModelMatrix.scale(0.85, 0.85, 0.85);
-  ModelMatrix.rotate(g_angle03, 1, 0, 0);
-  pushMatrix(ModelMatrix);
-  ModelMatrix.rotate(90, 1, 0, 0);
-  setMvpMatrix(gl, MvpMatrix, ModelMatrix, g_worldMat, 	u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)								
-  gl.drawArrays(gl.TRIANGLES, concaveHexStart/floatsPerVertex, concaveHexVerts.length/floatsPerVertex);
-
-  ModelMatrix = popMatrix();
-  ModelMatrix.translate(0, 0, 0.68);
-  ModelMatrix.scale(0.8, 0.8, 0.8);
-  ModelMatrix.rotate(g_angle05, 1, 0, 0);
-  pushMatrix(ModelMatrix);
-  ModelMatrix.rotate(90, 1, 0, 0);
-  setMvpMatrix(gl, MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)								
-  gl.drawArrays(gl.TRIANGLES, concaveHexStart/floatsPerVertex, concaveHexVerts.length/floatsPerVertex);
-}
-
-function drawAlienfish(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix,u_NormalMatrixLoc){
-  stack = []
-  ModelMatrix.setIdentity();
-  MvpMatrix.setIdentity()
-  ModelMatrix.rotate(45, 1, 1, 0);
-  ModelMatrix.translate(-2.6, -1.5, 1);
-  ModelMatrix.scale(0.4, 0.4, 0.4);
-  pushMatrix(ModelMatrix);
-
-  ModelMatrix = popMatrix();
-  pushMatrix(ModelMatrix);
-  ModelMatrix.rotate(g_angleNow1, 0, 0, 1);
-  setMvpMatrix(gl, MvpMatrix, 	ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)	
-  gl.drawArrays(gl.TRIANGLES, 
-    cube_vStart/floatsPerVertex, 
-    cube_v.length/floatsPerVertex);
-  ModelMatrix.translate(0, 0, 2);
-  setMvpMatrix(gl, MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)							
-  gl.drawArrays(gl.TRIANGLES, 
-    cube_vStart/floatsPerVertex, 
-    cube_v.length/floatsPerVertex);
-  ModelMatrix.translate(0, 0, 1.6);
-  setMvpMatrix(gl, MvpMatrix, 	ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)								
-  drawSphere(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)
-  stack.push(new Matrix4(ModelMatrix))
-  ModelMatrix.translate(0, 0.9, 0.4);
-  ModelMatrix.scale(0.25, 0.25, 0.25);
-  drawSphere(gl, MvpMatrix, ModelMatrix, g_worldMat,	u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)
-  ModelMatrix = stack.pop();
-  stack.push(new Matrix4(ModelMatrix));
-  ModelMatrix.translate(0, -0.9, 0.4);
-  ModelMatrix.scale(0.25, 0.25, 0.25);
-  drawSphere(gl, MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)
-  ModelMatrix = popMatrix();
-  ModelMatrix.translate(0, 0.3, -1.7);
-  ModelMatrix.scale(1.3, 1.3, 1.3);
-  pushMatrix(ModelMatrix);
-  ModelMatrix.rotate(90, 1, 0, 0);
-  setMvpMatrix(gl, MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)								
-  gl.drawArrays(gl.TRIANGLES, concaveHexStart/floatsPerVertex, concaveHexVerts.length/floatsPerVertex);
-  ModelMatrix = popMatrix();
-  ModelMatrix.scale(0.8, 0.8, 0.8);
-  ModelMatrix.translate(0, 0, -0.4);
-  ModelMatrix.rotate(g_angle05, 1, 0, 0);
-  ModelMatrix.translate(0, 0, -0.4);
-  pushMatrix(ModelMatrix);
-  ModelMatrix.rotate(90, 1, 0, 0);
-  setMvpMatrix(gl, MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)								
-  gl.drawArrays(gl.TRIANGLES, concaveHexStart/floatsPerVertex, concaveHexVerts.length/floatsPerVertex);
-  ModelMatrix = popMatrix();
-  ModelMatrix.translate(0, 0, -0.68);
-  ModelMatrix.scale(0.8, 0.8, 0.8);
-  ModelMatrix.rotate(g_angle05, 1, 0, 0);
-  pushMatrix(ModelMatrix);
-  ModelMatrix.rotate(90, 1, 0, 0);
-  setMvpMatrix(gl, MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)								
-  gl.drawArrays(gl.TRIANGLES, concaveHexStart/floatsPerVertex, concaveHexVerts.length/floatsPerVertex);
-}
 
 const glsl = x => x;
 
@@ -853,7 +836,7 @@ function VBObox1() {
     gl_FragColor = v_Color; 
   }`;
 
-  cube();
+  makeCube();
   makeSphere();
   makePyramid();
   makeConcaveHex(); 
@@ -892,11 +875,13 @@ function VBObox1() {
                   
               //----------------------Attribute offsets
 	this.vboOffset_a_Pos1 = 0;    //# of bytes from START of vbo to the START
-  this.vboOffset_a_Normal = (this.vboFcount_a_Pos1) * this.FSIZE;                                
+  this.vboOffset_a_Colr1 = (this.vboFcount_a_Pos1) * this.FSIZE;                                
 	this.vboLoc;									// GPU Location for Vertex Buffer Object, 
 	this.shaderLoc;								// GPU Location for compiled Shader-program  
-	this.a_Pos1Loc;							  // GPU location: shader 'a_Pos1' attribute
+	this.a_PosLoc;							  // GPU location: shader 'a_Pos1' attribute
   this.a_Normal;              // GPU location: shader 'a_Normal' attribute
+
+  
   this.ModelMatrix = new Matrix4();	// Transforms CVV axes to model axes.
   this.NormalMatrix = new Matrix4();
   this.MvpMatrix = new Matrix4();
@@ -939,7 +924,7 @@ VBObox1.prototype.init = function() {
  					 				this.vboContents, 		// JavaScript Float32Array
   							 	gl.STATIC_DRAW);			// Usage hint.  
 
-  this.a_Pos1Loc = gl.getAttribLocation(this.shaderLoc, 'a_Pos1');
+  this.a_PosLoc = gl.getAttribLocation(this.shaderLoc, 'a_Pos1');
   this.a_Normal = gl.getAttribLocation(this.shaderLoc, 'a_Normal');
   // c2) Find All Uniforms:-----------------------------------------------------
   //Get GPU storage location for each uniform var used in our shader programs: 
@@ -984,7 +969,7 @@ VBObox1.prototype.switchToMe = function () {
 										this.vboLoc);			// the ID# the GPU uses for our VBO.
 
   gl.vertexAttribPointer(
-		this.a_Pos1Loc,//index == ID# for the attribute var in GLSL shader pgm;
+		this.a_PosLoc,//index == ID# for the attribute var in GLSL shader pgm;
 		this.vboFcount_a_Pos1, // # of floats used by this attribute: 1,2,3 or 4?
 		gl.FLOAT,		  // type == what data type did we use for those numbers?
 		false,				// isNormalized == are these fixed-point values that we need
@@ -992,9 +977,9 @@ VBObox1.prototype.switchToMe = function () {
 		this.vboOffset_a_Pos1);						
   gl.vertexAttribPointer(this.a_Normal,this.vboFcount_a_Normal, 
                          gl.FLOAT, false, 
-							           this.vboStride,	this.vboOffset_a_Normal);	
+							           this.vboStride,	this.vboOffset_a_Colr1);	
   //-- Enable this assignment of the attribute to its' VBO source:
-  gl.enableVertexAttribArray(this.a_Pos1Loc);
+  gl.enableVertexAttribArray(this.a_PosLoc);
   gl.enableVertexAttribArray(this.a_Normal);
 // if(!initArrayBuffer(gl, this.shaderLoc,'a_Pos1', new Float32Array(this.vboPositions), gl.FLOAT, 3)) return -1;
 // if(!initArrayBuffer(gl, this.shaderLoc, 'a_Normal', new Float32Array(this.vboPositions), gl.FLOAT, 3)) return -1;
@@ -1035,18 +1020,18 @@ VBObox1.prototype.adjust = function() {
   // for material objects
   this.eyePosWorld.set([g_camX, g_camY, g_camZ]); // set the eye position to the position of our camera
   // **************** Central Sphere *****************
-  set_material(gl, g_currMatl3, this.matl1, g_shiny)
+  set_material(gl, g_currMatl3, this.matl1, g_shiny3)
   drawTree(gl,this.MvpMatrix, this.ModelMatrix, g_worldMat, this.u_MvpMatrixLoc, this.NormalMatrix, this.u_NormalMatrixLoc)
   // **************** Central Sphere *****************
-  set_material(gl, g_currMatl1, this.matl1, g_shiny)
+  set_material(gl, g_currMatl1, this.matl1, g_shiny1)
   this.ModelMatrix.setTranslate(0, 0, 0);	
   this.ModelMatrix.rotate(g_angleNow1, 0, 0, 1);
   drawSphere(gl,this.MvpMatrix, this.ModelMatrix, g_worldMat, this.u_MvpMatrixLoc, this.NormalMatrix, this.u_NormalMatrixLoc)
   // **************** Draw flower *****************
-  set_material(gl, g_currMatl4, this.matl1, g_shiny)
+  set_material(gl, g_currMatl4, this.matl1, g_shiny4)
   drawFlower(gl,this.MvpMatrix, this.ModelMatrix, g_worldMat, this.u_MvpMatrixLoc, this.NormalMatrix, this.u_NormalMatrixLoc)
   // **************** Draw alien fish *****************
-  set_material(gl, g_currMatl2, this.matl1, g_shiny)
+  set_material(gl, g_currMatl2, this.matl1, g_shiny2)
   drawAlienfish(gl,this.MvpMatrix, this.ModelMatrix, g_worldMat, this.u_MvpMatrixLoc, this.NormalMatrix, this.u_NormalMatrixLoc)
 }
 
@@ -1197,7 +1182,7 @@ function VBObox2() {
   
     // 
     
-    cube();
+    makeCube();
     makeSphere();
     makePyramid();
     makeConcaveHex(); 
@@ -1234,10 +1219,10 @@ function VBObox2() {
                     this.FSIZE == this.vboStride), // for agreeement with'stride'
                     "Uh oh! VBObox1.vboStride disagrees with attribute-size values!");
     this.vboOffset_a_Position = 0;    //# of bytes from START of vbo to the START
-    this.vboOffset_a_Normal = (this.vboFcount_a_Position) * this.FSIZE;                                 
+    this.vboOffset_a_Colr1 = (this.vboFcount_a_Position) * this.FSIZE;                                 
     this.vboLoc;									// GPU Location for Vertex Buffer Object, 
     this.shaderLoc;								// GPU Location for compiled Shader-program  
-    this.a_Pos1Loc;							  // GPU location: shader 'a_Pos1' attribute
+    this.a_PosLoc;							  // GPU location: shader 'a_Pos1' attribute
     this.a_Normal;              // GPU location: shader 'a_Normal' attribute
 
   
@@ -1278,8 +1263,8 @@ function VBObox2() {
                     gl.STATIC_DRAW);			// Usage hint.
                      
                      
-    this.a_Pos1Loc = gl.getAttribLocation(this.shaderLoc, 'a_Pos1');
-    if(this.a_Pos1Loc < 0) {
+    this.a_PosLoc = gl.getAttribLocation(this.shaderLoc, 'a_Pos1');
+    if(this.a_PosLoc < 0) {
       console.log(this.constructor.name + 
                   '.init() Failed to get GPU location of attribute a_Pos1');
       return -1;	// error exit.
@@ -1347,7 +1332,7 @@ function VBObox2() {
                       this.vboLoc);			// the ID# the GPU uses for our VBO.
 
   gl.vertexAttribPointer(
-  		this.a_Pos1Loc,//index == ID# for the attribute var in GLSL shader pgm;
+  		this.a_PosLoc,//index == ID# for the attribute var in GLSL shader pgm;
   		this.vboFcount_a_Position, // # of floats used by this attribute: 1,2,3 or 4?
   		gl.FLOAT,		  // type == what data type did we use for those numbers?
   		false,				// isNormalized == are these fixed-point values that we need
@@ -1364,9 +1349,9 @@ function VBObox2() {
     								// value we will actually use?  (we start with position).
     gl.vertexAttribPointer(this.a_Normal,this.vboFcount_a_Normal, 
                            gl.FLOAT, false, 
-  							           this.vboStride,	this.vboOffset_a_Normal);	
+  							           this.vboStride,	this.vboOffset_a_Colr1);	
     //-- Enable this assignment of the attribute to its' VBO source:
-    gl.enableVertexAttribArray(this.a_Pos1Loc);
+    gl.enableVertexAttribArray(this.a_PosLoc);
     gl.enableVertexAttribArray(this.a_Normal);
   }
   
@@ -1412,18 +1397,18 @@ function VBObox2() {
   gl.uniform3fv(this.lamp2.u_spec, this.lamp2.I_spec.elements);
 
   // **************** Central Sphere *****************
-  set_material(gl, g_currMatl3, this.matl2, g_shiny)
+  set_material(gl, g_currMatl3, this.matl2, g_shiny3)
   drawTree(gl,this.MvpMatrix, this.ModelMatrix, g_worldMat, this.u_MvpMatrixLoc, this.NormalMatrix, this.u_NormalMatrixLoc)
   // **************** Central Sphere *****************
-  set_material(gl, g_currMatl1, this.matl2, g_shiny)
+  set_material(gl, g_currMatl1, this.matl2, g_shiny1)
   this.ModelMatrix.setTranslate(0, 0, 0);	
   this.ModelMatrix.rotate(g_angleNow1, 0, 0, 1);
   drawSphere(gl,this.MvpMatrix, this.ModelMatrix, g_worldMat, this.u_MvpMatrixLoc, this.NormalMatrix, this.u_NormalMatrixLoc)
   // **************** Draw flower *****************
-  set_material(gl, g_currMatl4, this.matl2, g_shiny)
+  set_material(gl, g_currMatl4, this.matl2, g_shiny4)
   drawFlower(gl,this.MvpMatrix, this.ModelMatrix, g_worldMat, this.u_MvpMatrixLoc, this.NormalMatrix, this.u_NormalMatrixLoc)
   // **************** Draw alien fish *****************
-  set_material(gl, g_currMatl2, this.matl2, g_shiny)
+  set_material(gl, g_currMatl2, this.matl2, g_shiny2)
   drawAlienfish(gl,this.MvpMatrix, this.ModelMatrix, g_worldMat, this.u_MvpMatrixLoc, this.NormalMatrix, this.u_NormalMatrixLoc)
 }
   

@@ -69,8 +69,14 @@ var g_currMatl2;
 var g_currMatl3;
 var g_currMatl4;
 var g_isBlinn = false;
-var g_shiny;
-var g_shinyInit;
+var g_shiny1;
+var g_shinyInit1;
+var g_shiny2;
+var g_shinyInit2;
+var g_shiny3;
+var g_shinyInit3;
+var g_shiny4;
+var g_shinyInit4;
 
 var g_lightPosXInit = document.getElementById('posX').value;
 var g_lightPosYInit = document.getElementById('posY').value;
@@ -107,12 +113,12 @@ var g_specularB;
 // Perspective Camera Setting
 var g_camXInit = 6.5, g_camYInit = 5.5, g_camZInit = 5.0;
 var g_lookXInit = 1.0, g_lookYInit = 1.0, g_lookZInit = 4.5;
-var g_aimZDiffInit = g_lookZInit - g_camZInit
-var g_aimThetaInit = 215.0
+var g_DInit = g_lookZInit - g_camZInit
+var g_ThetaInit = 215.0
 // initialize the camera's position
 var g_camX = g_camXInit, g_camY = g_camYInit, g_camZ = g_camZInit;  
 var g_lookX = g_lookXInit, g_lookY = g_lookYInit, g_lookZ = g_lookZInit; 
-var g_Theta = g_aimThetaInit;
+var g_Theta = g_ThetaInit;
 var g_D = g_lookZ - g_camZ;
 var g_moveRate = 2.0;
 
@@ -226,9 +232,13 @@ function drawAll() {
   g_currMatl2 = getMaterial_A();
   g_currMatl3 = getMaterial_T();
   g_currMatl4 = getMaterial_F();
-  g_shiny = document.getElementById("shiny").value;
+  g_shiny1 = document.getElementById("shiny1").value;
+  g_shiny2 = document.getElementById("shiny2").value;
+  g_shiny3 = document.getElementById("shiny3").value;
+  g_shiny4 = document.getElementById("shiny4").value;
+  
   setCamera();
-  getUsrValues();
+  getWebInput();
 
 	if(g_show0 == 1) {	// IF user didn't press HTML button to 'hide' VBO0:
 	  worldBox.switchToMe();  // Set WebGL to render from this VBObox.
@@ -274,17 +284,7 @@ function VBO1toggle() {
     document.getElementById('toggleShading').innerText= "Switch Gouraud Shading";
   }									// hide.
 
-  // console.log('g_show1: '+g_show1);
-  // console.log('g_show2: '+g_show2);
 }
-
-// function VBO2toggle() {
-// //=============================================================================
-// // Called when user presses HTML-5 button 'Show/Hide VBO2'.
-//   if(g_show2 != 1) g_show2 = 1;			// show,
-//   else g_show2 = 0;									// hide.
-//   console.log('g_show2: '+g_show2);
-// }
 
 function toggleBlinn() {
   if(!g_isBlinn) g_isBlinn = true;
@@ -404,8 +404,8 @@ function mykeyDown(ev) {
       g_camX = g_camXInit;
       g_camY = g_camYInit;
       g_camZ = g_camZInit;
-      g_Theta = g_aimThetaInit
-      g_D = g_aimZDiffInit
+      g_Theta = g_ThetaInit
+      g_D = g_DInit
 
       break;
     default:
@@ -422,8 +422,8 @@ function getMaterial_S() {
   matlSelect = document.getElementById('Spherematerials').value;
   if (g_currMatl1 != matlSelect){
     var matl = new Material(parseInt(matlSelect));
-    g_shinyInit = matl.K_shiny;
-    document.getElementById('shiny').value = g_shinyInit;
+    g_shinyInit1 = matl.K_shiny;
+    document.getElementById('shiny1').value = g_shinyInit1;
     return matlSelect;
   }
   return g_currMatl1;
@@ -433,8 +433,8 @@ function getMaterial_A() {
   matlSelect = document.getElementById('Fishmaterials').value;
   if (g_currMatl2 != matlSelect){
     var matl = new Material(parseInt(matlSelect));
-    g_shinyInit = matl.K_shiny;
-    document.getElementById('shiny').value = g_shinyInit;
+    g_shinyInit2 = matl.K_shiny;
+    document.getElementById('shiny2').value = g_shinyInit2;
     return matlSelect;
   }
   return g_currMatl2;
@@ -444,8 +444,8 @@ function getMaterial_T() {
   matlSelect = document.getElementById('Treematerials').value;
   if (g_currMatl3 != matlSelect){
     var matl = new Material(parseInt(matlSelect));
-    g_shinyInit = matl.K_shiny;
-    document.getElementById('shiny').value = g_shinyInit;
+    g_shinyInit3 = matl.K_shiny;
+    document.getElementById('shiny3').value = g_shinyInit3;
     return matlSelect;
   }
   return g_currMatl3;
@@ -455,59 +455,55 @@ function getMaterial_F() {
   matlSelect = document.getElementById('materials').value;
   if (g_currMatl4 != matlSelect){
     var matl = new Material(parseInt(matlSelect));
-    g_shinyInit = matl.K_shiny;
-    document.getElementById('shiny').value = g_shinyInit;
+    g_shinyInit4 = matl.K_shiny;
+    document.getElementById('shiny4').value = g_shinyInit4;
     return matlSelect;
   }
   return g_currMatl4;
 }
 
-function getUsrValues() {
-  var usrPosX, usrPosY, usrPosZ, 
-      usrAmbiR, usrAmbiG, usrAmbiB, 
-      usrDiffR, usrDiffG, usrDiffB, 
-      usrSpecR, usrSpecG, usrSpecB;
+function getWebInput() {
+  var lightPosX, lightPosY, lightPosZ, 
+      AmbiR, AmbiG, AmbiB, 
+      DiffuR, DiffuG, DiffuB, 
+      SpecR, SpecG, SpecB;
 
   
-  usrPosX = document.getElementById('posX').value;
-  if(!isNaN(usrPosX)) g_lightPosX = usrPosX;
+  lightPosX = document.getElementById('posX').value;
+  if(!isNaN(lightPosX)) g_lightPosX = lightPosX;
 
-  usrPosY = document.getElementById('posY').value;
-  if(!isNaN(usrPosY)) g_lightPosY = usrPosY
+  lightPosY = document.getElementById('posY').value;
+  if(!isNaN(lightPosY)) g_lightPosY = lightPosY
 
-  usrPosZ = document.getElementById('posZ').value;
-  if(!isNaN(usrPosZ)) g_lightPosZ = usrPosZ;
+  lightPosZ = document.getElementById('posZ').value;
+  if(!isNaN(lightPosZ)) g_lightPosZ = lightPosZ;
 
-  // * Ambient light color
+  AmbiR = document.getElementById('ambiR').value;
+  if(!isNaN(AmbiR)) g_ambientR = AmbiR;
 
-  usrAmbiR = document.getElementById('ambiR').value;
-  if(!isNaN(usrAmbiR)) g_ambientR = usrAmbiR;
+  AmbiG = document.getElementById('ambiG').value;
+  if(!isNaN(AmbiG)) g_ambientG = AmbiG;
 
-  usrAmbiG = document.getElementById('ambiG').value;
-  if(!isNaN(usrAmbiG)) g_ambientG = usrAmbiG;
+  AmbiB = document.getElementById('ambiB').value;
+  if(!isNaN(AmbiB)) g_ambientB = AmbiB;
 
-  usrAmbiB = document.getElementById('ambiB').value;
-  if(!isNaN(usrAmbiB)) g_ambientB = usrAmbiB;
+  DiffuR = document.getElementById('diffR').value;
+  if(!isNaN(DiffuR)) g_diffuseR = DiffuR;
 
-  // * Diffuse light color
+  DiffuG = document.getElementById('diffG').value;
+  if(!isNaN(DiffuG)) g_diffuseG = DiffuG;
 
-  usrDiffR = document.getElementById('diffR').value;
-  if(!isNaN(usrDiffR)) g_diffuseR = usrDiffR;
+  DiffuB = document.getElementById('diffB').value;
+  if(!isNaN(DiffuB)) g_diffuseB = DiffuB;
 
-  usrDiffG = document.getElementById('diffG').value;
-  if(!isNaN(usrDiffG)) g_diffuseG = usrDiffG;
+  SpecR = document.getElementById('specR').value;
+  if(!isNaN(SpecR)) g_specularR = SpecR;
 
-  usrDiffB = document.getElementById('diffB').value;
-  if(!isNaN(usrDiffB)) g_diffuseB = usrDiffB;
+  SpecG = document.getElementById('specG').value;
+  if(!isNaN(SpecG)) g_specularG = SpecG;
 
-  usrSpecR = document.getElementById('specR').value;
-  if(!isNaN(usrSpecR)) g_specularR = usrSpecR;
-
-  usrSpecG = document.getElementById('specG').value;
-  if(!isNaN(usrSpecG)) g_specularG = usrSpecG;
-
-  usrSpecB = document.getElementById('specB').value;
-  if(!isNaN(usrSpecB)) g_specularB = usrSpecB;
+  SpecB = document.getElementById('specB').value;
+  if(!isNaN(SpecB)) g_specularB = SpecB;
 }
 
 function resetLightPos() {
@@ -516,26 +512,29 @@ function resetLightPos() {
   document.getElementById('posZ').value = g_lightPosZInit;
 }
 
-function resetLightAmbi() {
+function resetAmbi() {
   document.getElementById('ambiR').value = g_ambientRInit;
   document.getElementById('ambiG').value = g_ambientGInit;
   document.getElementById('ambiB').value = g_ambientBInit;
 }
 
-function resetLightDiff() {
+function resetDiffu() {
   document.getElementById('diffR').value = g_diffuseRInit;
   document.getElementById('diffG').value = g_diffuseGInit;
   document.getElementById('diffB').value = g_diffuseBInit;
 }
 
-function resetLightSpec() {
+function resetSpec() {
   document.getElementById('specR').value = g_specularRInit;
   document.getElementById('specG').value = g_specularGInit;
   document.getElementById('specB').value = g_specularBInit;
 }
 
 function resetShiny() {
-  document.getElementById('shiny').value = g_shinyInit;
+  document.getElementById('shiny1').value = g_shinyInit1;
+  document.getElementById('shiny2').value = g_shinyInit2;
+  document.getElementById('shiny3').value = g_shinyInit3;
+  document.getElementById('shiny4').value = g_shinyInit4;
 }
 
 function myMouseDown(ev) {
@@ -547,7 +546,7 @@ function myMouseDown(ev) {
                  (g_canvas.width/2);			// normalize canvas to -1 <= x < +1,
     var y = (yp - g_canvas.height/2) /		//										 -1 <= y < +1.
                  (g_canvas.height/2);
-    if (ev.clientY >1554)
+    if (ev.clientY/g_canvas.height >1.05)
       g_isDrag = false
     else
       g_isDrag = true;											// set our mouse-dragging flag
