@@ -19,15 +19,11 @@ var g_digits = 3.0
 var g_angleNow0  =  0.0; 			  // Current rotation angle, in degrees.
 var g_angleRate0 = 45.0;				// Rotation angle rate, in degrees/second.
                                 //---------------
-var g_angleNow1  = 100.0;       // current angle, in degrees
-var g_angleRate1 =  95.0;        // rotation angle rate, degrees/sec
+var g_angleSphere  = 100.0;       // current angle, in degrees
+var g_angleRate1 =  10.0;        // rotation angle rate, degrees/sec
 var g_angleMax1  = 150.0;       // max, min allowed angle, in degrees
 var g_angleMin1  =  60.0;
-                                //---------------
-var g_angleNow2  =  0.0; 			  // Current rotation angle, in degrees.
-var g_angleRate2 = -62.0;				// Rotation angle rate, in degrees/second.
 
-                                //---------------
 var g_posNow0 =  0.0;           // current position
 var g_posRate0 = 0.6;           // position change rate, in distance/second.
 var g_posMax0 =  0.5;           // max, min allowed for g_posNow;
@@ -60,15 +56,15 @@ var g_angleTail = 0.0;
 var g_angleTailRate = 20.0;
 
 // For mouse/keyboard:------------------------
-var g_show0 = 1;								// 0==Show, 1==Hide VBO0 contents on-screen.
-var g_show1 = 1;								// 	"					"			VBO1		"				"				" 
-var g_show2 = 1;                //  "         "     VBO2    "       "       "
+var show_VBO_0 = 1;								// 0==Show, 1==Hide VBO0 contents on-screen.
+var show_VBO_1 = 1;								// 	"					"			VBO1		"				"				" 
+var show_VBO_2 = 1;                //  "         "     VBO2    "       "       "
 
 var g_currMatl1;
 var g_currMatl2;
 var g_currMatl3;
 var g_currMatl4;
-var g_isBlinn = false;
+var g_isBlinn = true;
 var g_shiny1;
 var g_shinyInit1;
 var g_shiny2;
@@ -111,20 +107,20 @@ var g_specularG;
 var g_specularB;
 
 // Perspective Camera Setting
-var g_camXInit = 6.5, g_camYInit = 5.5, g_camZInit = 5.0;
-var g_lookXInit = 1.0, g_lookYInit = 1.0, g_lookZInit = 4.5;
+var g_camXInit = 6.5, g_camYInit = 6, g_camZInit = 5.55;
+var g_lookXInit = 1.5, g_lookYInit = 1.5, g_lookZInit = 5;
 var g_DInit = g_lookZInit - g_camZInit
-var g_ThetaInit = 215.0
+var g_ThetaInit = -142.0
 // initialize the camera's position
 var g_camX = g_camXInit, g_camY = g_camYInit, g_camZ = g_camZInit;  
 var g_lookX = g_lookXInit, g_lookY = g_lookYInit, g_lookZ = g_lookZInit; 
 var g_Theta = g_ThetaInit;
 var g_D = g_lookZ - g_camZ;
-var g_moveRate = 2.0;
+var g_moveRate = 2.5;
 
 
 // ! Global camera control
-g_worldMat = new Matrix4();
+g_worldMatrix = new Matrix4();
 
 function main() {
   g_canvas = document.getElementById('webgl');	
@@ -176,31 +172,22 @@ function animate() {
     }
  
   g_angleNow0 = g_angleNow0 + (g_angleRate0 * elapsed) / 1000.0;
-  g_angleNow1 = g_angleNow1 + (g_angleRate1 * elapsed) / 1000.0;
-  g_angleNow2 = g_angleNow2 + (g_angleRate2 * elapsed) / 1000.0;
-  g_angleNow0 %= 360.0;
-  g_angleNow1 %= 360.0;   
-  g_angleNow2 %= 360.0;
+  g_angleSphere = g_angleSphere + (g_angleRate1 * elapsed) / 1000.0;
 
-  // Continuous movement:
+  
+ 
   g_posNow0 += g_posRate0 * elapsed / 1000.0;
-  g_posNow1 += g_posRate1 * elapsed / 1000.0;
-  // apply position limits
-  if(g_posNow0 > g_posMax0) {   // above the max?
+  g_angleNow0 %= 360.0;
+  if(g_posNow0 > g_posMax0 || g_posNow0 < g_posMin0) {   // above the max?
     g_posNow0 = g_posMax0;      // move back down to the max, and
     g_posRate0 = -g_posRate0;   // reverse direction of change
     }
-  else if(g_posNow0 < g_posMin0) {  // or below the min? 
-    g_posNow0 = g_posMin0;      // move back up to the min, and
-    g_posRate0 = -g_posRate0;   // reverse direction of change.
-    }
-  if(g_posNow1 > g_posMax1) {   // above the max?
+
+  g_posNow1 += g_posRate1 * elapsed / 1000.0;
+  g_angleSphere %= 360.0; 
+  if(g_posNow1 > g_posMax1 || g_posNow1 < g_posMin1) {   // above the max?
     g_posNow1 = g_posMax1;      // move back down to the max, and
     g_posRate1 = -g_posRate1;   // reverse direction of change
-    }
-  else if(g_posNow1 < g_posMin1) {  // or below the min? 
-    g_posNow1 = g_posMin1;      // move back up to the min, and
-    g_posRate1 = -g_posRate1;   // reverse direction of change.
     }
 
   if(g_angle01 >  60 && g_angle01Rate > 0) g_angle01Rate = -g_angle01Rate;
@@ -240,18 +227,18 @@ function drawAll() {
   setCamera();
   getWebInput();
 
-	if(g_show0 == 1) {	// IF user didn't press HTML button to 'hide' VBO0:
+	if(show_VBO_0 == 1) {	// IF user didn't press HTML button to 'hide' VBO0:
 	  worldBox.switchToMe();  // Set WebGL to render from this VBObox.
 		worldBox.adjust();		  // Send new values for uniforms to the GPU, and
 		worldBox.draw();			  // draw our VBO's contents using our shaders.
   }
-  if(g_show1 == 1) { // IF user didn't press HTML button to 'hide' VBO1:
+  if(show_VBO_1 == 1) { // IF user didn't press HTML button to 'hide' VBO1:
     GouraudBox.switchToMe(); 
     GouraudBox.isReady(); 
   	GouraudBox.adjust();		  // Send new values for uniforms to the GPU, and
   	GouraudBox.draw();			  // draw our VBO's contents using our shaders.
 	  }
-	if(g_show2 == 1) { // IF user didn't press HTML button to 'hide' VBO2:
+	if(show_VBO_2 == 1) { // IF user didn't press HTML button to 'hide' VBO2:
 	  PhongBox.switchToMe();  // Set WebGL to render from this VBObox.
     PhongBox.isReady();
   	PhongBox.adjust();		  // Send new values for uniforms to the GPU, and
@@ -262,24 +249,24 @@ function drawAll() {
 function VBO0toggle() {
 //=============================================================================
 // Called when user presses HTML-5 button 'Show/Hide VBO0'.
-  if(g_show0 != 1) g_show0 = 1;				// show,
-  else g_show0 = 0;										// hide.
-  console.log('g_show0: '+g_show0);
+  if(show_VBO_0 != 1) show_VBO_0 = 1;				// show,
+  else show_VBO_0 = 0;										// hide.
+  console.log('show_VBO_0: '+show_VBO_0);
 }
 
 function VBO1toggle() {
 //=============================================================================
 // Called when user presses HTML-5 button 'Show/Hide VBO1'.
-  if(g_show1 == 1) {
-    g_show1 = 0;			// show,
+  if(show_VBO_1 == 1) {
+    show_VBO_1 = 0;			// show,
     console.log('Hide shader VBO1');
-    g_show2 = 1;
+    show_VBO_2 = 1;
     console.log('Show shader VBO2');
     document.getElementById('toggleShading').innerText = "Switch Phong Shading";
   } else {
-    g_show1 = 1;
+    show_VBO_1 = 1;
     console.log('Show shader VBO1');
-    g_show2 = 0;
+    show_VBO_2 = 0;
     console.log('Hide shader VBO2');
     document.getElementById('toggleShading').innerText= "Switch Gouraud Shading";
   }									// hide.
@@ -293,7 +280,7 @@ function toggleBlinn() {
 }
 
 function setCamera() {
-  g_worldMat.setIdentity();
+  g_worldMatrix.setIdentity();
 
   g_lookX = g_camX + Math.cos(Angle2Radians(g_Theta));
 	g_lookY = g_camY + Math.sin(Angle2Radians(g_Theta));
@@ -305,12 +292,12 @@ function setCamera() {
     g_canvas.height);			// viewport height in pixels.
 
   
-  g_worldMat.perspective(30.0, // FOV
+  g_worldMatrix.perspective(30.0, // FOV
     g_canvas.width/g_canvas.height, // Aspect ratio
     1.0, // z-near
     100.0,); // z-far
     
-  g_worldMat.lookAt( g_camX,  g_camY,  g_camZ, // camera position
+  g_worldMatrix.lookAt( g_camX,  g_camY,  g_camZ, // camera position
                      g_lookX, g_lookY, g_lookZ, // looking position
                      0.0,     0.0,     1.0,);// up vector
 }

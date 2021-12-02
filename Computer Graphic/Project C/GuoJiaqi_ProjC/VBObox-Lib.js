@@ -1,14 +1,17 @@
-
 const floatsPerVertex = 6;
 
 // *************************Useful Function************************** */
 
-function setMvpMatrix(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc){
+function setMvpMatrix(gl,MvpMatrix, ModelMatrix, g_worldMatrix, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc, u_ModelMatrixLoc){
   NormalMatrix.setInverseOf(ModelMatrix);
-  MvpMatrix.set(g_worldMat).multiply(ModelMatrix);
+  MvpMatrix.set(g_worldMatrix).multiply(ModelMatrix);
   NormalMatrix.transpose();
+  gl.uniformMatrix4fv(u_ModelMatrixLoc,	// GPU location of the uniform
+    false, 										// use matrix transpose instead?
+    ModelMatrix.elements);
   gl.uniformMatrix4fv(u_NormalMatrixLoc, false, NormalMatrix.elements);
   gl.uniformMatrix4fv(u_MvpMatrixLoc, false, MvpMatrix.elements)
+  
 }
 
 function set_material(gl, g_currMaterial, mat, g_shiny){
@@ -357,8 +360,8 @@ function makePyramid() {
 }
 
 function makeSphere() {
-  var slices = 15;		// # of slices of the sphere along the z axis. >=3 req'd
-  var sliceVerts = 25;	// # of vertices around the top edge of the slice
+  var slices = 30;		// # of slices of the sphere along the z axis. >=3 req'd
+  var sliceVerts = 40;	// # of vertices around the top edge of the slice
   var sliceAngle = Math.PI / slices;	// lattitude angle spanned by one slice.
   sphVerts = new Float32Array(((slices * 2 * sliceVerts) - 2) * floatsPerVertex);
   var cos0 = 0.0;					// sines,cosines of slice's top, bottom edge.
@@ -417,27 +420,27 @@ function makeSphere() {
 
 //*******************************Draw 3D Object************************************* */
 
-function drawSphere(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc){
-  setMvpMatrix(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)								
+function drawSphere(gl,MvpMatrix, ModelMatrix, g_worldMatrix, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc,u_ModelMatrixLoc){
+  setMvpMatrix(gl,MvpMatrix, ModelMatrix, g_worldMatrix, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc, u_ModelMatrixLoc)								
   gl.drawArrays(gl.TRIANGLE_STRIP, sphStart / floatsPerVertex, sphVerts.length / floatsPerVertex);
 }
 
-function drawTree(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix,u_NormalMatrixLoc){
+function drawTree(gl,MvpMatrix, ModelMatrix, g_worldMatrix, u_MvpMatrixLoc, NormalMatrix,u_NormalMatrixLoc,u_ModelMatrixLoc){
   ModelMatrix.setIdentity(); 
   MvpMatrix.setIdentity();
   ModelMatrix.translate(-2, 2.0, 0.0);
   ModelMatrix.scale(0.2, 0.2, 0.2);
-  setMvpMatrix(gl,	MvpMatrix, 	ModelMatrix, g_worldMat, 	u_MvpMatrixLoc, 	NormalMatrix, 	u_NormalMatrixLoc)	
+  setMvpMatrix(gl,	MvpMatrix, 	ModelMatrix, g_worldMatrix, 	u_MvpMatrixLoc, 	NormalMatrix, 	u_NormalMatrixLoc, u_ModelMatrixLoc)	
   gl.drawArrays(gl.TRIANGLES, 
     cube_vStart/floatsPerVertex, 
     cube_v.length/floatsPerVertex);
   ModelMatrix.translate(0, 0, 2);
-  setMvpMatrix(gl,	MvpMatrix, 	ModelMatrix, g_worldMat, 	u_MvpMatrixLoc, 	NormalMatrix, 	u_NormalMatrixLoc)							
+  setMvpMatrix(gl,	MvpMatrix, 	ModelMatrix, g_worldMatrix, 	u_MvpMatrixLoc, 	NormalMatrix, 	u_NormalMatrixLoc, u_ModelMatrixLoc)							
   gl.drawArrays(gl.TRIANGLES, 
     cube_vStart/floatsPerVertex, 
     cube_v.length/floatsPerVertex);
   ModelMatrix.translate(0, 0, 2);
-  setMvpMatrix(gl,	MvpMatrix, 	ModelMatrix, g_worldMat, 	u_MvpMatrixLoc, 	NormalMatrix, 	u_NormalMatrixLoc)								
+  setMvpMatrix(gl,	MvpMatrix, 	ModelMatrix, g_worldMatrix, 	u_MvpMatrixLoc, 	NormalMatrix, 	u_NormalMatrixLoc, u_ModelMatrixLoc)								
   gl.drawArrays(gl.TRIANGLES, 
   cube_vStart/floatsPerVertex, 
   cube_v.length/floatsPerVertex);
@@ -447,7 +450,7 @@ function drawTree(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalM
   MvpMatrix.setIdentity();
   pushMatrix(	ModelMatrix);
   	ModelMatrix.rotate(90, 1, 0, 0);
-  setMvpMatrix(gl,	MvpMatrix, 	ModelMatrix, g_worldMat, 	u_MvpMatrixLoc, 	NormalMatrix, 	u_NormalMatrixLoc)								
+  setMvpMatrix(gl,	MvpMatrix, 	ModelMatrix, g_worldMatrix, 	u_MvpMatrixLoc, 	NormalMatrix, 	u_NormalMatrixLoc, u_ModelMatrixLoc)								
   gl.drawArrays(gl.TRIANGLES, 
   pyrStart/floatsPerVertex, 
   pyrVerts.length/floatsPerVertex);
@@ -458,7 +461,7 @@ function drawTree(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalM
   ModelMatrix.rotate(g_angle03, 1, 0, 0);
   pushMatrix(	ModelMatrix);
   ModelMatrix.rotate(90, 1, 0, 0);
-  setMvpMatrix(gl,	MvpMatrix, 	ModelMatrix, g_worldMat, 	u_MvpMatrixLoc, 	NormalMatrix, 	u_NormalMatrixLoc)								
+  setMvpMatrix(gl,	MvpMatrix, 	ModelMatrix, g_worldMatrix, 	u_MvpMatrixLoc, 	NormalMatrix, 	u_NormalMatrixLoc, u_ModelMatrixLoc)								
   gl.drawArrays(gl.TRIANGLES, 
   pyrStart/floatsPerVertex, 
   pyrVerts.length/floatsPerVertex);
@@ -469,13 +472,13 @@ function drawTree(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalM
   ModelMatrix.rotate(g_angle05, 1, 0, 0);
   pushMatrix(	ModelMatrix);
   ModelMatrix.rotate(90, 1, 0, 0);
-  setMvpMatrix(gl,	MvpMatrix, 	ModelMatrix, g_worldMat, 	u_MvpMatrixLoc, 	NormalMatrix, 	u_NormalMatrixLoc)								
+  setMvpMatrix(gl,	MvpMatrix, 	ModelMatrix, g_worldMatrix, 	u_MvpMatrixLoc, 	NormalMatrix, 	u_NormalMatrixLoc, u_ModelMatrixLoc)								
   gl.drawArrays(gl.TRIANGLES, 
     pyrStart/floatsPerVertex, 
     pyrVerts.length/floatsPerVertex);
 }
 
-function drawFlower(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix,u_NormalMatrixLoc){
+function drawFlower(gl,MvpMatrix, ModelMatrix, g_worldMatrix, u_MvpMatrixLoc, NormalMatrix,u_NormalMatrixLoc, u_ModelMatrixLoc){
   ModelMatrix.setIdentity();
   MvpMatrix.setIdentity();
   ModelMatrix.translate(2.5, 1.5, 1);
@@ -484,14 +487,14 @@ function drawFlower(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, Norma
   ModelMatrix.scale(0.5, 0.5, 0.5);
   pushMatrix(ModelMatrix);
   ModelMatrix.rotate(90, 1, 0, 0);
-  setMvpMatrix(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)								
+  setMvpMatrix(gl,MvpMatrix, ModelMatrix, g_worldMatrix, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc, u_ModelMatrixLoc)								
   gl.drawArrays(gl.TRIANGLES, concaveHexStart/floatsPerVertex, concaveHexVerts.length/floatsPerVertex);
   
   ModelMatrix = popMatrix();
   pushMatrix(ModelMatrix);
   ModelMatrix.translate(0, -0.25, -0.6);
   ModelMatrix.scale(0.3,0.3,0.3)
-  drawSphere(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)
+  drawSphere(gl,MvpMatrix, ModelMatrix, g_worldMatrix, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc, u_ModelMatrixLoc)
 
   ModelMatrix = popMatrix();
   ModelMatrix.translate(0, 0, 0.7);
@@ -499,20 +502,19 @@ function drawFlower(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, Norma
   ModelMatrix.rotate(g_angle03, 1, 0, 0);
   pushMatrix(ModelMatrix);
   ModelMatrix.rotate(90, 1, 0, 0);
-  setMvpMatrix(gl, MvpMatrix, ModelMatrix, g_worldMat, 	u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)								
+  setMvpMatrix(gl, MvpMatrix, ModelMatrix, g_worldMatrix, 	u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc, u_ModelMatrixLoc)								
   gl.drawArrays(gl.TRIANGLES, concaveHexStart/floatsPerVertex, concaveHexVerts.length/floatsPerVertex);
 
   ModelMatrix = popMatrix();
   ModelMatrix.translate(0, 0, 0.68);
   ModelMatrix.scale(0.8, 0.8, 0.8);
   ModelMatrix.rotate(g_angle05, 1, 0, 0);
-  pushMatrix(ModelMatrix);
   ModelMatrix.rotate(90, 1, 0, 0);
-  setMvpMatrix(gl, MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)								
+  setMvpMatrix(gl, MvpMatrix, ModelMatrix, g_worldMatrix, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc, u_ModelMatrixLoc)								
   gl.drawArrays(gl.TRIANGLES, concaveHexStart/floatsPerVertex, concaveHexVerts.length/floatsPerVertex);
 }
 
-function drawAlienfish(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix,u_NormalMatrixLoc){
+function drawAlienfish(gl,MvpMatrix, ModelMatrix, g_worldMatrix, u_MvpMatrixLoc, NormalMatrix,u_NormalMatrixLoc, u_ModelMatrixLoc){
   stack = []
   ModelMatrix.setIdentity();
   MvpMatrix.setIdentity()
@@ -521,36 +523,34 @@ function drawAlienfish(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, No
   ModelMatrix.scale(0.4, 0.4, 0.4);
   pushMatrix(ModelMatrix);
 
-  ModelMatrix = popMatrix();
-  pushMatrix(ModelMatrix);
-  ModelMatrix.rotate(g_angleNow1, 0, 0, 1);
-  setMvpMatrix(gl, MvpMatrix, 	ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)	
+  ModelMatrix.rotate(g_angleSphere, 0, 0, 1);
+  setMvpMatrix(gl, MvpMatrix, 	ModelMatrix, g_worldMatrix, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc, u_ModelMatrixLoc)	
   gl.drawArrays(gl.TRIANGLES, 
     cube_vStart/floatsPerVertex, 
     cube_v.length/floatsPerVertex);
   ModelMatrix.translate(0, 0, 2);
-  setMvpMatrix(gl, MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)							
+  setMvpMatrix(gl, MvpMatrix, ModelMatrix, g_worldMatrix, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc, u_ModelMatrixLoc)							
   gl.drawArrays(gl.TRIANGLES, 
     cube_vStart/floatsPerVertex, 
     cube_v.length/floatsPerVertex);
   ModelMatrix.translate(0, 0, 1.6);
-  setMvpMatrix(gl, MvpMatrix, 	ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)								
-  drawSphere(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)
+  setMvpMatrix(gl, MvpMatrix, 	ModelMatrix, g_worldMatrix, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc, u_ModelMatrixLoc)								
+  drawSphere(gl,MvpMatrix, ModelMatrix, g_worldMatrix, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)
   stack.push(new Matrix4(ModelMatrix))
   ModelMatrix.translate(0, 0.9, 0.4);
   ModelMatrix.scale(0.25, 0.25, 0.25);
-  drawSphere(gl, MvpMatrix, ModelMatrix, g_worldMat,	u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)
+  drawSphere(gl, MvpMatrix, ModelMatrix, g_worldMatrix,	u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc, u_ModelMatrixLoc)
   ModelMatrix = stack.pop();
   stack.push(new Matrix4(ModelMatrix));
   ModelMatrix.translate(0, -0.9, 0.4);
   ModelMatrix.scale(0.25, 0.25, 0.25);
-  drawSphere(gl, MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)
+  drawSphere(gl, MvpMatrix, ModelMatrix, g_worldMatrix, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc, u_ModelMatrixLoc)
   ModelMatrix = popMatrix();
   ModelMatrix.translate(0, 0.3, -1.7);
   ModelMatrix.scale(1.3, 1.3, 1.3);
   pushMatrix(ModelMatrix);
   ModelMatrix.rotate(90, 1, 0, 0);
-  setMvpMatrix(gl, MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)								
+  setMvpMatrix(gl, MvpMatrix, ModelMatrix, g_worldMatrix, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc, u_ModelMatrixLoc)								
   gl.drawArrays(gl.TRIANGLES, concaveHexStart/floatsPerVertex, concaveHexVerts.length/floatsPerVertex);
   ModelMatrix = popMatrix();
   ModelMatrix.scale(0.8, 0.8, 0.8);
@@ -559,7 +559,7 @@ function drawAlienfish(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, No
   ModelMatrix.translate(0, 0, -0.4);
   pushMatrix(ModelMatrix);
   ModelMatrix.rotate(90, 1, 0, 0);
-  setMvpMatrix(gl, MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)								
+  setMvpMatrix(gl, MvpMatrix, ModelMatrix, g_worldMatrix, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc, u_ModelMatrixLoc)								
   gl.drawArrays(gl.TRIANGLES, concaveHexStart/floatsPerVertex, concaveHexVerts.length/floatsPerVertex);
   ModelMatrix = popMatrix();
   ModelMatrix.translate(0, 0, -0.68);
@@ -567,7 +567,7 @@ function drawAlienfish(gl,MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, No
   ModelMatrix.rotate(g_angle05, 1, 0, 0);
   pushMatrix(ModelMatrix);
   ModelMatrix.rotate(90, 1, 0, 0);
-  setMvpMatrix(gl, MvpMatrix, ModelMatrix, g_worldMat, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc)								
+  setMvpMatrix(gl, MvpMatrix, ModelMatrix, g_worldMatrix, u_MvpMatrixLoc, NormalMatrix, u_NormalMatrixLoc, u_ModelMatrixLoc)								
   gl.drawArrays(gl.TRIANGLES, concaveHexStart/floatsPerVertex, concaveHexVerts.length/floatsPerVertex);
 }
 
@@ -713,7 +713,7 @@ VBObox0.prototype.adjust = function() {
   }  
   // Adjust values for our uniforms
   this.ModelMat.setIdentity(); // sanity check: clear modelMatrix
-  this.ModelMat.set(g_worldMat); // use global camera 
+  this.ModelMat.set(g_worldMatrix); // use global camera 
 
   //this.ModelMat.translate(0.4, -0.4, 0.0);
   //this.ModelMat.scale(0.1, 0.1, 0.1)
@@ -786,7 +786,7 @@ function VBObox1() {
 
   attribute vec4 a_Pos1;
   attribute vec4 a_Normal;
-  varying vec4 v_Pos1;
+  varying vec4 v_Position;
   varying vec4 v_Color;
 
   varying vec3 v_Kd;
@@ -797,24 +797,26 @@ function VBObox1() {
 
   void main() {
     gl_Position = u_MvpMatrix * a_Pos1;
-    v_Pos1 = u_ModelMatrix * a_Pos1;
+    v_Position = u_ModelMatrix * a_Pos1;
     
     v_Normal = normalize(vec3(u_NormalMatrix * a_Normal));
     v_Kd = u_MatlSet[0].diff;
-    vec3 normal = normalize(v_Normal);
-    vec3 lightDirection = normalize(u_LampSet[0].pos - vec3(v_Pos1));
-    vec3 eyeDirection = normalize(u_eyePosWorld - vec3(v_Pos1));
-    // ? Lambertian's cosine law
-    float nDotL = max(dot(lightDirection, normal), 0.0);
+
+
+    vec3 lightDirection = normalize(u_LampSet[0].pos - v_Position.xyz);
+    vec3 eyeDirection = normalize(u_eyePosWorld - v_Position.xyz);
+    float nDotL = max(dot(lightDirection, v_Normal), 0.0);
     float e64 = 0.0;
 
+  
+
     if(!u_isBlinn) {
-      vec3 R = reflect(-lightDirection, normal);
+      vec3 R = reflect(-lightDirection, v_Normal);
       float specAngle = max(dot(R, eyeDirection), 0.0);
       e64 = pow(specAngle, float(u_MatlSet[0].shiny));
     } else {
       vec3 H = normalize(lightDirection + eyeDirection);
-      float nDotH = max(dot(H, normal), 0.0);
+      float nDotH = max(dot(H, v_Normal), 0.0);
       e64 = pow(nDotH, float(u_MatlSet[0].shiny));
     }
     vec3 emissive = u_MatlSet[0].emit;
@@ -867,9 +869,9 @@ function VBObox1() {
 	this.vboStride = this.vboBytes / this.vboVerts;     
   this.vboFcount_a_Pos1 =  3;    // # of floats in the VBO needed to store the
                                 // attribute named a_Pos1. (4: x,y,z,w values)
-  this.vboFcount_a_Normal = 3;  // # of floats for this attrib (just one!)   
+  this.vboFcount_a_normal = 3;  // # of floats for this attrib (just one!)   
   console.assert(((this.vboFcount_a_Pos1 +     // check the size of each and 
-                  this.vboFcount_a_Normal) *   // every attribute in our VBO
+                  this.vboFcount_a_normal) *   // every attribute in our VBO
                   this.FSIZE == this.vboStride), // for agreeement with'stride'
                   "Uh oh! VBObox1.vboStride disagrees with attribute-size values!");
                   
@@ -975,14 +977,12 @@ VBObox1.prototype.switchToMe = function () {
 		false,				// isNormalized == are these fixed-point values that we need
 		this.vboStride,// Stride == #bytes we must skip in the VBO to move from the
 		this.vboOffset_a_Pos1);						
-  gl.vertexAttribPointer(this.a_Normal,this.vboFcount_a_Normal, 
+  gl.vertexAttribPointer(this.a_Normal,this.vboFcount_a_normal, 
                          gl.FLOAT, false, 
 							           this.vboStride,	this.vboOffset_a_Colr1);	
-  //-- Enable this assignment of the attribute to its' VBO source:
+
   gl.enableVertexAttribArray(this.a_PosLoc);
   gl.enableVertexAttribArray(this.a_Normal);
-// if(!initArrayBuffer(gl, this.shaderLoc,'a_Pos1', new Float32Array(this.vboPositions), gl.FLOAT, 3)) return -1;
-// if(!initArrayBuffer(gl, this.shaderLoc, 'a_Normal', new Float32Array(this.vboPositions), gl.FLOAT, 3)) return -1;
 }
 
 VBObox1.prototype.isReady = function() {
@@ -1021,18 +1021,19 @@ VBObox1.prototype.adjust = function() {
   this.eyePosWorld.set([g_camX, g_camY, g_camZ]); // set the eye position to the position of our camera
   // **************** Central Sphere *****************
   set_material(gl, g_currMatl3, this.matl1, g_shiny3)
-  drawTree(gl,this.MvpMatrix, this.ModelMatrix, g_worldMat, this.u_MvpMatrixLoc, this.NormalMatrix, this.u_NormalMatrixLoc)
+  drawTree(gl,this.MvpMatrix, this.ModelMatrix, g_worldMatrix, this.u_MvpMatrixLoc, this.NormalMatrix, this.u_NormalMatrixLoc, this.u_ModelMatrixLoc)
   // **************** Central Sphere *****************
   set_material(gl, g_currMatl1, this.matl1, g_shiny1)
   this.ModelMatrix.setTranslate(0, 0, 0);	
-  this.ModelMatrix.rotate(g_angleNow1, 0, 0, 1);
-  drawSphere(gl,this.MvpMatrix, this.ModelMatrix, g_worldMat, this.u_MvpMatrixLoc, this.NormalMatrix, this.u_NormalMatrixLoc)
+  this.ModelMatrix.rotate(45,1,1,0);
+  this.ModelMatrix.rotate(g_angleSphere,0,0,1);
+  drawSphere(gl,this.MvpMatrix, this.ModelMatrix, g_worldMatrix, this.u_MvpMatrixLoc, this.NormalMatrix, this.u_NormalMatrixLoc, this.u_ModelMatrixLoc)
   // **************** Draw flower *****************
   set_material(gl, g_currMatl4, this.matl1, g_shiny4)
-  drawFlower(gl,this.MvpMatrix, this.ModelMatrix, g_worldMat, this.u_MvpMatrixLoc, this.NormalMatrix, this.u_NormalMatrixLoc)
+  drawFlower(gl,this.MvpMatrix, this.ModelMatrix, g_worldMatrix, this.u_MvpMatrixLoc, this.NormalMatrix, this.u_NormalMatrixLoc, this.u_ModelMatrixLoc)
   // **************** Draw alien fish *****************
   set_material(gl, g_currMatl2, this.matl1, g_shiny2)
-  drawAlienfish(gl,this.MvpMatrix, this.ModelMatrix, g_worldMat, this.u_MvpMatrixLoc, this.NormalMatrix, this.u_NormalMatrixLoc)
+  drawAlienfish(gl,this.MvpMatrix, this.ModelMatrix, g_worldMatrix, this.u_MvpMatrixLoc, this.NormalMatrix, this.u_NormalMatrixLoc, this.u_ModelMatrixLoc)
 }
 
 VBObox1.prototype.draw = function() {
@@ -1057,39 +1058,7 @@ VBObox1.prototype.reload = function() {
  					 				this.vboContents);   // the JS source-data array used to fill VBO
 }
 
-/*
-VBObox1.prototype.empty = function() {
-//=============================================================================
-// Remove/release all GPU resources used by this VBObox object, including any 
-// shader programs, attributes, uniforms, textures, samplers or other claims on 
-// GPU memory.  However, make sure this step is reversible by a call to 
-// 'restoreMe()': be sure to retain all our Float32Array data, all values for 
-// uniforms, all stride and offset values, etc.
-//
-//
-// 		********   YOU WRITE THIS! ********
-//
-//
-//
-}
 
-VBObox1.prototype.restore = function() {
-//=============================================================================
-// Replace/restore all GPU resources used by this VBObox object, including any 
-// shader programs, attributes, uniforms, textures, samplers or other claims on 
-// GPU memory.  Use our retained Float32Array data, all values for  uniforms, 
-// all stride and offset values, etc.
-//
-//
-// 		********   YOU WRITE THIS! ********
-//
-//
-//
-}
-*/
-
-//=============================================================================
-//=============================================================================
 function VBObox2() {
     this.VERT_SRC =	//--------------------- VERTEX SHADER source code 
     glsl` 
@@ -1159,12 +1128,12 @@ function VBObox2() {
       vec3 eyeDirection = normalize(u_eyePosWorld - v_Position.xyz);
       
       float nDotL = max(dot(lightDirection, normal), 0.0);
-      vec3 R = reflect(-lightDirection, normal);
       vec3 H = normalize(lightDirection + eyeDirection);
       float e64 = 0.0;
 
 
       if(!u_isBlinn) {
+        vec3 R = reflect(-lightDirection, normal);
         float specAngle = max(dot(R, eyeDirection), 0.0);
         e64 = pow(specAngle, float(u_MatlSet[0].shiny));
       } else {
@@ -1212,17 +1181,20 @@ function VBObox2() {
     this.FSIZE = this.vboContents.BYTES_PER_ELEMENT;  
     this.vboBytes = this.vboContents.length * this.FSIZE;               
     this.vboStride = this.vboBytes / this.vboVerts;     
-    this.vboFcount_a_Position =  3;    // # of floats in the VBO needed to store the
-    this.vboFcount_a_Normal = 3;  // # of floats for this attrib (just one!)   
-    console.assert(((this.vboFcount_a_Position +     // check the size of each and 
-                    this.vboFcount_a_Normal) *   // every attribute in our VBO
+    this.vboFcount_a_Pos1 =  3;    // # of floats in the VBO needed to store the
+    this.vboFcount_a_normal = 3;  // # of floats for this attrib (just one!)   
+    console.assert(((this.vboFcount_a_Pos1 +     // check the size of each and 
+                    this.vboFcount_a_normal) *   // every attribute in our VBO
                     this.FSIZE == this.vboStride), // for agreeement with'stride'
                     "Uh oh! VBObox1.vboStride disagrees with attribute-size values!");
-    this.vboOffset_a_Position = 0;    //# of bytes from START of vbo to the START
-    this.vboOffset_a_Colr1 = (this.vboFcount_a_Position) * this.FSIZE;                                 
+    this.vboOffset_a_Pos1 = 0;    //# of bytes from START of vbo to the START
+    this.vboOffset_a_Colr1 = (this.vboFcount_a_Pos1) * this.FSIZE;    
+    this.vboOffset_a_normal =(this.vboFcount_a_Pos1 +
+                                this.vboFcount_a_Colr1) * this.FSIZE;                              
     this.vboLoc;									// GPU Location for Vertex Buffer Object, 
-    this.shaderLoc;								// GPU Location for compiled Shader-program  
-    this.a_PosLoc;							  // GPU location: shader 'a_Pos1' attribute
+    this.shaderLoc;								// GPU Location for compiled Shader-program  \
+
+    this.a_Pos1Loc;							  // GPU location: shader 'a_Pos1' attribute
     this.a_Normal;              // GPU location: shader 'a_Normal' attribute
 
   
@@ -1263,8 +1235,8 @@ function VBObox2() {
                     gl.STATIC_DRAW);			// Usage hint.
                      
                      
-    this.a_PosLoc = gl.getAttribLocation(this.shaderLoc, 'a_Pos1');
-    if(this.a_PosLoc < 0) {
+    this.a_Pos1Loc = gl.getAttribLocation(this.shaderLoc, 'a_Pos1');
+    if(this.a_Pos1Loc < 0) {
       console.log(this.constructor.name + 
                   '.init() Failed to get GPU location of attribute a_Pos1');
       return -1;	// error exit.
@@ -1306,7 +1278,6 @@ function VBObox2() {
     this.lamp2.u_diff = gl.getUniformLocation(this.shaderLoc, 'u_LampSet[0].diff');
     this.lamp2.u_ambi = gl.getUniformLocation(this.shaderLoc, 'u_LampSet[0].ambi');
     this.lamp2.u_spec = gl.getUniformLocation(this.shaderLoc, 'u_LampSet[0].spec');
-  
     if( !this.lamp2.u_pos || !this.lamp2.u_diff 
     || !this.lamp2.u_ambi || !this.lamp2.u_spec) {
       console.log(this.constructor.name + ' failed to get one or more lighting uniform storage locations.');
@@ -1332,8 +1303,8 @@ function VBObox2() {
                       this.vboLoc);			// the ID# the GPU uses for our VBO.
 
   gl.vertexAttribPointer(
-  		this.a_PosLoc,//index == ID# for the attribute var in GLSL shader pgm;
-  		this.vboFcount_a_Position, // # of floats used by this attribute: 1,2,3 or 4?
+  		this.a_Pos1Loc,//index == ID# for the attribute var in GLSL shader pgm;
+  		this.vboFcount_a_Pos1, // # of floats used by this attribute: 1,2,3 or 4?
   		gl.FLOAT,		  // type == what data type did we use for those numbers?
   		false,				// isNormalized == are these fixed-point values that we need
   									//									normalize before use? true or false
@@ -1344,14 +1315,14 @@ function VBObox2() {
   									// to zero, the GPU gets attribute values sequentially from 
   									// VBO, starting at 'Offset'.	
   									// (Our vertex size in bytes: 4 floats for pos + 3 for color)
-  		this.vboOffset_a_Position);						
+  		this.vboOffset_a_Pos1);						
   		              // Offset == how many bytes from START of buffer to the first
     								// value we will actually use?  (we start with position).
-    gl.vertexAttribPointer(this.a_Normal,this.vboFcount_a_Normal, 
+    gl.vertexAttribPointer(this.a_Normal,this.vboFcount_a_normal, 
                            gl.FLOAT, false, 
   							           this.vboStride,	this.vboOffset_a_Colr1);	
     //-- Enable this assignment of the attribute to its' VBO source:
-    gl.enableVertexAttribArray(this.a_PosLoc);
+    gl.enableVertexAttribArray(this.a_Pos1Loc);
     gl.enableVertexAttribArray(this.a_Normal);
   }
   
@@ -1398,18 +1369,19 @@ function VBObox2() {
 
   // **************** Central Sphere *****************
   set_material(gl, g_currMatl3, this.matl2, g_shiny3)
-  drawTree(gl,this.MvpMatrix, this.ModelMatrix, g_worldMat, this.u_MvpMatrixLoc, this.NormalMatrix, this.u_NormalMatrixLoc)
+  drawTree(gl,this.MvpMatrix, this.ModelMatrix, g_worldMatrix, this.u_MvpMatrixLoc, this.NormalMatrix, this.u_NormalMatrixLoc, this.u_ModelMatrixLoc)
   // **************** Central Sphere *****************
   set_material(gl, g_currMatl1, this.matl2, g_shiny1)
   this.ModelMatrix.setTranslate(0, 0, 0);	
-  this.ModelMatrix.rotate(g_angleNow1, 0, 0, 1);
-  drawSphere(gl,this.MvpMatrix, this.ModelMatrix, g_worldMat, this.u_MvpMatrixLoc, this.NormalMatrix, this.u_NormalMatrixLoc)
+  this.ModelMatrix.rotate(45,1,1,0);
+  this.ModelMatrix.rotate(g_angleSphere,0,0,1);
+  drawSphere(gl,this.MvpMatrix, this.ModelMatrix, g_worldMatrix, this.u_MvpMatrixLoc, this.NormalMatrix, this.u_NormalMatrixLoc, this.u_ModelMatrixLoc)
   // **************** Draw flower *****************
   set_material(gl, g_currMatl4, this.matl2, g_shiny4)
-  drawFlower(gl,this.MvpMatrix, this.ModelMatrix, g_worldMat, this.u_MvpMatrixLoc, this.NormalMatrix, this.u_NormalMatrixLoc)
+  drawFlower(gl,this.MvpMatrix, this.ModelMatrix, g_worldMatrix, this.u_MvpMatrixLoc, this.NormalMatrix, this.u_NormalMatrixLoc, this.u_ModelMatrixLoc)
   // **************** Draw alien fish *****************
   set_material(gl, g_currMatl2, this.matl2, g_shiny2)
-  drawAlienfish(gl,this.MvpMatrix, this.ModelMatrix, g_worldMat, this.u_MvpMatrixLoc, this.NormalMatrix, this.u_NormalMatrixLoc)
+  drawAlienfish(gl,this.MvpMatrix, this.ModelMatrix, g_worldMatrix, this.u_MvpMatrixLoc, this.NormalMatrix, this.u_NormalMatrixLoc, this.u_ModelMatrixLoc)
 }
   
   VBObox2.prototype.draw = function() {
