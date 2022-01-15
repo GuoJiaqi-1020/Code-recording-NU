@@ -26,7 +26,7 @@ If you want to download specific any folder in my project, please use [**DownGit
 
 <font size=2>
 
-**1. [COMP\_SCI 396: Special Topic-Social Networking](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Computer%20Graphic)**
+**1. [COMP\_SCI 396: Special Topic-Social Networking](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Social%20Networking_396/Lab1a_Descriptive%20Network%20Analysis)**
 
 **2. [ELEC_ENG  433-0: Statistical Pattern Recognition](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Statistical%20Pattern%20Recognition_433)**
 
