@@ -18,7 +18,7 @@ If you want to download specific any folder in my project, please use [**DownGit
 
 **2. [ELEC_ENG  359-0: Dig Sig Process](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Digital%20Signal%20Processing)**
 
-**3. [ELEC_ENG 475-0-1: Machine Learning: FAA](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Machine%20Learning%20FFA)**
+**3. [ELEC_ENG 475-0-1: Machine Learning: FFA](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Machine%20Learning%20FFA)**
 
 </font>
 
@@ -28,9 +28,9 @@ If you want to download specific any folder in my project, please use [**DownGit
 
 **1. [COMP\_SCI 396: Special Topic-Social Networking](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Computer%20Graphic)**
 
-**2. [ELEC_ENG  433-0: Statistical Pattern Recognition](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Digital%20Signal%20Processing)**
+**2. [ELEC_ENG  433-0: Statistical Pattern Recognition](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Statistical%20Pattern%20Recognition_433)**
 
-**3. [ELEC_ENG 475-0-1: Deep Learning: FAA](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Machine%20Learning%20FFA)**
+**3. [ELEC_ENG 475-0-1: Deep Learning: FFA](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Deep%20Learning%20FFA_435)**
 
 </font>
 
