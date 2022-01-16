@@ -240,31 +240,33 @@ class Visualizer:
         plt.show()
 
     ##### draw picture of function and run for two-input function ####       
-    def two_input_contour_vert_plots(self, gs, histories, **kwargs):
+    def two_input_contour_vert_plots(self, title, gs, histories, **kwargs):
         ##### construct figure with panels #####
         # construct figure
-        fig = plt.figure(figsize=(10, 7))
+
+        fig = plt.figure(figsize=(12, 7))
 
         # create figure with single plot for contour
         num_plots = len(histories)
         axs = gridspec.GridSpec(num_plots, 1)
 
         # remove whitespace from figure
-        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)  # remove whitespace
-        fig.subplots_adjust(wspace=0.01, hspace=0.01)
+        fig.subplots_adjust(left=0, right=0.94, bottom=0.075, top=0.945)  # remove whitespace
+        fig.subplots_adjust(wspace=0, hspace=0.335)
 
         # define edgecolors 
         edgecolors = ['k', 'k', 'k', 'k', 'k']
 
         # loop over histories and plot
         for j in range(num_plots):
+            if j == 1:
+                plt.title(title, fontsize=14)
             # get next weight history
             w_hist = histories[j]
             g = gs[j]
 
             # create subplot
             ax = plt.subplot(axs[j], aspect='equal');
-
             ### make contour right plot - as well as horizontal and vertical axes ###
             self.contour_plot_setup(g, ax, **kwargs)  # draw contour plot
             self.edgecolor = edgecolors[j]
@@ -286,8 +288,8 @@ class Visualizer:
         ax2 = plt.subplot(gs[1], aspect='equal')
 
         # remove whitespace from figure
-        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)  # remove whitespace
-        fig.subplots_adjust(wspace=0.01, hspace=0.01)
+        fig.subplots_adjust(left=0, right=0.94, bottom=0.09, top=0.955)  # remove whitespace
+        fig.subplots_adjust(wspace=0, hspace=0.335)
 
         ### make contour right plot - as well as horizontal and vertical axes ###
         self.contour_plot_setup(g, ax1, **kwargs)  # draw contour plot
@@ -303,10 +305,10 @@ class Visualizer:
 
     def plot_cost_histories(self, histories, start, title, **kwargs):
         # plotting colors
-        colors = ['k', 'magenta', 'aqua', 'blueviolet', 'chocolate']
+        colors = ['orange','b', 'blueviolet', 'b', 'r', 'aqua', 'chocolate']
 
         # initialize figure
-        fig = plt.figure(figsize=(10, 3))
+        fig = plt.figure(figsize=(10, 6))
 
         # create subplot with 1 panel
         gs = gridspec.GridSpec(1, 1)
