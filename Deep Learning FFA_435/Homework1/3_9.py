@@ -1,6 +1,4 @@
 from mlrefined_libraries.math_optimization_library import static_plotter
-
-from mlrefined_libraries.math_optimization_library import static_plotter
 from autograd import *
 from autograd import numpy as np
 
