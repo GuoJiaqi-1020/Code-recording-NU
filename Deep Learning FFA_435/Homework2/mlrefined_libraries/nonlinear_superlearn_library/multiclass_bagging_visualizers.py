@@ -68,6 +68,7 @@ class Visualizer:
         # plot all models and ave
         self.draw_models(ax,best_runs)
         ax.axis('equal')
+        plt.show()
 
             
     def draw_models(self,ax,runs):
@@ -327,4 +328,5 @@ class Visualizer:
                 z_final[i,j] = common_val.mode[0]
 
         ax1.contour(a,b,z_final,colors = 'k',levels = range(0,C+1),linewidths = 3.5,zorder = 5)
-        
+        plt.show()
+

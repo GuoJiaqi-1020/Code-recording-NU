@@ -108,7 +108,7 @@ class Setup:
         # add regularizer 
         cost += self.reg(w)
         
-        # return average
+        # return averageset
         return cost/float(np.size(y_p))
     
     # the counting cost function

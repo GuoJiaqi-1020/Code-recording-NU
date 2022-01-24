@@ -115,7 +115,7 @@ class Setup:
         # loop over lams and try out each
         for i in range(num_rounds):     
             # print update
-            #print ('running '  + str(i+1) + ' of ' + str(num_rounds) + ' rounds')
+            print ('running '  + str(i+1) + ' of ' + str(num_rounds) + ' rounds')
             
             # set lambda
             lam = self.lams[i]

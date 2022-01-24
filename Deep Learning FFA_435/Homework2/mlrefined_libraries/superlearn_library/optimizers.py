@@ -140,7 +140,7 @@ class MyOptimizers:
             geval_new = flat_g(w)
             if k > 2 and geval_new > geval_old:
                 print ('singular system reached')
-                time.sleep(1.5)
+                time.sleep(0.5)
                 clear_output()
                 return w_hist
             else:

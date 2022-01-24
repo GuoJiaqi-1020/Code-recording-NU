@@ -25,45 +25,45 @@ class Visualizer:
         # grab input
         data = np.loadtxt(csvname,delimiter = ',')
         self.x = data[:-1,:]
-        self.y = data[-1:,:] 
+        self.y = data[-1:,:]
 
         self.colors = ['salmon','cornflowerblue','lime','bisque','mediumaquamarine','b','m','g']
-        
+
     ########## show boosting results on 1d regression, with fit to residual ##########
     def animate_trees(self,tree,**kwargs):
         # construct figure
         fig = plt.figure(figsize=(3.5,3.5))
         artist = fig
-        
+
         pt_size = 60
         if 'pt_size' in kwargs:
             pt_size = kwargs['pt_size']
 
         # create subplot with 2 active panels
-        gs = gridspec.GridSpec(1, 1) 
-        ax = plt.subplot(gs[0]); 
+        gs = gridspec.GridSpec(1, 1)
+        ax = plt.subplot(gs[0]);
         ax.axis('off')
-        
+
         # set plotting limits
         xmax1 = np.max(copy.deepcopy(self.x[0,:]))
         xmin1 = np.min(copy.deepcopy(self.x[0,:]))
         xgap1 = (xmax1 - xmin1)*0.1
         xmin1 -= xgap1
         xmax1 += xgap1
-        
+
         xmax2 = np.max(copy.deepcopy(self.x[1,:]))
         xmin2 = np.min(copy.deepcopy(self.x[1,:]))
         xgap2 = (xmax2 - xmin2)*0.1
         xmin2 -= xgap2
-        xmax2 += xgap2 
- 
+        xmax2 += xgap2
+
         # start animation
         num_frames = tree.depth + 1
         print ('starting animation rendering...')
         def animate(k):
             # clear panels
             ax.cla()
-            
+
             # print rendering update
             if np.mod(k+1,25) == 0:
                 print ('rendering animation frame ' + str(k) + ' of ' + str(num_frames))
@@ -71,7 +71,7 @@ class Visualizer:
                 print ('animation rendering complete!')
                 time.sleep(1.5)
                 clear_output()
-            
+
             # scatter data
             vals = np.unique(self.y)
             count = 0
@@ -86,22 +86,22 @@ class Visualizer:
             ax.set_ylabel(r'$x_2$', rotation = 0,fontsize = 14,labelpad = 15)
             # ax.axis('off')
 
-            ### clean up panels ###             
+            ### clean up panels ###
             ax.set_xlim([xmin1,xmax1])
             ax.set_ylim([xmin2,xmax2])
-            
+
             if k == 0:
                 ax.set_title('a',fontsize = 14,alpha=0)
-        
+
             if k > 0:
-                # pluck out current weights 
+                # pluck out current weights
                 color_it = True
                 self.draw_fit(ax,tree,k-1,color_it)
                 ax.set_title('tree depth = ' + str(k),fontsize = 14)
             return artist,
 
         anim = animation.FuncAnimation(fig, animate ,frames=num_frames, interval=num_frames, blit=True)
-        
+
         return(anim)
 
     # 1d regression demo
@@ -112,13 +112,13 @@ class Visualizer:
         xgap1 = (xmax1 - xmin1)*0.1
         xmin1 -= xgap1
         xmax1 += xgap1
-        
+
         xmax2 = np.max(copy.deepcopy(self.x[1,:]))
         xmin2 = np.min(copy.deepcopy(self.x[1,:]))
         xgap2 = (xmax2 - xmin2)*0.1
         xmin2 -= xgap2
-        xmax2 += xgap2 
- 
+        xmax2 += xgap2
+
         # plot boundary for 2d plot
         r1 = np.linspace(xmin1,xmax1,150)
         r2 = np.linspace(xmin2,xmax2,150)
@@ -126,13 +126,13 @@ class Visualizer:
         s = np.reshape(s,(np.size(s),1))
         t = np.reshape(t,(np.size(t),1))
         h = np.concatenate((s,t),axis = 1)
-        
+
         a = []
         for val in h:
             val = val[:,np.newaxis]
             out = tree.evaluate_tree(val,ind)
-            a.append(out)    
-        a = np.array(a)    
+            a.append(out)
+        a = np.array(a)
 
         # compute model on train data
         #z1 = np.sign(a)
@@ -141,9 +141,9 @@ class Visualizer:
 
         # reshape it
         s.shape = (np.size(r1),np.size(r2))
-        t.shape = (np.size(r1),np.size(r2))     
+        t.shape = (np.size(r1),np.size(r2))
         z1.shape = (np.size(r1),np.size(r2))
-        
+
         #### plot contour, color regions ####
         ax.contour(s,t,z1,colors='k', linewidths=2.5,levels = range(C-1),zorder = 2)
         if color_it == True:
@@ -151,4 +151,3 @@ class Visualizer:
 
 
         #for s in range(ind):
-            

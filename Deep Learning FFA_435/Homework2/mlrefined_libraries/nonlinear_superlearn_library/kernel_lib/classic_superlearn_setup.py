@@ -48,12 +48,12 @@ class Setup:
         self.y_valid = self.y[:,self.valid_inds]   
         
     #### define feature transformation ####
-    def choose_kernel(self,name,**kwargs):    
-        # choose kernel type 
+    def choose_kernel(self,name,**kwargs):
+        # choose kernel type
         self.transformer = kernels.Setup(name,**kwargs)
         self.H_train = self.transformer.kernel(self.x_train,self.x_train)
         self.H = lambda x: self.transformer.kernel(self.x_train,x)
-     
+
     #### define cost function ####
     def choose_cost(self,name,**kwargs):
         # create cost on entire dataset
