@@ -1,48 +1,13 @@
-# Lab 1a: Descriptive Network Analysis (Gathering data and visualization)
-
-######################################################################################
-#
-# Intro
-#
-######################################################################################
-
-# Lines that start with a hashtag/pound symbol, like this one, are comment lines.
-# Comment lines are ignored by R when it is running the code.
-
-# To run a non-commented line in RStudio, click the "Run" button above
-# or press Ctrl+Enter on Windows and Cmd+Enter on macOS.
-# Any output will be printed in the Console pane (placed below) and all plots
-# will be displayed in the Plots pane (placed bottom right).
-# Try running the lines below and observing what happens:
-
-print("Hello, R!")
-plot(1:10)
-
-# Complete the lab work by following the instructions and running the provided code.
-# You may be required to edit some lines before running them to achieve the desired result.
-
-######################################################################################
-#
-# Import the necessary libraries
-#
-######################################################################################
-
-# First time you run this file, you will need to install several packages.
-# To do that, run code lines 35-38. It may take up a copule of minutes.
-# You only need to install packages once, next time you should skip those lines.
 
 if (!"vosonSML" %in% installed.packages()) install.packages("vosonSML") ## this package is a social media data collection tool
 if (!"magrittr" %in% installed.packages()) install.packages("magrittr") ## this package allows you to use so-called pipe (%>%)
 if (!"igraph" %in% installed.packages()) install.packages("igraph") ## this package is a network analysis tool
 if (!"statnet" %in% install.packages()) install.packages("statnet") ## this package is another popular network analysis tool
 
-# Now run the lines below to load the packages you have installed.
-# You need to load packages every time you run the script or restart R.
 library(magrittr)
 library(igraph)
 library(vosonSML)
 
-# To check whether your R loads these packages, run te following code
 sessionInfo() ## check other attached packages. If magrittr, vosonSML, & igraph are listed there, you're ready!
 
 ######################################################################################
@@ -81,7 +46,7 @@ sessionInfo() ## check other attached packages. If magrittr, vosonSML, & igraph 
 ########################
 # collect reddit comment threads
 # Replace with your list of reddit comment thread urls
-myThreadUrls <- c("https://www.reddit.com/r/AskReddit/comments/7sk2ox/what_are_your_views_on_the_metoo_movement/","https://www.reddit.com/r/meToo/comments/mj9rs3/a_generational_gap/")
+myThreadUrls <- c("https://www.reddit.com/r/bayarea/comments/sd7eup/san_jose_passes_first_us_law_requiring_gun_owners/")
 
 # authentication does not require credentials
 redditData <- Authenticate("reddit") %>%
@@ -91,70 +56,70 @@ View(redditData)
 ## actor network - nodes are users who have posted comments
 # create an actor network with comment text as edge attribute
 actorGraph <- redditData %>% Create("actor") %>% AddText(redditData) %>% Graph
-
-#########################
-# Youtube data collection
-#########################
-# Follow instructions in the lab writeup to get api keys
-
-# YoutubeAPIKey - Replace with your API key
-myYoutubeAPIKey <- "xxxxxxxxxxxxxxxxxxxxx"
-
-# helper to create a list of youtube video ids from urls
-# Replace with your list of youtube video urls
-myYoutubeVideoIds <- GetYoutubeVideoIDs(c("https://www.youtube.com/watch?v=ATYK2svJ6eM","https://www.youtube.com/watch?v=ZF55ItXWjck"))
-
-# authenticate and collect 500 top-level comments per youtube video in list
-# also collects reply-comments for each top-level comment
-youtubeData <- Authenticate("youtube", apiKey = myYoutubeAPIKey) %>%
-  Collect(videoIDs = myYoutubeVideoIds, maxComments = 500,verbose = TRUE)
-View(youtubeData)
-
-
-## actor network - nodes are users who have posted comments
-actorGraph <- youtubeData %>% Create("actor") %>% AddText(youtubeData) %>% Graph
-
-#########################
-# Twitter data collection
-#########################
-# Follow instructions in the lab writeup to get API keys
-
-# App name - Replace with your app name
-myAppName <- "replace w/ app name"
-# apiKey - Replace with your API key
-myApiKey <- "replace with API key"
-# apiSecret - Replace with your API key secret
-myApiSecret <- "replace with API secret"
-# Replace with access token and access token secret
-myAccessToken <- "replace w cToken"
-myAccessTokenSecret <- "replace with accessTokenSecret"
-
-twitterAuth <- Authenticate("twitter", appName = myAppName, apiKey = myApiKey, 
-                            apiSecret = myApiSecret, accessToken = myAccessToken,
-                            accessTokenSecret = myAccessTokenSecret)
-
-# twitter authentication creates an access token as part of the auth object
-# this can and should be re-used by saving it and then loading it for future sessions
-# save the auth object after authenticate 
-saveRDS(twitterAuth, file = "~/.twitter_auth")
-
-# load a previously saved auth object for use in collect
-twitterAuth <- readRDS("~/.twitter_auth")
-
-# searchTerm - Replace with your search terms such as c('#prolife','#prochoice')
-# collect 500 recent tweets
-twittersearchTerm <- c('#metoomovement')
-twitterData <- twitterAuth %>%
-  Collect(searchTerm = twittersearchTerm, searchType = "recent", numTweets = 500, 
-          includeRetweets = TRUE, retryOnRateLimit = TRUE, writeToFile = FALSE, 
-          verbose = TRUE)
-View(twitterData)
-
-## actor network - nodes are users who have tweeted
-## edges are based on either retweets or @mention (so-called reply)
-actorGraph <- twitterData %>% 
-  Create("actor") %>% 
-  Graph
+# 
+# #########################
+# # Youtube data collection
+# #########################
+# # Follow instructions in the lab writeup to get api keys
+# 
+# # YoutubeAPIKey - Replace with your API key
+# myYoutubeAPIKey <- "xxxxxxxxxxxxxxxxxxxxx"
+# 
+# # helper to create a list of youtube video ids from urls
+# # Replace with your list of youtube video urls
+# myYoutubeVideoIds <- GetYoutubeVideoIDs(c("https://www.youtube.com/watch?v=ATYK2svJ6eM","https://www.youtube.com/watch?v=ZF55ItXWjck"))
+# 
+# # authenticate and collect 500 top-level comments per youtube video in list
+# # also collects reply-comments for each top-level comment
+# youtubeData <- Authenticate("youtube", apiKey = myYoutubeAPIKey) %>%
+#   Collect(videoIDs = myYoutubeVideoIds, maxComments = 500,verbose = TRUE)
+# View(youtubeData)
+# 
+# 
+# ## actor network - nodes are users who have posted comments
+# actorGraph <- youtubeData %>% Create("actor") %>% AddText(youtubeData) %>% Graph
+# 
+# #########################
+# # Twitter data collection
+# #########################
+# # Follow instructions in the lab writeup to get API keys
+# 
+# # App name - Replace with your app name
+# myAppName <- "replace w/ app name"
+# # apiKey - Replace with your API key
+# myApiKey <- "replace with API key"
+# # apiSecret - Replace with your API key secret
+# myApiSecret <- "replace with API secret"
+# # Replace with access token and access token secret
+# myAccessToken <- "replace w cToken"
+# myAccessTokenSecret <- "replace with accessTokenSecret"
+# 
+# twitterAuth <- Authenticate("twitter", appName = myAppName, apiKey = myApiKey, 
+#                             apiSecret = myApiSecret, accessToken = myAccessToken,
+#                             accessTokenSecret = myAccessTokenSecret)
+# 
+# # twitter authentication creates an access token as part of the auth object
+# # this can and should be re-used by saving it and then loading it for future sessions
+# # save the auth object after authenticate 
+# saveRDS(twitterAuth, file = "~/.twitter_auth")
+# 
+# # load a previously saved auth object for use in collect
+# twitterAuth <- readRDS("~/.twitter_auth")
+# 
+# # searchTerm - Replace with your search terms such as c('#prolife','#prochoice')
+# # collect 500 recent tweets
+# twittersearchTerm <- c('#metoomovement')
+# twitterData <- twitterAuth %>%
+#   Collect(searchTerm = twittersearchTerm, searchType = "recent", numTweets = 500, 
+#           includeRetweets = TRUE, retryOnRateLimit = TRUE, writeToFile = FALSE, 
+#           verbose = TRUE)
+# View(twitterData)
+# 
+# ## actor network - nodes are users who have tweeted
+# ## edges are based on either retweets or @mention (so-called reply)
+# actorGraph <- twitterData %>% 
+#   Create("actor") %>% 
+#   Graph
 
 ########################
 # Clean up the data
@@ -230,7 +195,7 @@ actorGraph %>%
         margin = c(-0.3,-0.3,-0.3,-0.3),
        
        # Settings for nodes:
-       vertex.size = 3,               ## node size
+       vertex.size = 4,               ## node size
        vertex.color = 'red',           ## node color
        
        # Settings for node labels:
@@ -239,7 +204,7 @@ actorGraph %>%
        vertex.label.color = 'gray19',  ## node label color
        
        # Settings for edges:
-       edge.arrow.size = .8,           ## arrow size
+       edge.arrow.size = .3,           ## arrow size
        edge.color = 'gray30',          ## arrow color
        
        # Settings for layouts:
@@ -276,6 +241,7 @@ giantGraph %>%
   plot(.,
        layout = layout_with_dh(.), ## Davidson and Harel graph layout
        edge.arrow.size = .3,
+       vertex.label = NA,
        vertex.size = 4,
        vertex.color = 'red',
        vertex.label.cex = .5,
