@@ -1,16 +1,17 @@
 import sys
 import autograd.numpy as np
 from matplotlib import pyplot as plt, gridspec
-
-from mlrefined_libraries.multilayer_perceptron_library.basic_lib import super_cost_functions, multilayer_perceptron, \
-    super_optimizers, history_plotters
+from sklearn.datasets import fetch_openml
+from mlrefined_libraries.multilayer_perceptron_library.basic_lib import multilayer_perceptron, super_cost_functions, \
+    super_optimizers, multilayer_perceptron_batch_normalized, history_plotters, multirun_history_plotters
 
 sys.path.append('../')
 
 
-class two_class_classifation_CNN:
-    def __init__(self, filename, layer_size):
-        data = np.loadtxt(filename, delimiter=",")
+class Batch_normalization:
+    def __init__(self, x_sample, y_sample, layer_size):
+        self.x = x_sample
+        self.y = y_sample
         # define the parameter
         self.weight_histories = []
         self.train_cost_histories = []
@@ -22,21 +23,20 @@ class two_class_classifation_CNN:
         self.val_costs = []
         self.val_counts = []
         # training process
-        self.fetch_data(data.T)
+
         self.data_preprocess()
         self.split_dataset(train_portion=1)
         self.define_cost_function()
         self.parameter_setting(feature_name='multilayer_perceptron', layer_sizes=layer_size,
-                               activation='tanh', scale=0.5)
-        self.fit()
-        # ploting parameter
-        self.colors = ['orchid', 'b']
-        self.plot_hist()
+                               activation='relu', scale=0.1)
 
-    def fetch_data(self, data):
-        self.x = data[:, :-1].T
-        y = data[:, -1]
-        self.y = y[np.newaxis, :]
+        self.fit(max_its=10, alpha_choice=10 ** (-2), verbose=False, batch_size=200)
+
+        self.parameter_setting(feature_name='multilayer_perceptron_batch_normalized', layer_sizes=layer_size,
+                               activation='relu', scale=0.1)
+        self.fit(max_its=10, alpha_choice=10 ** (-1), verbose=False, w_init=self.w_init, batch_size=200)
+        # ploting parameter
+        self.show_multirun_histories(start=0, labels=['regular', 'batch-normalized'])
 
     def normalize(self, x):
         x_means = np.mean(x, axis=1)[:, np.newaxis]
@@ -64,10 +64,12 @@ class two_class_classifation_CNN:
         self.y_train = self.y[:, self.train_inds]
         self.y_val = self.y[:, self.val_inds]
 
+
     def define_cost_function(self):
         self.cost_name = 'multiclass_softmax'
         self.cost_object = super_cost_functions.Setup(self.cost_name)
         self.count_object = super_cost_functions.Setup('multiclass_counter')
+
 
     def parameter_setting(self, **kwargs):
         layer_sizes = [1]
@@ -84,91 +86,118 @@ class two_class_classifation_CNN:
         self.feature_transforms = transformer.feature_transforms
         self.multilayer_initializer = transformer.initializer
         self.layer_sizes = transformer.layer_sizes
+        feature_name = 'multilayer_perceptron'
         if 'name' in kwargs:
-            self.feature_name = kwargs['feature_name']
+            feature_name = kwargs['feature_name']
+
+        if feature_name == 'multilayer_perceptron':
+            transformer = multilayer_perceptron.Setup(**kwargs)
+            self.feature_transforms = transformer.feature_transforms
+            self.multilayer_initializer = transformer.initializer
+            self.layer_sizes = transformer.layer_sizes
+
+        if feature_name == 'multilayer_perceptron_batch_normalized':
+            transformer = multilayer_perceptron_batch_normalized.Setup(**kwargs)
+            self.feature_transforms = transformer.feature_transforms
+            self.multilayer_initializer = transformer.initializer
+            self.layer_sizes = transformer.layer_sizes
+
+        self.feature_name = feature_name
         self.cost_object.define_feature_transform(self.feature_transforms)
         self.cost = self.cost_object.cost
         self.model = self.cost_object.model
         self.count_object.define_feature_transform(self.feature_transforms)
         self.counter = self.count_object.cost
 
-    def fit(self):
-        self.max_its = 1000
-        self.alpha_choice = 1
-        self.w_init = self.multilayer_initializer()
+    def fit(self, **kwargs):
+        max_its = 100
+        alpha_choice = 10 ** (-1)
+
+        if 'max_its' in kwargs:
+            self.max_its = kwargs['max_its']
+        if 'alpha_choice' in kwargs:
+            self.alpha_choice = kwargs['alpha_choice']
+
+        # set initialization
+        if 'w_init' in kwargs:
+            self.w_init = kwargs['w_init']
+        else:
+            self.w_init = self.multilayer_initializer()
+
+        # batch size for gradient descent?
         self.train_num = np.size(self.y_train)
         self.val_num = np.size(self.y_val)
         self.batch_size = np.size(self.y_train)
-        weight_history, train_cost_history, val_cost_history = super_optimizers.gradient_descent(self.cost,
-                                                                                                 self.w_init,
-                                                                                                 self.x_train,
-                                                                                                 self.y_train,
-                                                                                                 self.x_val,
-                                                                                                 self.y_val,
-                                                                                                 self.alpha_choice,
-                                                                                                 self.max_its,
-                                                                                                 self.batch_size,
-                                                                                                 'standard',
-                                                                                                 verbose="True")
+        if 'batch_size' in kwargs:
+            self.batch_size = min(kwargs['batch_size'], self.batch_size)
+
+        # verbose or not
+        verbose = True
+        if 'verbose' in kwargs:
+            verbose = kwargs['verbose']
+
+        # optimize
+        weight_history = []
+        cost_history = []
+
+        # run optimizer
+        algo = 'gradient_descent'
+        if 'algo' in kwargs:
+            algo = kwargs['algo']
+        if algo == 'gradient_descent':
+            version = 'standard'
+            if 'version' in kwargs:
+                version = kwargs['version']
+            weight_history, train_cost_history, val_cost_history = super_optimizers.gradient_descent(self.cost,
+                                                                                                     self.w_init,
+                                                                                                     self.x_train,
+                                                                                                     self.y_train,
+                                                                                                     self.x_val,
+                                                                                                     self.y_val,
+                                                                                                     self.alpha_choice,
+                                                                                                     self.max_its,
+                                                                                                     self.batch_size,
+                                                                                                     version,
+                                                                                                     verbose=verbose)
+
+        # store all new histories
         self.weight_histories.append(weight_history)
         self.train_cost_histories.append(train_cost_history)
         self.val_cost_histories.append(val_cost_history)
-        train_accuracy_history = [1 - self.counter(v, self.x_train, self.y_train) / float(self.y_train.size) for v
-                                  in weight_history]
-        val_accuracy_history = [1 - self.counter(v, self.x_val, self.y_val) / float(self.y_val.size) for v in
-                                weight_history]
 
-        self.train_accuracy_histories.append(train_accuracy_history)
-        self.val_accuracy_histories.append(val_accuracy_history)
+        # if classification produce count history
+        if self.cost_name == 'softmax' or self.cost_name == 'perceptron' or self.cost_name == 'multiclass_softmax' or self.cost_name == 'multiclass_perceptron':
+            train_accuracy_history = [1 - self.counter(v, self.x_train, self.y_train) / float(self.y_train.size) for v
+                                      in weight_history]
+            val_accuracy_history = [1 - self.counter(v, self.x_val, self.y_val) / float(self.y_val.size) for v in
+                                    weight_history]
 
-    def plot_fun(self, train_cost_histories, train_accuracy_histories, val_cost_histories, val_accuracy_histories,
-                 start):
-        fig = plt.figure(figsize=(15, 4.5))
-        gs = gridspec.GridSpec(1, 2)
-        ax1 = plt.subplot(gs[0])
-        ax2 = plt.subplot(gs[1])
-        for c in range(len(train_cost_histories)):
-            train_cost_history = train_cost_histories[c]
-            train_accuracy_history = train_accuracy_histories[c]
-            val_cost_history = val_cost_histories[c]
-            val_accuracy_history = val_accuracy_histories[c]
-            ax1.plot(np.arange(start, len(train_cost_history), 1), train_cost_history[start:],
-                     linewidth=3 * 0.6 ** c, color=self.colors[1])
-            ax2.plot(np.arange(start, len(train_accuracy_history), 1), train_accuracy_history[start:],
-                     linewidth=3 * 0.6 ** c, color=self.colors[1],label='Training set')
-            if np.size(val_cost_history) > 0:
-                ax1.plot(np.arange(start, len(val_cost_history), 1), val_cost_history[start:],
-                         linewidth=3 * 0.8 ** c, color=self.colors[1])
-                ax2.plot(np.arange(start, len(val_accuracy_history), 1), val_accuracy_history[start:],
-                         linewidth=3 * 0.8 ** c, color=self.colors[1], label='validation')
-        xlabel = 'Step $k$'
-        ylabel = r'$g\left({\mathbf{\Theta}}^k\right)$'
-        ax1.set_xlabel(xlabel, fontsize=14)
-        ax1.set_ylabel(ylabel, fontsize=14, rotation=0, labelpad=25)
-        title = 'Cost History'
-        ax1.set_title(title, fontsize=15)
-        ylabel = 'Accuracy'
-        ax2.set_xlabel(xlabel, fontsize=14)
-        ax2.set_ylabel(ylabel, fontsize=14, rotation=90, labelpad=10)
-        title = 'Accuracy History'
-        ax2.set_title(title, fontsize=15)
-        anchor = (1, 1)
-        plt.legend(loc='lower right')  # bbox_to_anchor=anchor)
-        ax1.set_xlim([start - 0.5, len(train_cost_history) - 0.5])
-        ax2.set_xlim([start - 0.5, len(train_cost_history) - 0.5])
-        ax2.set_ylim([0, 1.05])
-        plt.show()
+            # store count history
+            self.train_accuracy_histories.append(train_accuracy_history)
+            self.val_accuracy_histories.append(val_accuracy_history)
 
-    def plot_hist(self):
+    def show_histories(self, **kwargs):
         start = 0
+        if 'start' in kwargs:
+            start = kwargs['start']
         if self.train_portion == 1:
             self.val_cost_histories = [[] for s in range(len(self.val_cost_histories))]
             self.val_accuracy_histories = [[] for s in range(len(self.val_accuracy_histories))]
-        self.plot_fun(self.train_cost_histories, self.train_accuracy_histories, self.val_cost_histories,
-                      self.val_accuracy_histories, start)
+        history_plotters.Setup(self.train_cost_histories, self.train_accuracy_histories, self.val_cost_histories,
+                               self.val_accuracy_histories, start)
+
+    def show_multirun_histories(self, start, labels, **kwargs):
+        multirun_history_plotters.Setup(self.train_cost_histories, self.train_accuracy_histories, start, labels)
 
 
 if __name__ == "__main__":
-    datapath = '../mlrefined_datasets/nonlinear_superlearn_datasets/3_layercake_data.csv'
-    layer_sizes = [12, 5]
-    CNN2 = two_class_classifation_CNN(filename=datapath, layer_size=layer_sizes)
+    layer_sizes = [10, 10, 10, 10]
+    x, y = fetch_openml('mnist_784', version=1, return_X_y=True)
+    y = np.array([int(v) for v in y])[np.newaxis,:]
+    num_sample = 50000
+    inds = np.random.permutation(y.shape[1])[:num_sample]
+    x_sample = np.array(x.T)[:, inds]
+    y_sample = y[:, inds]
+    print("input shape = ", x_sample.shape)
+    print("output shape = ", y_sample.shape)
+    NA = Batch_normalization(x_sample, y_sample, layer_sizes)

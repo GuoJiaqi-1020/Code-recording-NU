@@ -121,7 +121,7 @@ class Setup:
             self.count_object.define_feature_transform(self.feature_transforms)
             self.counter = self.count_object.cost
 
-    #### run optimization ####
+    #### run optimiza
     def fit(self, **kwargs):
         # basic parameters for gradient descent run (default algorithm)
         max_its = 500;
@@ -213,6 +213,7 @@ class Setup:
             # store count history
             self.train_accuracy_histories.append(train_accuracy_history)
             self.val_accuracy_histories.append(val_accuracy_history)
+####
 
     #### plot histories ###
     def show_histories(self, **kwargs):

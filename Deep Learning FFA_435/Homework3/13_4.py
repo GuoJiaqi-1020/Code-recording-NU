@@ -1,16 +1,19 @@
 import sys
 import autograd.numpy as np
 from matplotlib import pyplot as plt, gridspec
-
-from mlrefined_libraries.multilayer_perceptron_library.basic_lib import super_cost_functions, multilayer_perceptron, \
-    super_optimizers, history_plotters
+from mlrefined_libraries.multilayer_perceptron_library.basic_lib.unsuper_setup import history_plotters
+from mlrefined_libraries.multilayer_perceptron_library.basic_lib import multilayer_perceptron, unsuper_cost_functions, \
+    unsuper_optimizers
 
 sys.path.append('../')
 
 
-class two_class_classifation_CNN:
+class Nonlinear_Autoencoder():
     def __init__(self, filename, layer_size):
         data = np.loadtxt(filename, delimiter=",")
+        self.encoder = layer_size
+        self.decoder = list(reversed(layer_size))
+        self.x = data
         # define the parameter
         self.weight_histories = []
         self.train_cost_histories = []
@@ -21,22 +24,17 @@ class two_class_classifation_CNN:
         self.train_counts = []
         self.val_costs = []
         self.val_counts = []
+
+        self.plot_origin_dataset()
         # training process
-        self.fetch_data(data.T)
+
         self.data_preprocess()
         self.split_dataset(train_portion=1)
-        self.define_cost_function()
-        self.parameter_setting(feature_name='multilayer_perceptron', layer_sizes=layer_size,
-                               activation='tanh', scale=0.5)
+        self.choose_encoder(layer_sizes=self.encoder, scale=0.2)
+        self.choose_decoder(layer_sizes=self.decoder, scale=0.2)
+        self.choose_cost(name='autoencoder')
         self.fit()
-        # ploting parameter
-        self.colors = ['orchid', 'b']
-        self.plot_hist()
-
-    def fetch_data(self, data):
-        self.x = data[:, :-1].T
-        y = data[:, -1]
-        self.y = y[np.newaxis, :]
+        self.show_histories()
 
     def normalize(self, x):
         x_means = np.mean(x, axis=1)[:, np.newaxis]
@@ -61,65 +59,52 @@ class two_class_classifation_CNN:
         self.val_inds = r[train_num:]
         self.x_train = self.x[:, self.train_inds]
         self.x_val = self.x[:, self.val_inds]
-        self.y_train = self.y[:, self.train_inds]
-        self.y_val = self.y[:, self.val_inds]
 
-    def define_cost_function(self):
-        self.cost_name = 'multiclass_softmax'
-        self.cost_object = super_cost_functions.Setup(self.cost_name)
-        self.count_object = super_cost_functions.Setup('multiclass_counter')
-
-    def parameter_setting(self, **kwargs):
-        layer_sizes = [1]
-        if 'layer_sizes' in kwargs:
-            layer_sizes = kwargs['layer_sizes']
-        input_size = self.x.shape[0]
-        layer_sizes.insert(0, input_size)
-        num_labels = len(np.unique(self.y))
-        if num_labels == 2:
-            layer_sizes.append(1)
-        else:
-            layer_sizes.append(num_labels)
+    def choose_encoder(self, **kwargs):
         transformer = multilayer_perceptron.Setup(**kwargs)
         self.feature_transforms = transformer.feature_transforms
-        self.multilayer_initializer = transformer.initializer
-        self.layer_sizes = transformer.layer_sizes
-        if 'name' in kwargs:
-            self.feature_name = kwargs['feature_name']
-        self.cost_object.define_feature_transform(self.feature_transforms)
-        self.cost = self.cost_object.cost
-        self.model = self.cost_object.model
-        self.count_object.define_feature_transform(self.feature_transforms)
-        self.counter = self.count_object.cost
+        self.initializer_1 = transformer.initializer
 
-    def fit(self):
-        self.max_its = 1000
-        self.alpha_choice = 1
-        self.w_init = self.multilayer_initializer()
-        self.train_num = np.size(self.y_train)
-        self.val_num = np.size(self.y_val)
-        self.batch_size = np.size(self.y_train)
-        weight_history, train_cost_history, val_cost_history = super_optimizers.gradient_descent(self.cost,
-                                                                                                 self.w_init,
-                                                                                                 self.x_train,
-                                                                                                 self.y_train,
-                                                                                                 self.x_val,
-                                                                                                 self.y_val,
-                                                                                                 self.alpha_choice,
-                                                                                                 self.max_its,
-                                                                                                 self.batch_size,
-                                                                                                 'standard',
-                                                                                                 verbose="True")
+    def choose_decoder(self, **kwargs):
+        transformer = multilayer_perceptron.Setup(**kwargs)
+        self.feature_transforms_2 = transformer.feature_transforms
+        self.initializer_2 = transformer.initializer
+
+    def choose_cost(self, name, **kwargs):
+        self.cost_object = unsuper_cost_functions.Setup(name, **kwargs)
+        self.cost_object.define_encoder_decoder(self.feature_transforms, self.feature_transforms_2)
+        self.cost = self.cost_object.cost
+        self.cost_name = name
+        self.encoder = self.cost_object.encoder
+        self.decoder = self.cost_object.decoder
+
+    def fit(self, **kwargs):
+        max_its = 1000
+        alpha_choice = 10 ** (-1)
+        self.w_init_1 = self.initializer_1()
+        self.w_init_2 = self.initializer_2()
+        self.w_init = [self.w_init_1, self.w_init_2]
+
+        # batch size for gradient descent?
+        self.train_num = np.shape(self.x_train)[1]
+        self.val_num = np.shape(self.x_val)[1]
+        self.batch_size = np.shape(self.x_train)[1]
+
+        # run gradient descent
+        weight_history, train_cost_history, val_cost_history = unsuper_optimizers.gradient_descent(self.cost,
+                                                                                                   self.w_init,
+                                                                                                   self.x_train,
+                                                                                                   self.x_val,
+                                                                                                   alpha_choice,
+
+                                                                                                   max_its,
+                                                                                                   self.batch_size,
+                                                                                                   verbose=False)
+
+        # store all new histories
         self.weight_histories.append(weight_history)
         self.train_cost_histories.append(train_cost_history)
         self.val_cost_histories.append(val_cost_history)
-        train_accuracy_history = [1 - self.counter(v, self.x_train, self.y_train) / float(self.y_train.size) for v
-                                  in weight_history]
-        val_accuracy_history = [1 - self.counter(v, self.x_val, self.y_val) / float(self.y_val.size) for v in
-                                weight_history]
-
-        self.train_accuracy_histories.append(train_accuracy_history)
-        self.val_accuracy_histories.append(val_accuracy_history)
 
     def plot_fun(self, train_cost_histories, train_accuracy_histories, val_cost_histories, val_accuracy_histories,
                  start):
@@ -135,7 +120,7 @@ class two_class_classifation_CNN:
             ax1.plot(np.arange(start, len(train_cost_history), 1), train_cost_history[start:],
                      linewidth=3 * 0.6 ** c, color=self.colors[1])
             ax2.plot(np.arange(start, len(train_accuracy_history), 1), train_accuracy_history[start:],
-                     linewidth=3 * 0.6 ** c, color=self.colors[1],label='Training set')
+                     linewidth=3 * 0.6 ** c, color=self.colors[1], label='Training set')
             if np.size(val_cost_history) > 0:
                 ax1.plot(np.arange(start, len(val_cost_history), 1), val_cost_history[start:],
                          linewidth=3 * 0.8 ** c, color=self.colors[1])
@@ -167,8 +152,28 @@ class two_class_classifation_CNN:
         self.plot_fun(self.train_cost_histories, self.train_accuracy_histories, self.val_cost_histories,
                       self.val_accuracy_histories, start)
 
+    def plot_origin_dataset(self):
+        X = self.x
+        fig = plt.figure(figsize=(9, 4))
+        gs = gridspec.GridSpec(1, 1)
+        ax = plt.subplot(gs[0], aspect='equal')
+        ax.set_xlabel(r'$x_1$', fontsize=15)
+        ax.set_ylabel(r'$x_2$', fontsize=15)
+        ax.scatter(X[0, :], X[1, :], c='k', s=60, linewidth=0.75, edgecolor='w')
+        plt.show()
+
+    def show_histories(self, **kwargs):
+        start = 0
+        if 'start' in kwargs:
+            start = kwargs['start']
+        if self.train_portion == 1:
+            self.val_cost_histories = [[] for s in range(len(self.val_cost_histories))]
+            self.val_accuracy_histories = [[] for s in range(len(self.val_accuracy_histories))]
+        history_plotters.Setup(self.train_cost_histories, self.train_accuracy_histories, self.val_cost_histories,
+                               self.val_accuracy_histories, start)
+
 
 if __name__ == "__main__":
-    datapath = '../mlrefined_datasets/nonlinear_superlearn_datasets/3_layercake_data.csv'
-    layer_sizes = [12, 5]
-    CNN2 = two_class_classifation_CNN(filename=datapath, layer_size=layer_sizes)
+    datapath = '../mlrefined_datasets/nonlinear_superlearn_datasets/universal_autoencoder_samples.csv'
+    layer_sizes = [2, 10, 10, 1]
+    NA = Nonlinear_Autoencoder(datapath, layer_sizes)
