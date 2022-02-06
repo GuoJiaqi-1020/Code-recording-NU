@@ -3,7 +3,7 @@ import autograd.numpy as np
 from matplotlib import pyplot as plt, gridspec
 
 from mlrefined_libraries.multilayer_perceptron_library.basic_lib import super_cost_functions, multilayer_perceptron, \
-    super_optimizers
+    super_optimizers, history_plotters
 
 sys.path.append('../')
 
@@ -26,7 +26,8 @@ class two_class_classifation_CNN:
         self.data_preprocess()
         self.split_dataset(train_portion=1)
         self.define_cost_function()
-        self.parameter_setting(feature_name='multilayer_softmax', layer_sizes=layer_size, activation='tanh', scale=0.5)
+        self.parameter_setting(feature_name='multilayer_perceptron', layer_sizes=layer_size,
+                               activation='tanh', scale=0.5)
         self.fit()
         # ploting parameter
         self.colors = ['orchid', 'b']
@@ -64,9 +65,9 @@ class two_class_classifation_CNN:
         self.y_val = self.y[:, self.val_inds]
 
     def define_cost_function(self):
-        self.cost_name = 'softmax'
+        self.cost_name = 'multiclass_softmax'
         self.cost_object = super_cost_functions.Setup(self.cost_name)
-        self.count_object = super_cost_functions.Setup('twoclass_counter')
+        self.count_object = super_cost_functions.Setup('multiclass_counter')
 
     def parameter_setting(self, **kwargs):
         layer_sizes = [1]
@@ -92,7 +93,7 @@ class two_class_classifation_CNN:
         self.counter = self.count_object.cost
 
     def fit(self):
-        self.max_its = 300
+        self.max_its = 1000
         self.alpha_choice = 1
         self.w_init = self.multilayer_initializer()
         self.train_num = np.size(self.y_train)
@@ -134,7 +135,7 @@ class two_class_classifation_CNN:
             ax1.plot(np.arange(start, len(train_cost_history), 1), train_cost_history[start:],
                      linewidth=3 * 0.6 ** c, color=self.colors[1])
             ax2.plot(np.arange(start, len(train_accuracy_history), 1), train_accuracy_history[start:],
-                     linewidth=3 * 0.6 ** c, color=self.colors[1], label='Training set')
+                     linewidth=3 * 0.6 ** c, color=self.colors[1],label='Training set')
             if np.size(val_cost_history) > 0:
                 ax1.plot(np.arange(start, len(val_cost_history), 1), val_cost_history[start:],
                          linewidth=3 * 0.8 ** c, color=self.colors[1])
@@ -168,6 +169,6 @@ class two_class_classifation_CNN:
 
 
 if __name__ == "__main__":
-    datapath = '../mlrefined_datasets/nonlinear_superlearn_datasets/2_eggs.csv'
-    layer_sizes = [10, 10, 10, 10]
+    datapath = '../mlrefined_datasets/nonlinear_superlearn_datasets/3_layercake_data.csv'
+    layer_sizes = [12, 5]
     CNN2 = two_class_classifation_CNN(filename=datapath, layer_size=layer_sizes)
