@@ -11,16 +11,20 @@ sys.path.append('../')
 class two_class_classifation_CNN:
     def __init__(self, filename, layer_size):
         data = np.loadtxt(filename, delimiter=",")
-        # define the parameter
+        x = data[:-1, :]
+        y = data[-1:, :]
+
+        self.x = x
+        self.y = y
+
+        # make containers for all histories
         self.weight_histories = []
         self.train_cost_histories = []
-        self.train_accuracy_histories = []
-        self.val_cost_histories = []
-        self.val_accuracy_histories = []
-        self.train_costs = []
-        self.train_counts = []
-        self.val_costs = []
-        self.val_counts = []
+        self.train_count_histories = []
+        self.valid_cost_histories = []
+        self.valid_count_histories = []
+
+
         # training process
         self.fetch_data(data.T)
         self.data_preprocess()
@@ -135,7 +139,7 @@ class two_class_classifation_CNN:
             ax1.plot(np.arange(start, len(train_cost_history), 1), train_cost_history[start:],
                      linewidth=3 * 0.6 ** c, color=self.colors[1])
             ax2.plot(np.arange(start, len(train_accuracy_history), 1), train_accuracy_history[start:],
-                     linewidth=3 * 0.6 ** c, color=self.colors[1],label='Training set')
+                     linewidth=3 * 0.6 ** c, color=self.colors[1], label='Training set')
             if np.size(val_cost_history) > 0:
                 ax1.plot(np.arange(start, len(val_cost_history), 1), val_cost_history[start:],
                          linewidth=3 * 0.8 ** c, color=self.colors[1])
@@ -169,6 +173,6 @@ class two_class_classifation_CNN:
 
 
 if __name__ == "__main__":
-    datapath = '../mlrefined_datasets/nonlinear_superlearn_datasets/3_layercake_data.csv'
-    layer_sizes = [12, 5]
+    datapath = '../mlrefined_datasets/nonlinear_superlearn_datasets/noisy_sin_sample.csv'
+    layer_sizes = [1, 10, 10, 10, 1]
     CNN2 = two_class_classifation_CNN(filename=datapath, layer_size=layer_sizes)

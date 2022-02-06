@@ -79,7 +79,7 @@ class Nonlinear_Autoencoder():
         self.decoder = self.cost_object.decoder
 
     def fit(self, **kwargs):
-        max_its = 1000
+        max_its = 1500
         alpha_choice = 10 ** (-1)
         self.w_init_1 = self.initializer_1()
         self.w_init_2 = self.initializer_2()

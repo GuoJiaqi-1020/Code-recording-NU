@@ -23,19 +23,21 @@ class Batch_normalization:
         self.val_costs = []
         self.val_counts = []
         # training process
+        self.train_main(layer_size)
 
+    def train_main(self, layer_size):
         self.data_preprocess()
         self.split_dataset(train_portion=1)
         self.define_cost_function()
+        # Without batch normalization
         self.parameter_setting(feature_name='multilayer_perceptron', layer_sizes=layer_size,
                                activation='relu', scale=0.1)
+        self.fit(max_its=10, alpha_choice=30 ** (-2), verbose=False, batch_size=200)
 
-        self.fit(max_its=10, alpha_choice=10 ** (-2), verbose=False, batch_size=200)
-
+        # With batch normalization
         self.parameter_setting(feature_name='multilayer_perceptron_batch_normalized', layer_sizes=layer_size,
                                activation='relu', scale=0.1)
         self.fit(max_its=10, alpha_choice=10 ** (-1), verbose=False, w_init=self.w_init, batch_size=200)
-        # ploting parameter
         self.show_multirun_histories(start=0, labels=['regular', 'batch-normalized'])
 
     def normalize(self, x):
@@ -64,12 +66,10 @@ class Batch_normalization:
         self.y_train = self.y[:, self.train_inds]
         self.y_val = self.y[:, self.val_inds]
 
-
     def define_cost_function(self):
         self.cost_name = 'multiclass_softmax'
         self.cost_object = super_cost_functions.Setup(self.cost_name)
         self.count_object = super_cost_functions.Setup('multiclass_counter')
-
 
     def parameter_setting(self, **kwargs):
         layer_sizes = [1]
@@ -112,55 +112,34 @@ class Batch_normalization:
     def fit(self, **kwargs):
         max_its = 100
         alpha_choice = 10 ** (-1)
-
         if 'max_its' in kwargs:
             self.max_its = kwargs['max_its']
         if 'alpha_choice' in kwargs:
             self.alpha_choice = kwargs['alpha_choice']
-
-        # set initialization
         if 'w_init' in kwargs:
             self.w_init = kwargs['w_init']
         else:
             self.w_init = self.multilayer_initializer()
-
-        # batch size for gradient descent?
         self.train_num = np.size(self.y_train)
         self.val_num = np.size(self.y_val)
         self.batch_size = np.size(self.y_train)
         if 'batch_size' in kwargs:
             self.batch_size = min(kwargs['batch_size'], self.batch_size)
-
-        # verbose or not
-        verbose = True
-        if 'verbose' in kwargs:
-            verbose = kwargs['verbose']
-
-        # optimize
-        weight_history = []
-        cost_history = []
-
-        # run optimizer
-        algo = 'gradient_descent'
-        if 'algo' in kwargs:
-            algo = kwargs['algo']
-        if algo == 'gradient_descent':
-            version = 'standard'
-            if 'version' in kwargs:
-                version = kwargs['version']
-            weight_history, train_cost_history, val_cost_history = super_optimizers.gradient_descent(self.cost,
-                                                                                                     self.w_init,
-                                                                                                     self.x_train,
-                                                                                                     self.y_train,
-                                                                                                     self.x_val,
-                                                                                                     self.y_val,
-                                                                                                     self.alpha_choice,
-                                                                                                     self.max_its,
-                                                                                                     self.batch_size,
-                                                                                                     version,
-                                                                                                     verbose=verbose)
-
-        # store all new histories
+        verbose = False
+        version = 'standard'
+        if 'version' in kwargs:
+            version = kwargs['version']
+        weight_history, train_cost_history, val_cost_history = super_optimizers.gradient_descent(self.cost,
+                                                                                                 self.w_init,
+                                                                                                 self.x_train,
+                                                                                                 self.y_train,
+                                                                                                 self.x_val,
+                                                                                                 self.y_val,
+                                                                                                 self.alpha_choice,
+                                                                                                 self.max_its,
+                                                                                                 self.batch_size,
+                                                                                                 version,
+                                                                                                 verbose=verbose)
         self.weight_histories.append(weight_history)
         self.train_cost_histories.append(train_cost_history)
         self.val_cost_histories.append(val_cost_history)
@@ -193,7 +172,7 @@ class Batch_normalization:
 if __name__ == "__main__":
     layer_sizes = [10, 10, 10, 10]
     x, y = fetch_openml('mnist_784', version=1, return_X_y=True)
-    y = np.array([int(v) for v in y])[np.newaxis,:]
+    y = np.array([int(v) for v in y])[np.newaxis, :]
     num_sample = 50000
     inds = np.random.permutation(y.shape[1])[:num_sample]
     x_sample = np.array(x.T)[:, inds]

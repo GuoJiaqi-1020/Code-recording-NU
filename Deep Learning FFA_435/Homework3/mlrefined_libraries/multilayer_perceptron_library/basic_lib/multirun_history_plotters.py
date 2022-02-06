@@ -6,7 +6,7 @@ from matplotlib import gridspec
 class Setup:
     def __init__(self,train_cost_histories,train_accuracy_histories,start,labels):
         # plotting colors
-        self.colors = ['magenta','blue','springgreen','orange']
+        self.colors = ['orange','blue','springgreen','orange']
 
         # just plot cost history?
         if len(train_accuracy_histories) == 0:
