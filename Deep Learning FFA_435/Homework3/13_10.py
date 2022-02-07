@@ -26,8 +26,8 @@ class Handwritten_digit_DL:
         self.parameter_setting(name='multilayer_perceptron', layer_sizes=layer_size,
                                activation='maxout', scale=0.1)
         self.define_cost_function(name='multiclass_softmax')
-        self.fit(max_its=50, alpha_choice=10 ** (-1), batch_size=500)
-        self.result_validation()
+        self.fit(max_its=80, alpha_choice=10 ** (-1), batch_size=500)
+        self.show_histories()
 
     def normalize(self, x):
         x_means = np.mean(x, axis=1)[:, np.newaxis]
@@ -93,11 +93,11 @@ class Handwritten_digit_DL:
         self.val_cost_histories.append(val_cost_history)
         self.val_count_histories.append(val_count_history)
 
-    def result_validation(self):
+    def result_validation(self, x_test, y_test):
         ind = np.argmax(self.val_count_histories[0])
         best_val = self.val_count_histories[0][ind]
         best_train = self.train_count_histories[0][ind]
-        print("Training set ACC:{} Validation set ACC:{}".format(best_val, best_train))
+        print("Training set ACC:{} Validation set ACC:{}".format(best_train, best_val))
 
         w_best = self.weight_histories[0][ind]
         test_evals = self.model(x_test, w_best)
@@ -107,8 +107,9 @@ class Handwritten_digit_DL:
         print("The test set accuracy is: {}".format(acc))
 
     def show_histories(self):
-        history_plotters.Setup(self.train_cost_histories, self.train_count_histories, self.valid_cost_histories,
-                               self.valid_count_histories, start=0)
+        plotter = history_plotters.Setup(self.train_cost_histories, self.train_count_histories, self.val_cost_histories,
+                               self.val_count_histories, start=0)
+
 
 
 if __name__ == "__main__":
@@ -130,3 +131,4 @@ if __name__ == "__main__":
     print("y test shape = ", y_test.shape)
 
     NA = Handwritten_digit_DL(x_sample, y_sample, layer_sizes)
+    NA.result_validation(x_test, y_test)

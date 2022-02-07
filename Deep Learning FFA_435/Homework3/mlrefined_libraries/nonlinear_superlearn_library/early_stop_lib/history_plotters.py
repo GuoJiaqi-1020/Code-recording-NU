@@ -6,7 +6,7 @@ from matplotlib import gridspec
 class Setup:
     def __init__(self,train_cost_histories,train_count_histories,valid_cost_histories,valid_count_histories,start):
         # plotting colors
-        self.colors = [[0,0.7,1],[1,0.8,0.5]]
+        self.colors = [[0,0.8,1],[1,0,0.5]]
 
         # just plot cost history?
         if len(train_count_histories) == 0:
@@ -92,14 +92,14 @@ class Setup:
         title = 'accuracy history'
         ax2.set_title(title,fontsize = 15)
         
-        '''
+
         anchor = (1,1)
         plt.legend()# bbox_to_anchor=anchor)
         ax1.set_xlim([start - 0.5,len(train_cost_history) - 0.5])
         ax2.set_xlim([start - 0.5,len(train_cost_history) - 0.5])
         ax2.set_ylim([0,1.05])
         plt.show()     
-        '''  
+
    
 
     #### compare multiple histories of cost and misclassification counts ####
