@@ -31,11 +31,16 @@ def RMSprop(g, w, x_train, y_train, x_val, y_val, alpha, max_its, batch_size, ve
 
     # how many mini-batches equal the entire dataset?
     num_batches = int(np.ceil(np.divide(num_train, batch_size)))
-
+    alp = alpha
     # over the line
     for k in range(max_its):
         # loop over each minibatch
         start = timer()
+
+        if k % 1000 == 0:
+            alp = alpha - ((alpha - 10 ** (-4)) / 10)
+            print(alp)
+
         train_cost = 0
         for b in range(num_batches):
             # collect indices of current mini-batch
@@ -53,7 +58,7 @@ def RMSprop(g, w, x_train, y_train, x_val, y_val, alpha, max_its, batch_size, ve
             avg_sq_grad = gamma * avg_sq_grad + (1 - gamma) * grad_eval ** 2
 
             # take descent step 
-            w = w - alpha * grad_eval / (avg_sq_grad ** (0.5) + eps)
+            w = w - alp * grad_eval / (avg_sq_grad ** (0.5) + eps)
 
         end = timer()
 

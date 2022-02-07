@@ -90,7 +90,7 @@ class Setup:
     #### run optimization ####
     def fit(self, **kwargs):
         # basic parameters for gradient descent run (default algorithm)
-        max_its = 500;
+        max_its = 1000
         alpha_choice = 10 ** (-1);
         self.w_init = self.initializer()
         optimizer = 'gradient_descent'

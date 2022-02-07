@@ -1,6 +1,5 @@
 import sys
 import autograd.numpy as np
-from matplotlib import pyplot as plt, gridspec
 from sklearn.datasets import fetch_openml
 from mlrefined_libraries.multilayer_perceptron_library.basic_lib import multilayer_perceptron, super_cost_functions, \
     super_optimizers, multilayer_perceptron_batch_normalized, history_plotters, multirun_history_plotters

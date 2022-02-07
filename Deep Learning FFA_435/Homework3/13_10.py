@@ -1,42 +1,33 @@
 import sys
 import autograd.numpy as np
-from matplotlib import pyplot as plt, gridspec
-
-from mlrefined_libraries.multilayer_perceptron_library.basic_lib import super_cost_functions, multilayer_perceptron, \
-    super_optimizers, history_plotters
+from sklearn.datasets import fetch_openml
+from mlrefined_libraries.nonlinear_superlearn_library.early_stop_lib import multilayer_perceptron, optimizers, \
+    cost_functions, history_plotters
 
 sys.path.append('../')
 
 
-class two_class_classifation_CNN:
-    def __init__(self, filename, layer_size):
-        data = np.loadtxt(filename, delimiter=",")
+class Handwritten_digit_DL:
+    def __init__(self, x_sample, y_sample, layer_size):
+        self.x = x_sample
+        self.y = y_sample
         # define the parameter
         self.weight_histories = []
         self.train_cost_histories = []
-        self.train_accuracy_histories = []
+        self.train_count_histories = []
         self.val_cost_histories = []
-        self.val_accuracy_histories = []
-        self.train_costs = []
-        self.train_counts = []
-        self.val_costs = []
-        self.val_counts = []
+        self.val_count_histories = []
         # training process
-        self.fetch_data(data.T)
-        self.data_preprocess()
-        self.split_dataset(train_portion=1)
-        self.define_cost_function()
-        self.parameter_setting(feature_name='multilayer_perceptron', layer_sizes=layer_size,
-                               activation='tanh', scale=0.5)
-        self.fit()
-        # ploting parameter
-        self.colors = ['orchid', 'b']
-        self.plot_hist()
+        self.train_main(layer_size)
 
-    def fetch_data(self, data):
-        self.x = data[:, :-1].T
-        y = data[:, -1]
-        self.y = y[np.newaxis, :]
+    def train_main(self, layer_size):
+        self.data_preprocess()
+        self.split_dataset(train_portion=0.83)
+        self.parameter_setting(name='multilayer_perceptron', layer_sizes=layer_size,
+                               activation='maxout', scale=0.1)
+        self.define_cost_function(name='multiclass_softmax')
+        self.fit(max_its=50, alpha_choice=10 ** (-1), batch_size=500)
+        self.result_validation()
 
     def normalize(self, x):
         x_means = np.mean(x, axis=1)[:, np.newaxis]
@@ -64,111 +55,78 @@ class two_class_classifation_CNN:
         self.y_train = self.y[:, self.train_inds]
         self.y_val = self.y[:, self.val_inds]
 
-    def define_cost_function(self):
-        self.cost_name = 'multiclass_softmax'
-        self.cost_object = super_cost_functions.Setup(self.cost_name)
-        self.count_object = super_cost_functions.Setup('multiclass_counter')
+    def define_cost_function(self, name, **kwargs):
+        funcs = cost_functions.Setup(name, self.feature_transforms, **kwargs)
+        self.full_cost = funcs.cost
+        self.full_model = funcs.model
+        funcs = cost_functions.Setup(name, self.feature_transforms, **kwargs)
+        self.cost = funcs.cost
+        self.model = funcs.model
+        funcs = cost_functions.Setup('multiclass_accuracy', self.feature_transforms, **kwargs)
+        self.counter = funcs.cost
+        self.cost_name = name
 
-    def parameter_setting(self, **kwargs):
-        layer_sizes = [1]
-        if 'layer_sizes' in kwargs:
-            layer_sizes = kwargs['layer_sizes']
-        input_size = self.x.shape[0]
-        layer_sizes.insert(0, input_size)
-        num_labels = len(np.unique(self.y))
-        if num_labels == 2:
-            layer_sizes.append(1)
-        else:
-            layer_sizes.append(num_labels)
-        transformer = multilayer_perceptron.Setup(**kwargs)
-        self.feature_transforms = transformer.feature_transforms
-        self.multilayer_initializer = transformer.initializer
-        self.layer_sizes = transformer.layer_sizes
-        if 'name' in kwargs:
-            self.feature_name = kwargs['feature_name']
-        self.cost_object.define_feature_transform(self.feature_transforms)
-        self.cost = self.cost_object.cost
-        self.model = self.cost_object.model
-        self.count_object.define_feature_transform(self.feature_transforms)
-        self.counter = self.count_object.cost
+    def parameter_setting(self, name, **kwargs):
+        self.transformer = multilayer_perceptron.Setup(**kwargs)
+        self.feature_transforms = self.transformer.feature_transforms
+        self.initializer = self.transformer.initializer
+        self.layer_sizes = self.transformer.layer_sizes
+        self.feature_name = name
 
-    def fit(self):
-        self.max_its = 1000
-        self.alpha_choice = 1
-        self.w_init = self.multilayer_initializer()
-        self.train_num = np.size(self.y_train)
-        self.val_num = np.size(self.y_val)
+    def fit(self, **kwargs):
+        if 'max_its' in kwargs:
+            self.max_its = kwargs['max_its']
+        if 'alpha_choice' in kwargs:
+            self.alpha_choice = kwargs['alpha_choice']
+        self.w_init = self.initializer()
+        self.num_pts = np.size(self.y_train)
         self.batch_size = np.size(self.y_train)
-        weight_history, train_cost_history, val_cost_history = super_optimizers.gradient_descent(self.cost,
-                                                                                                 self.w_init,
-                                                                                                 self.x_train,
-                                                                                                 self.y_train,
-                                                                                                 self.x_val,
-                                                                                                 self.y_val,
-                                                                                                 self.alpha_choice,
-                                                                                                 self.max_its,
-                                                                                                 self.batch_size,
-                                                                                                 'standard',
-                                                                                                 verbose="True")
+        if 'batch_size' in kwargs:
+            self.batch_size = min(kwargs['batch_size'], self.batch_size)
+        weight_history, train_cost_history, train_count_hist, val_cost_history, val_count_history = optimizers.gradient_descent(
+            self.cost, self.counter, self.x_train, self.y_train, self.x_val, self.y_val, self.alpha_choice,
+            self.max_its, self.w_init, self.num_pts, self.batch_size, verbose="True", version="standard")
+
         self.weight_histories.append(weight_history)
         self.train_cost_histories.append(train_cost_history)
+        self.train_count_histories.append(train_count_hist)
         self.val_cost_histories.append(val_cost_history)
-        train_accuracy_history = [1 - self.counter(v, self.x_train, self.y_train) / float(self.y_train.size) for v
-                                  in weight_history]
-        val_accuracy_history = [1 - self.counter(v, self.x_val, self.y_val) / float(self.y_val.size) for v in
-                                weight_history]
+        self.val_count_histories.append(val_count_history)
 
-        self.train_accuracy_histories.append(train_accuracy_history)
-        self.val_accuracy_histories.append(val_accuracy_history)
+    def result_validation(self):
+        ind = np.argmax(self.val_count_histories[0])
+        best_val = self.val_count_histories[0][ind]
+        best_train = self.train_count_histories[0][ind]
+        print("Training set ACC:{} Validation set ACC:{}".format(best_val, best_train))
 
-    def plot_fun(self, train_cost_histories, train_accuracy_histories, val_cost_histories, val_accuracy_histories,
-                 start):
-        fig = plt.figure(figsize=(15, 4.5))
-        gs = gridspec.GridSpec(1, 2)
-        ax1 = plt.subplot(gs[0])
-        ax2 = plt.subplot(gs[1])
-        for c in range(len(train_cost_histories)):
-            train_cost_history = train_cost_histories[c]
-            train_accuracy_history = train_accuracy_histories[c]
-            val_cost_history = val_cost_histories[c]
-            val_accuracy_history = val_accuracy_histories[c]
-            ax1.plot(np.arange(start, len(train_cost_history), 1), train_cost_history[start:],
-                     linewidth=3 * 0.6 ** c, color=self.colors[1])
-            ax2.plot(np.arange(start, len(train_accuracy_history), 1), train_accuracy_history[start:],
-                     linewidth=3 * 0.6 ** c, color=self.colors[1],label='Training set')
-            if np.size(val_cost_history) > 0:
-                ax1.plot(np.arange(start, len(val_cost_history), 1), val_cost_history[start:],
-                         linewidth=3 * 0.8 ** c, color=self.colors[1])
-                ax2.plot(np.arange(start, len(val_accuracy_history), 1), val_accuracy_history[start:],
-                         linewidth=3 * 0.8 ** c, color=self.colors[1], label='validation')
-        xlabel = 'Step $k$'
-        ylabel = r'$g\left({\mathbf{\Theta}}^k\right)$'
-        ax1.set_xlabel(xlabel, fontsize=14)
-        ax1.set_ylabel(ylabel, fontsize=14, rotation=0, labelpad=25)
-        title = 'Cost History'
-        ax1.set_title(title, fontsize=15)
-        ylabel = 'Accuracy'
-        ax2.set_xlabel(xlabel, fontsize=14)
-        ax2.set_ylabel(ylabel, fontsize=14, rotation=90, labelpad=10)
-        title = 'Accuracy History'
-        ax2.set_title(title, fontsize=15)
-        anchor = (1, 1)
-        plt.legend(loc='lower right')  # bbox_to_anchor=anchor)
-        ax1.set_xlim([start - 0.5, len(train_cost_history) - 0.5])
-        ax2.set_xlim([start - 0.5, len(train_cost_history) - 0.5])
-        ax2.set_ylim([0, 1.05])
-        plt.show()
+        w_best = self.weight_histories[0][ind]
+        test_evals = self.model(x_test, w_best)
+        y_hat = (np.argmax(test_evals, axis=0))[np.newaxis, :]
+        misses = np.argwhere(y_hat != y_test)
+        acc = 1 - (misses.size / y_test.size)
+        print("The test set accuracy is: {}".format(acc))
 
-    def plot_hist(self):
-        start = 0
-        if self.train_portion == 1:
-            self.val_cost_histories = [[] for s in range(len(self.val_cost_histories))]
-            self.val_accuracy_histories = [[] for s in range(len(self.val_accuracy_histories))]
-        self.plot_fun(self.train_cost_histories, self.train_accuracy_histories, self.val_cost_histories,
-                      self.val_accuracy_histories, start)
+    def show_histories(self):
+        history_plotters.Setup(self.train_cost_histories, self.train_count_histories, self.valid_cost_histories,
+                               self.valid_count_histories, start=0)
 
 
 if __name__ == "__main__":
-    datapath = '../mlrefined_datasets/nonlinear_superlearn_datasets/3_layercake_data.csv'
-    layer_sizes = [12, 5]
-    CNN2 = two_class_classifation_CNN(filename=datapath, layer_size=layer_sizes)
+    layer_sizes = [784, 100, 100, 10]
+    x, y = fetch_openml('mnist_784', version=1, return_X_y=True)
+    y = np.array([int(v) for v in y])[np.newaxis, :]
+    num_sample = 60000
+    inds = np.random.permutation(y.shape[1])
+    train_set = inds[:num_sample]
+    x_sample = np.array(x.T)[:, train_set]
+    y_sample = y[:, train_set]
+    print("x train shape = ", x_sample.shape)
+    print("y train shape = ", y_sample.shape)
+
+    test_set = inds[num_sample:]
+    x_test = np.array(x.T)[:, test_set]
+    y_test = y[:, test_set]
+    print("x test shape = ", x_test.shape)
+    print("y test shape = ", y_test.shape)
+
+    NA = Handwritten_digit_DL(x_sample, y_sample, layer_sizes)
