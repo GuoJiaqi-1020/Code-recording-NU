@@ -25,9 +25,9 @@ class Handwritten_digit_DL:
         self.split_dataset(train_portion=0.83)
         self.parameter_setting(name='multilayer_perceptron', layer_sizes=layer_size,
                                activation='maxout', scale=0.1)
-        self.define_cost_function(name='multiclass_softmax')
+        self.cost_fun(name='multiclass_softmax')
         self.fit(max_its=80, alpha_choice=10 ** (-1), batch_size=500)
-        self.show_histories()
+        self.plot_history()
 
     def normalize(self, x):
         x_means = np.mean(x, axis=1)[:, np.newaxis]
@@ -55,7 +55,7 @@ class Handwritten_digit_DL:
         self.y_train = self.y[:, self.train_inds]
         self.y_val = self.y[:, self.val_inds]
 
-    def define_cost_function(self, name, **kwargs):
+    def cost_fun(self, name, **kwargs):
         funcs = cost_functions.Setup(name, self.feature_transforms, **kwargs)
         self.full_cost = funcs.cost
         self.full_model = funcs.model
@@ -106,7 +106,7 @@ class Handwritten_digit_DL:
         acc = 1 - (misses.size / y_test.size)
         print("The test set accuracy is: {}".format(acc))
 
-    def show_histories(self):
+    def plot_history(self):
         plotter = history_plotters.Setup(self.train_cost_histories, self.train_count_histories, self.val_cost_histories,
                                self.val_count_histories, start=0)
 

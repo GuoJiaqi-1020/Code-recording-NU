@@ -1,7 +1,6 @@
 import sys
 import autograd.numpy as np
 from matplotlib import pyplot as plt, gridspec
-
 from mlrefined_libraries.nonlinear_superlearn_library.early_stop_lib import multilayer_perceptron
 from mlrefined_libraries.nonlinear_superlearn_library.early_stop_regression_animator import Visualizer
 from mlrefined_libraries.nonlinear_superlearn_library.reg_lib import cost_functions, super_optimizers, history_plotters, \
@@ -35,8 +34,8 @@ class Early_Stop:
         # training process
         self.data_preprocess()
         self.split_dataset(train_portion=0.66)
-        self.choose_cost(name='least_squares')
-        self.choose_features(name='multilayer_perceptron', layer_sizes=layer_size, activation='tanh')
+        self.cost_fun(name='least_squares')
+        self.parameter_setting(name='multilayer_perceptron', layer_sizes=layer_size, activation='tanh')
         self.fit()
         self.show_histories()
 
@@ -66,7 +65,7 @@ class Early_Stop:
         self.y_train = self.y[:, self.train_inds]
         self.y_valid = self.y[:, self.valid_inds]
 
-    def choose_cost(self, name, **kwargs):
+    def cost_fun(self, name, **kwargs):
         # create training and testing cost functions
         self.cost_object = super_cost_functions.Setup(name, **kwargs)
         if name == 'softmax' or name == 'perceptron':
@@ -81,7 +80,7 @@ class Early_Stop:
 
         self.cost_name = name
 
-    def choose_features(self, name, **kwargs):
+    def parameter_setting(self, name, **kwargs):
         transformer = multilayer_perceptron.Setup(**kwargs)
         self.feature_transforms = transformer.feature_transforms
         self.initializer = transformer.initializer

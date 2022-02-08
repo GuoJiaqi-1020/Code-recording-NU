@@ -24,15 +24,17 @@ class Nonlinear_Autoencoder():
         self.train_counts = []
         self.val_costs = []
         self.val_counts = []
-
         self.plot_origin_dataset()
         # training process
+        self.training_main()
 
+
+    def training_main(self):
         self.data_preprocess()
         self.split_dataset(train_portion=1)
-        self.choose_encoder(layer_sizes=self.encoder, scale=0.2)
-        self.choose_decoder(layer_sizes=self.decoder, scale=0.2)
-        self.choose_cost(name='autoencoder')
+        self.encoder(layer_sizes=self.encoder, scale=0.2)
+        self.decoder(layer_sizes=self.decoder, scale=0.2)
+        self.cost_fun(name='autoencoder')
         self.fit()
         self.show_histories()
 
@@ -60,17 +62,17 @@ class Nonlinear_Autoencoder():
         self.x_train = self.x[:, self.train_inds]
         self.x_val = self.x[:, self.val_inds]
 
-    def choose_encoder(self, **kwargs):
+    def encoder(self, **kwargs):
         transformer = multilayer_perceptron.Setup(**kwargs)
         self.feature_transforms = transformer.feature_transforms
         self.initializer_1 = transformer.initializer
 
-    def choose_decoder(self, **kwargs):
+    def decoder(self, **kwargs):
         transformer = multilayer_perceptron.Setup(**kwargs)
         self.feature_transforms_2 = transformer.feature_transforms
         self.initializer_2 = transformer.initializer
 
-    def choose_cost(self, name, **kwargs):
+    def cost_fun(self, name, **kwargs):
         self.cost_object = unsuper_cost_functions.Setup(name, **kwargs)
         self.cost_object.define_encoder_decoder(self.feature_transforms, self.feature_transforms_2)
         self.cost = self.cost_object.cost
@@ -84,24 +86,18 @@ class Nonlinear_Autoencoder():
         self.w_init_1 = self.initializer_1()
         self.w_init_2 = self.initializer_2()
         self.w_init = [self.w_init_1, self.w_init_2]
-
-        # batch size for gradient descent?
         self.train_num = np.shape(self.x_train)[1]
         self.val_num = np.shape(self.x_val)[1]
         self.batch_size = np.shape(self.x_train)[1]
-
-        # run gradient descent
         weight_history, train_cost_history, val_cost_history = unsuper_optimizers.gradient_descent(self.cost,
                                                                                                    self.w_init,
                                                                                                    self.x_train,
                                                                                                    self.x_val,
                                                                                                    alpha_choice,
-
                                                                                                    max_its,
                                                                                                    self.batch_size,
                                                                                                    verbose=False)
 
-        # store all new histories
         self.weight_histories.append(weight_history)
         self.train_cost_histories.append(train_cost_history)
         self.val_cost_histories.append(val_cost_history)

@@ -27,7 +27,7 @@ class Batch_normalization:
     def train_main(self, layer_size):
         self.data_preprocess()
         self.split_dataset(train_portion=1)
-        self.define_cost_function()
+        self.cost_fun()
         # Without batch normalization
         self.parameter_setting(feature_name='multilayer_perceptron', layer_sizes=layer_size,
                                activation='relu', scale=0.1)
@@ -37,7 +37,7 @@ class Batch_normalization:
         self.parameter_setting(feature_name='multilayer_perceptron_batch_normalized', layer_sizes=layer_size,
                                activation='relu', scale=0.1)
         self.fit(max_its=10, alpha_choice=10 ** (-1), verbose=False, w_init=self.w_init, batch_size=200)
-        self.show_multirun_histories(start=0, labels=['regular', 'batch-normalized'])
+        self.show_history(start=0, labels=['regular', 'batch-normalized'])
 
     def normalize(self, x):
         x_means = np.mean(x, axis=1)[:, np.newaxis]
@@ -65,7 +65,7 @@ class Batch_normalization:
         self.y_train = self.y[:, self.train_inds]
         self.y_val = self.y[:, self.val_inds]
 
-    def define_cost_function(self):
+    def cost_fun(self):
         self.cost_name = 'multiclass_softmax'
         self.cost_object = super_cost_functions.Setup(self.cost_name)
         self.count_object = super_cost_functions.Setup('multiclass_counter')
@@ -126,8 +126,6 @@ class Batch_normalization:
             self.batch_size = min(kwargs['batch_size'], self.batch_size)
         verbose = False
         version = 'standard'
-        if 'version' in kwargs:
-            version = kwargs['version']
         weight_history, train_cost_history, val_cost_history = super_optimizers.gradient_descent(self.cost,
                                                                                                  self.w_init,
                                                                                                  self.x_train,
@@ -142,8 +140,6 @@ class Batch_normalization:
         self.weight_histories.append(weight_history)
         self.train_cost_histories.append(train_cost_history)
         self.val_cost_histories.append(val_cost_history)
-
-        # if classification produce count history
         if self.cost_name == 'softmax' or self.cost_name == 'perceptron' or self.cost_name == 'multiclass_softmax' or self.cost_name == 'multiclass_perceptron':
             train_accuracy_history = [1 - self.counter(v, self.x_train, self.y_train) / float(self.y_train.size) for v
                                       in weight_history]
@@ -154,17 +150,7 @@ class Batch_normalization:
             self.train_accuracy_histories.append(train_accuracy_history)
             self.val_accuracy_histories.append(val_accuracy_history)
 
-    def show_histories(self, **kwargs):
-        start = 0
-        if 'start' in kwargs:
-            start = kwargs['start']
-        if self.train_portion == 1:
-            self.val_cost_histories = [[] for s in range(len(self.val_cost_histories))]
-            self.val_accuracy_histories = [[] for s in range(len(self.val_accuracy_histories))]
-        history_plotters.Setup(self.train_cost_histories, self.train_accuracy_histories, self.val_cost_histories,
-                               self.val_accuracy_histories, start)
-
-    def show_multirun_histories(self, start, labels, **kwargs):
+    def show_history(self, start, labels, **kwargs):
         multirun_history_plotters.Setup(self.train_cost_histories, self.train_accuracy_histories, start, labels)
 
 
