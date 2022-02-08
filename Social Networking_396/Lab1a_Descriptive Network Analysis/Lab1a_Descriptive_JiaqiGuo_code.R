@@ -57,8 +57,8 @@ graph.density(actorGraph)
 ########################
 # Save your data       
 ########################
-save.image('Lab1_Descriptive_JiaqiGuo.RData')
-load('Lab1_Descriptive_JiaqiGuo.RData')
+save.image('Lab1_Descriptive_JiaqiGuo2.RData')
+load('Lab1_Descriptive_JiaqiGuo2.RData')
 ########################
 # Part II: Network Visualization
 ########################
@@ -70,7 +70,7 @@ comp
 help("igraph.plotting")
 actorGraph %>% 
   plot(.,
-        margin = c(-0.3,-0.3,-0.3,-0.3),
+        margin = c(0.1,0.1,0.1,0.1),
        
        # Settings for nodes:
        vertex.size = 3,               ## node size
@@ -113,3 +113,4 @@ giantGraph %>%
        vertex.color = 'red',
        vertex.label.cex = .5,
        vertex.label.color = 'black')
+
