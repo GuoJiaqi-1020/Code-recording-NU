@@ -2,7 +2,7 @@ import sys
 import autograd.numpy as np
 from sklearn.datasets import fetch_openml
 from mlrefined_libraries.multilayer_perceptron_library.basic_lib import multilayer_perceptron, super_cost_functions, \
-    super_optimizers, multilayer_perceptron_batch_normalized, history_plotters, multirun_history_plotters
+    super_optimizers, multilayer_perceptron_batch_normalized, multirun_history_plotters
 
 sys.path.append('../')
 
@@ -31,8 +31,7 @@ class Batch_normalization:
         # Without batch normalization
         self.parameter_setting(feature_name='multilayer_perceptron', layer_sizes=layer_size,
                                activation='relu', scale=0.1)
-        self.fit(max_its=10, alpha_choice=30 ** (-2), verbose=False, batch_size=200)
-
+        self.fit(max_its=10, alpha_choice=10 ** (-2), verbose=False, batch_size=200)
         # With batch normalization
         self.parameter_setting(feature_name='multilayer_perceptron_batch_normalized', layer_sizes=layer_size,
                                activation='relu', scale=0.1)
@@ -109,8 +108,6 @@ class Batch_normalization:
         self.counter = self.count_object.cost
 
     def fit(self, **kwargs):
-        max_its = 100
-        alpha_choice = 10 ** (-1)
         if 'max_its' in kwargs:
             self.max_its = kwargs['max_its']
         if 'alpha_choice' in kwargs:
@@ -124,7 +121,6 @@ class Batch_normalization:
         self.batch_size = np.size(self.y_train)
         if 'batch_size' in kwargs:
             self.batch_size = min(kwargs['batch_size'], self.batch_size)
-        verbose = False
         version = 'standard'
         weight_history, train_cost_history, val_cost_history = super_optimizers.gradient_descent(self.cost,
                                                                                                  self.w_init,
@@ -135,22 +131,19 @@ class Batch_normalization:
                                                                                                  self.alpha_choice,
                                                                                                  self.max_its,
                                                                                                  self.batch_size,
-                                                                                                 version,
-                                                                                                 verbose=verbose)
+                                                                                                 version)
         self.weight_histories.append(weight_history)
         self.train_cost_histories.append(train_cost_history)
         self.val_cost_histories.append(val_cost_history)
-        if self.cost_name == 'softmax' or self.cost_name == 'perceptron' or self.cost_name == 'multiclass_softmax' or self.cost_name == 'multiclass_perceptron':
-            train_accuracy_history = [1 - self.counter(v, self.x_train, self.y_train) / float(self.y_train.size) for v
-                                      in weight_history]
-            val_accuracy_history = [1 - self.counter(v, self.x_val, self.y_val) / float(self.y_val.size) for v in
-                                    weight_history]
+        train_accuracy_history = [1 - self.counter(v, self.x_train, self.y_train) / float(self.y_train.size) for v
+                                  in weight_history]
+        val_accuracy_history = [1 - self.counter(v, self.x_val, self.y_val) / float(self.y_val.size) for v in
+                                weight_history]
 
-            # store count history
-            self.train_accuracy_histories.append(train_accuracy_history)
-            self.val_accuracy_histories.append(val_accuracy_history)
+        self.train_accuracy_histories.append(train_accuracy_history)
+        self.val_accuracy_histories.append(val_accuracy_history)
 
-    def show_history(self, start, labels, **kwargs):
+    def show_history(self, start, labels):
         multirun_history_plotters.Setup(self.train_cost_histories, self.train_accuracy_histories, start, labels)
 
 

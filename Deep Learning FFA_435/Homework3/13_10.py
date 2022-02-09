@@ -108,8 +108,7 @@ class Handwritten_digit_DL:
 
     def plot_history(self):
         plotter = history_plotters.Setup(self.train_cost_histories, self.train_count_histories, self.val_cost_histories,
-                               self.val_count_histories, start=0)
-
+                                         self.val_count_histories, start=0)
 
 
 if __name__ == "__main__":

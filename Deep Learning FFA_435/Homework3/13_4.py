@@ -11,8 +11,8 @@ sys.path.append('../')
 class Nonlinear_Autoencoder():
     def __init__(self, filename, layer_size):
         data = np.loadtxt(filename, delimiter=",")
-        self.encoder = layer_size
-        self.decoder = list(reversed(layer_size))
+        self.encoder_size = layer_size
+        self.decoder_size = list(reversed(layer_size))
         self.x = data
         # define the parameter
         self.weight_histories = []
@@ -28,12 +28,11 @@ class Nonlinear_Autoencoder():
         # training process
         self.training_main()
 
-
     def training_main(self):
         self.data_preprocess()
         self.split_dataset(train_portion=1)
-        self.encoder(layer_sizes=self.encoder, scale=0.2)
-        self.decoder(layer_sizes=self.decoder, scale=0.2)
+        self.def_encoder(layer_sizes=self.encoder_size, scale=0.2)
+        self.def_decoder(layer_sizes=self.decoder_size, scale=0.2)
         self.cost_fun(name='autoencoder')
         self.fit()
         self.show_histories()
@@ -62,12 +61,12 @@ class Nonlinear_Autoencoder():
         self.x_train = self.x[:, self.train_inds]
         self.x_val = self.x[:, self.val_inds]
 
-    def encoder(self, **kwargs):
+    def def_encoder(self, **kwargs):
         transformer = multilayer_perceptron.Setup(**kwargs)
         self.feature_transforms = transformer.feature_transforms
         self.initializer_1 = transformer.initializer
 
-    def decoder(self, **kwargs):
+    def def_decoder(self, **kwargs):
         transformer = multilayer_perceptron.Setup(**kwargs)
         self.feature_transforms_2 = transformer.feature_transforms
         self.initializer_2 = transformer.initializer
@@ -80,7 +79,7 @@ class Nonlinear_Autoencoder():
         self.encoder = self.cost_object.encoder
         self.decoder = self.cost_object.decoder
 
-    def fit(self, **kwargs):
+    def fit(self):
         max_its = 1500
         alpha_choice = 10 ** (-1)
         self.w_init_1 = self.initializer_1()
@@ -97,14 +96,12 @@ class Nonlinear_Autoencoder():
                                                                                                    max_its,
                                                                                                    self.batch_size,
                                                                                                    verbose=False)
-
         self.weight_histories.append(weight_history)
         self.train_cost_histories.append(train_cost_history)
         self.val_cost_histories.append(val_cost_history)
 
     def plot_fun(self, train_cost_histories, train_accuracy_histories, val_cost_histories, val_accuracy_histories,
                  start):
-        fig = plt.figure(figsize=(15, 4.5))
         gs = gridspec.GridSpec(1, 2)
         ax1 = plt.subplot(gs[0])
         ax2 = plt.subplot(gs[1])
@@ -133,8 +130,7 @@ class Nonlinear_Autoencoder():
         ax2.set_ylabel(ylabel, fontsize=14, rotation=90, labelpad=10)
         title = 'Accuracy History'
         ax2.set_title(title, fontsize=15)
-        anchor = (1, 1)
-        plt.legend(loc='lower right')  # bbox_to_anchor=anchor)
+        plt.legend(loc='lower right')
         ax1.set_xlim([start - 0.5, len(train_cost_history) - 0.5])
         ax2.set_xlim([start - 0.5, len(train_cost_history) - 0.5])
         ax2.set_ylim([0, 1.05])
