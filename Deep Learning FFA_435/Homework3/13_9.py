@@ -1,10 +1,8 @@
 import sys
 import autograd.numpy as np
-from matplotlib import pyplot as plt, gridspec
-
 from mlrefined_libraries.nonlinear_superlearn_library.early_stop_lib import multilayer_perceptron
 from mlrefined_libraries.nonlinear_superlearn_library.early_stop_regression_animator import Visualizer
-from mlrefined_libraries.nonlinear_superlearn_library.reg_lib import cost_functions, super_optimizers, history_plotters, \
+from mlrefined_libraries.nonlinear_superlearn_library.reg_lib import super_optimizers, history_plotters, \
     super_cost_functions
 
 sys.path.append('../')
@@ -18,8 +16,6 @@ class Early_Stop:
 
         self.x = x
         self.y = y
-
-        # make containers for all histories
         self.weight_histories = []
         self.train_cost_histories = []
         self.train_count_histories = []
@@ -31,14 +27,14 @@ class Early_Stop:
         self.valid_counts = []
         self.train_main(layer_size)
 
-    def train_main(self,layer_size):
+    def train_main(self, layer_size):
         # training process
         self.data_preprocess()
         self.split_dataset(train_portion=0.66)
-        self.choose_cost(name='least_squares')
-        self.choose_features(name='multilayer_perceptron', layer_sizes=layer_size, activation='tanh')
+        self.cost_fun(name='least_squares')
+        self.parameter_setting(name='multilayer_perceptron', layer_sizes=layer_size, activation='tanh')
         self.fit()
-        self.show_histories()
+        self.plot_history()
 
     def normalize(self, x):
         x_means = np.mean(x, axis=1)[:, np.newaxis]
@@ -66,22 +62,11 @@ class Early_Stop:
         self.y_train = self.y[:, self.train_inds]
         self.y_valid = self.y[:, self.valid_inds]
 
-    def choose_cost(self, name, **kwargs):
-        # create training and testing cost functions
+    def cost_fun(self, name, **kwargs):
         self.cost_object = super_cost_functions.Setup(name, **kwargs)
-        if name == 'softmax' or name == 'perceptron':
-            self.count_object = super_cost_functions.Setup('twoclass_counter', **kwargs)
-        if name == 'multiclass_softmax' or name == 'multiclass_perceptron':
-            self.count_object = super_cost_functions.Setup('multiclass_counter', **kwargs)
         self.cost_name = name
 
-        if name == 'multiclass_softmax' or name == 'multiclass_perceptron':
-            funcs = cost_functions.Setup('multiclass_accuracy', self.feature_transforms, **kwargs)
-            self.counter = funcs.cost
-
-        self.cost_name = name
-
-    def choose_features(self, name, **kwargs):
+    def parameter_setting(self, name, **kwargs):
         transformer = multilayer_perceptron.Setup(**kwargs)
         self.feature_transforms = transformer.feature_transforms
         self.initializer = transformer.initializer
@@ -93,7 +78,7 @@ class Early_Stop:
 
     def fit(self, **kwargs):
         self.max_its = 10000
-        self.alpha_choice = 10**(-3)
+        self.alpha_choice = 10 ** (-3)
         self.lam = 0
         self.algo = 'RMSprop'
         self.w_init = self.initializer()
@@ -103,8 +88,6 @@ class Early_Stop:
         if 'batch_size' in kwargs:
             self.batch_size = min(kwargs['batch_size'], self.batch_size)
         verbose = True
-        if 'verbose' in kwargs:
-            verbose = kwargs['verbose']
         weight_history, train_cost_history, valid_cost_history = super_optimizers.RMSprop(self.cost, self.w_init,
                                                                                           self.x_train,
                                                                                           self.y_train,
@@ -118,7 +101,7 @@ class Early_Stop:
         self.train_cost_histories.append(train_cost_history)
         self.valid_cost_histories.append(valid_cost_history)
 
-    def show_histories(self, **kwargs):
+    def plot_history(self, **kwargs):
         start = 0
         if 'start' in kwargs:
             start = kwargs['start']
