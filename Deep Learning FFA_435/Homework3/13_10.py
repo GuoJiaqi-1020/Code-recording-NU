@@ -1,4 +1,5 @@
 import sys
+from tqdm import trange
 import autograd.numpy as np
 from sklearn.datasets import fetch_openml
 from mlrefined_libraries.nonlinear_superlearn_library.early_stop_lib import multilayer_perceptron, optimizers, \
@@ -26,7 +27,7 @@ class Handwritten_digit_DL:
         self.parameter_setting(name='multilayer_perceptron', layer_sizes=layer_size,
                                activation='maxout', scale=0.1)
         self.define_cost_function(name='multiclass_softmax')
-        self.fit(max_its=80, alpha_choice=10 ** (-1), batch_size=500)
+        self.fit(max_its=100, alpha_choice=10 ** (-1), batch_size=500)
         self.show_histories()
 
     def normalize(self, x):
@@ -107,9 +108,8 @@ class Handwritten_digit_DL:
         print("The test set accuracy is: {}".format(acc))
 
     def show_histories(self):
-        plotter = history_plotters.Setup(self.train_cost_histories, self.train_count_histories, self.val_cost_histories,
-                               self.val_count_histories, start=0)
-
+        _ = history_plotters.Setup(self.train_cost_histories, self.train_count_histories, self.val_cost_histories,
+                                   self.val_count_histories, start=0)
 
 
 if __name__ == "__main__":

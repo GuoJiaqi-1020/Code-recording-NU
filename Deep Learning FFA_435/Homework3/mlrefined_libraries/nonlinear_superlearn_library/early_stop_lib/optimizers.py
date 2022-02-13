@@ -1,10 +1,8 @@
 import autograd.numpy as np
 from autograd import grad
-from autograd import hessian
 from autograd.misc.flatten import flatten_func
-from IPython.display import clear_output
 from timeit import default_timer as timer
-import time
+from tqdm import trange
 
 
 # minibatch gradient descent
@@ -37,12 +35,9 @@ def gradient_descent(g, counter, x_train, y_train, x_valid, y_valid, alpha, max_
     for k in range(max_its):
         # loop over each minibatch
         start = timer()
+        print("Epoches: {}".format(k))
         train_cost = 0
-        for b in range(num_batches):
-            if b % 10 == 0:
-                per = b / num_batches
-                print("Epoches: {}, Batches finished:{}%".format(k, per*100))
-            # collect indices of current mini-batch
+        for b in trange(num_batches):
             batch_inds = np.arange(b * batch_size, min((b + 1) * batch_size, num_train))
 
             # plug in value into func and derivative
