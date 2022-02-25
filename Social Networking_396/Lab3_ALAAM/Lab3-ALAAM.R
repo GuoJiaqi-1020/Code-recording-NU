@@ -121,7 +121,7 @@ res.0 <- BayesALAAM(y = smoke,           # dependent variable
                     saveFreq = 500,      # print and save frequency
                     contagion = 'none')  # type of contagion
 
-## Plot the MCMC output in trace plots 
+## Plot the MCMC output in trace plots a
 plot(ts(res.0$Theta[,1:6]))
 plot(ts(res.0$Theta[,7:13]))
 
