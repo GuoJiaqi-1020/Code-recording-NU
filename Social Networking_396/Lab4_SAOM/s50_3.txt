@@ -1,0 +1,602 @@
+
+
+-----------------------------------
+New Analysis started.
+Date and time: 26/02/2022 15:42:11
+New results follow.
+-----------------------------------
+
+RSiena version 1.3.0.1 (02 5月 21)
+
+
+@1
+Estimation by stochastic approximation algorithm.
+=================================================
+
+Random initialization of random number stream.
+Current random number seed is 128771.
+Effects object used: myeff 
+Model Type:
+ Standard actor-oriented model
+Behavioral Model Type:
+ Standard behavior actor-oriented model ('restrict')
+Estimation method: unconditional moment estimation
+.
+
+Time duration for simulations in each period is 1.0.
+Standard errors are estimated with the likelihood ratio method.
+Dolby method (regression on scores) is used.
+Initial value of gain parameter is  0.2000000.
+Reduction factor for gain parameter is  0.5000000.
+Number of subphases in Phase 2 is 4.
+
+Initial parameter values are 
+  1. rate:  constant friendship rate (period 1)             4.6960
+  2. rate:  constant friendship rate (period 2)             4.3288
+  3. eval:  outdegree (density)                            -1.4677
+  4. eval:  reciprocity                                     0.0000
+  5. eval:  GWESP I -> K -> J (69)                          0.0000
+  6. eval:  drugbeh alter                                   0.0000
+  7. eval:  drugbeh ego                                     0.0000
+  8. eval:  same drugbeh                                    0.0000
+  9. rate:  rate drugbeh (period 1)                         0.2600
+ 10. rate:  rate drugbeh (period 2)                         0.5000
+ 11. eval:  drugbeh linear shape                            0.5663
+ 12. eval:  drugbeh quadratic shape                         0.0000
+ 13. eval:  drugbeh total similarity                        0.0000
+
+
+Observed values of target statistics are
+  1. Amount of network change in period 1                               115.0000
+  2. Amount of network change in period 2                               106.0000
+  3. Number of ties                                                     238.0000
+  4. Number of reciprocated ties                                        160.0000
+  5. Numb. edgew. shrd prtns.by two path (69)                           187.6381
+  6. Sum indegrees x drugbeh                                            -41.3867
+  7. Sum outdegrees x drugbeh                                           -39.3867
+  8. Same values on drugbeh                                             177.0000
+  9. Amount of behavioral change in period 1 on drugbeh                   8.0000
+ 10. Amount of behavioral change in period 2 on drugbeh                  20.0000
+ 11. drugbeh centered sum                                                 7.3333
+ 12. drugbeh sum of cent. squares                                        76.2978
+ 13. drugbeh total similarity                                            26.9728
+
+ 13 parameters, 13 statistics
+
+Estimation of derivatives by the LR method (type 1).
+
+
+@2
+End of stochastic approximation algorithm, phase 3.
+---------------------------------------------------
+
+Total of 3141 iterations.
+Parameter estimates based on 2141 iterations,
+convergence diagnostics, covariance and derivative matrices based on 1000 iterations.
+
+Information for convergence diagnosis.
+Averages, standard deviations, and t-ratios for deviations from targets:
+  1.   0.6020  10.6378   0.0566 
+  2.  -0.5080   9.3690  -0.0542 
+  3.   7.5220  22.8558   0.3291 
+  4.  -1.3280  19.8086  -0.0670 
+  5.   9.1532  37.9864   0.2410 
+  6.  -1.4673  15.9876  -0.0918 
+  7.  10.8437  15.4589   0.7015 
+  8.   3.2990  18.6146   0.1772 
+  9.   2.8930   3.5808   0.8079 
+ 10.  -1.4490   4.5224  -0.3204 
+ 11.   8.5540   5.7392   1.4905 
+ 12.   7.0711   5.6605   1.2492 
+ 13.  -6.0233   4.2065  -1.4319 
+
+Good convergence is indicated by the t-ratios being close to zero.
+
+Overall maximum convergence ratio =  4.3386 .
+One or more of the t-statistics are rather large.
+Convergence of the algorithm is doubtful.
+
+
+
+@2
+Estimation Results.
+-------------------
+
+Regular end of estimation algorithm.
+Total of 3141 iteration steps.
+
+
+@3
+Estimates and standard errors
+                             
+Network Dynamics
+ 1. rate:  constant friendship rate (period 1)                     6.3903  (   0.9831)
+ 2. rate:  constant friendship rate (period 2)                     4.9244  (   0.7255)
+ 3. eval:  outdegree (density)                                    -3.0244  (   0.1884)
+ 4. eval:  reciprocity                                             2.3410  (   0.2051)
+ 5. eval:  GWESP I -> K -> J (69)                                  1.5865  (   0.1589)
+ 6. eval:  drugbeh alter                                          -0.0420  (   0.1165)
+ 7. eval:  drugbeh ego                                             0.2639  (   0.1347)
+ 8. eval:  same drugbeh                                            0.5240  (   0.2146)
+
+Behavior Dynamics
+ 9. rate:  rate drugbeh (period 1)                                 3.5812  (   2.0667)
+10. rate:  rate drugbeh (period 2)                                86.1490  ( 372.4569)
+11. eval:  drugbeh linear shape                                   19.9854  ( 203.2749)
+12. eval:  drugbeh quadratic shape                               -10.5360  ( 113.5778)
+13. eval:  drugbeh total similarity                              160.5805  ( 372.2727)
+
+
+@3
+Covariance matrices
+                   
+Covariance matrix of estimates (correlations below diagonal):
+      0.967      -0.061      -0.002       0.002      -0.017       0.000      -0.012       0.013      -0.385      81.757      38.341     -21.398     -81.851
+     -0.085       0.526       0.019      -0.004      -0.008      -0.006      -0.004      -0.024       0.156      50.247     -19.316      10.759     -50.238
+     -0.012       0.137       0.035      -0.019      -0.010       0.002      -0.010      -0.029       0.018      -4.839       0.141      -0.082       4.809
+      0.010      -0.028      -0.487       0.042       0.005      -0.005       0.008       0.000      -0.047      -8.403      -0.549       0.311       8.405
+     -0.107      -0.073      -0.337       0.157       0.025      -0.001       0.002      -0.004       0.017       1.266      -2.647       1.476      -1.250
+      0.000      -0.072       0.077      -0.197      -0.044       0.014      -0.008       0.003      -0.025       6.525       3.793      -2.113      -6.491
+     -0.092      -0.045      -0.410       0.285       0.108      -0.497       0.018       0.009      -0.043       1.469      -3.982       2.224      -1.456
+      0.062      -0.156      -0.708      -0.005      -0.111       0.104       0.311       0.046      -0.001      -4.683       2.638      -1.467       4.738
+     -0.190       0.104       0.047      -0.112       0.053      -0.102      -0.155      -0.002       4.271    -107.646     -52.157      29.002     105.577
+      0.223       0.186      -0.069      -0.110       0.021       0.150       0.029      -0.059      -0.140  138724.171   39881.479  -22257.950 -138652.996
+      0.192      -0.131       0.004      -0.013      -0.082       0.160      -0.145       0.060      -0.124       0.527   41320.705  -23087.412  -39673.314
+     -0.192       0.131      -0.004       0.013       0.082      -0.160       0.145      -0.060       0.124      -0.526      -1.000   12899.913   22141.762
+     -0.224      -0.186       0.069       0.110      -0.021      -0.150      -0.029       0.059       0.137      -1.000      -0.524       0.524  138586.977
+
+Derivative matrix of expected statistics X by parameters and
+covariance/correlation matrix of X can be found using
+summary(ans) within R, or by using the 'verbose' option in Siena07.
+ 
+Total computation time 108.97 seconds.
+
+
+-----------------------------------
+New Analysis started.
+Date and time: 26/02/2022 16:47:09
+New results follow.
+-----------------------------------
+
+RSiena version 1.3.0.1 (02 5月 21)
+
+
+@1
+Estimation by stochastic approximation algorithm.
+=================================================
+
+Random initialization of random number stream.
+Current random number seed is 53445.
+Effects object used: myeff 
+Model Type:
+ Standard actor-oriented model
+Behavioral Model Type:
+ Standard behavior actor-oriented model ('restrict')
+Estimation method: unconditional moment estimation
+.
+
+Time duration for simulations in each period is 1.0.
+Standard errors are estimated with the likelihood ratio method.
+Dolby method (regression on scores) is used.
+Initial value of gain parameter is  0.2000000.
+Reduction factor for gain parameter is  0.5000000.
+Number of subphases in Phase 2 is 4.
+
+Initial parameter values are 
+  1. rate:  constant friendship rate (period 1)             4.6960
+  2. rate:  constant friendship rate (period 2)             4.3288
+  3. eval:  outdegree (density)                            -1.4677
+  4. eval:  reciprocity                                     0.0000
+  5. eval:  GWESP I -> K -> J (69)                          0.0000
+  6. eval:  drugbeh alter                                   0.0000
+  7. eval:  drugbeh ego                                     0.0000
+  8. eval:  same drugbeh                                    0.0000
+  9. rate:  rate drugbeh (period 1)                         0.2600
+ 10. rate:  rate drugbeh (period 2)                         0.5000
+ 11. eval:  drugbeh linear shape                            0.5663
+ 12. eval:  drugbeh quadratic shape                         0.0000
+ 13. eval:  drugbeh total similarity                        0.0000
+
+
+Observed values of target statistics are
+  1. Amount of network change in period 1                               115.0000
+  2. Amount of network change in period 2                               106.0000
+  3. Number of ties                                                     238.0000
+  4. Number of reciprocated ties                                        160.0000
+  5. Numb. edgew. shrd prtns.by two path (69)                           187.6381
+  6. Sum indegrees x drugbeh                                            -41.3867
+  7. Sum outdegrees x drugbeh                                           -39.3867
+  8. Same values on drugbeh                                             177.0000
+  9. Amount of behavioral change in period 1 on drugbeh                   8.0000
+ 10. Amount of behavioral change in period 2 on drugbeh                  20.0000
+ 11. drugbeh centered sum                                                 7.3333
+ 12. drugbeh sum of cent. squares                                        76.2978
+ 13. drugbeh total similarity                                            26.9728
+
+ 13 parameters, 13 statistics
+
+Estimation of derivatives by the LR method (type 1).
+
+
+@2
+End of stochastic approximation algorithm, phase 3.
+---------------------------------------------------
+
+Total of 3191 iterations.
+Parameter estimates based on 2191 iterations,
+convergence diagnostics, covariance and derivative matrices based on 1000 iterations.
+
+Information for convergence diagnosis.
+Averages, standard deviations, and t-ratios for deviations from targets:
+  1.   0.5160  10.6355   0.0485 
+  2.  -3.9610   8.7399  -0.4532 
+  3.  -3.7010  23.4769  -0.1576 
+  4.  -0.9200  21.0935  -0.0436 
+  5.  -1.7315  39.7367  -0.0436 
+  6.  -0.1637  15.9833  -0.0102 
+  7.   5.1463  15.4878   0.3323 
+  8.  -1.7290  20.1008  -0.0860 
+  9.   1.9970   3.3839   0.5902 
+ 10.  -2.8200   4.3396  -0.6498 
+ 11.   1.5330   5.3710   0.2854 
+ 12.   0.8730   7.2564   0.1203 
+ 13.  -5.4417   4.3061  -1.2637 
+
+Good convergence is indicated by the t-ratios being close to zero.
+
+Overall maximum convergence ratio =  2.2924 .
+One or more of the t-statistics are rather large.
+Convergence of the algorithm is doubtful.
+
+
+
+@2
+Estimation Results.
+-------------------
+
+Regular end of estimation algorithm.
+Total of 3191 iteration steps.
+
+
+@3
+Estimates and standard errors
+                             
+Network Dynamics
+ 1. rate:  constant friendship rate (period 1)                     6.8187  (   1.6093)
+ 2. rate:  constant friendship rate (period 2)                     5.0097  (   0.8232)
+ 3. eval:  outdegree (density)                                    -3.1262  (   0.1933)
+ 4. eval:  reciprocity                                             2.5088  (   0.2142)
+ 5. eval:  GWESP I -> K -> J (69)                                  1.5572  (   0.1664)
+ 6. eval:  drugbeh alter                                           0.0060  (   0.1250)
+ 7. eval:  drugbeh ego                                             0.1991  (   0.2235)
+ 8. eval:  same drugbeh                                            0.5376  (   0.2600)
+
+Behavior Dynamics
+ 9. rate:  rate drugbeh (period 1)                                 3.9652  (   2.7895)
+10. rate:  rate drugbeh (period 2)                                40.6447  (  33.5616)
+11. eval:  drugbeh linear shape                                    1.2259  (   1.1684)
+12. eval:  drugbeh quadratic shape                                -0.6834  (   0.4970)
+13. eval:  drugbeh total similarity                               45.9011  (   4.3061)
+
+
+@3
+Covariance matrices
+                   
+Covariance matrix of estimates (correlations below diagonal):
+     2.590     -0.216     -0.034      0.065      0.009     -0.001     -0.227     -0.139     -2.394     36.922      0.550     -0.151     -1.730
+    -0.163      0.678      0.030     -0.002     -0.014      0.000      0.011     -0.009      0.479     -4.616     -0.149      0.049     -0.578
+    -0.108      0.188      0.037     -0.017     -0.014      0.000      0.005     -0.020      0.112     -2.063     -0.020      0.008      0.065
+     0.188     -0.012     -0.402      0.046      0.006     -0.003     -0.008     -0.016      0.040      1.821     -0.040      0.017     -0.021
+     0.032     -0.102     -0.442      0.167      0.028     -0.002     -0.008     -0.008     -0.072      1.508      0.000      0.000     -0.044
+    -0.003      0.003     -0.014     -0.101     -0.102      0.016     -0.005      0.007      0.027     -0.398     -0.016      0.007      0.012
+    -0.632      0.060      0.121     -0.172     -0.214     -0.189      0.050      0.031      0.329     -6.111     -0.064      0.013      0.193
+    -0.332     -0.041     -0.407     -0.281     -0.188      0.231      0.530      0.068      0.095     -4.094      0.002     -0.009      0.330
+    -0.533      0.208      0.207      0.067     -0.156      0.077      0.527      0.131      7.781    -57.825     -2.098      0.697      0.773
+     0.684     -0.167     -0.318      0.253      0.270     -0.095     -0.815     -0.469     -0.618   1126.378     10.417     -2.478    -40.711
+     0.293     -0.155     -0.087     -0.162      0.002     -0.110     -0.245      0.008     -0.644      0.266      1.365     -0.552     -0.416
+    -0.189      0.119      0.079      0.163      0.000      0.119      0.117     -0.073      0.503     -0.149     -0.950      0.247     -0.040
+    -0.250     -0.163      0.078     -0.023     -0.061      0.022      0.201      0.294      0.064     -0.282     -0.083     -0.019     18.542
+
+Derivative matrix of expected statistics X by parameters and
+covariance/correlation matrix of X can be found using
+summary(ans) within R, or by using the 'verbose' option in Siena07.
+ 
+Total computation time 114.15 seconds.
+
+
+-----------------------------------
+New Analysis started.
+Date and time: 26/02/2022 17:38:48
+New results follow.
+-----------------------------------
+
+RSiena version 1.2-23 (12 1月 20)
+
+
+@1
+Estimation by stochastic approximation algorithm.
+=================================================
+
+Random initialization of random number stream.
+Current random number seed is 3821.
+Effects object used: myeff 
+Model Type:
+ 
+Behavioral Model Type:
+ 
+Estimation method: unconditional moment estimation.
+
+Time duration for simulations in each period is 1.0.
+Standard errors are estimated with the likelihood ratio method.
+Dolby method (regression on scores) is used.
+Initial value of gain parameter is  0.2000000.
+Reduction factor for gain parameter is  0.5000000.
+Number of subphases in Phase 2 is 4.
+
+Initial parameter values are 
+  1. rate:  constant friendship rate (period 1)             4.6960
+  2. rate:  constant friendship rate (period 2)             4.3288
+  3. eval:  outdegree (density)                            -1.4677
+  4. eval:  reciprocity                                     0.0000
+  5. eval:  GWESP I -> K -> J (69)                          0.0000
+  6. eval:  drugbeh alter                                   0.0000
+  7. eval:  drugbeh ego                                     0.0000
+  8. eval:  same drugbeh                                    0.0000
+  9. rate:  rate drugbeh (period 1)                         0.2600
+ 10. rate:  rate drugbeh (period 2)                         0.5000
+ 11. eval:  drugbeh linear shape                            0.5663
+ 12. eval:  drugbeh quadratic shape                         0.0000
+ 13. eval:  drugbeh total similarity                        0.0000
+
+
+Observed values of target statistics are
+  1. Amount of network change in period 1                               115.0000
+  2. Amount of network change in period 2                               106.0000
+  3. Number of ties                                                     238.0000
+  4. Number of reciprocated ties                                        160.0000
+  5. Numb. edgew. shrd prtns.by two path (69)                           187.6381
+  6. Sum indegrees x drugbeh                                            -41.3867
+  7. Sum outdegrees x drugbeh                                           -39.3867
+  8. Same values on drugbeh                                             177.0000
+  9. Amount of behavioral change in period 1 on drugbeh                   8.0000
+ 10. Amount of behavioral change in period 2 on drugbeh                  20.0000
+ 11. drugbeh centered sum                                                 7.3333
+ 12. drugbeh sum of cent. squares                                        76.2978
+ 13. drugbeh total similarity                                            26.9728
+
+ 13 parameters, 13 statistics
+
+Estimation of derivatives by the LR method (type 1).
+
+
+@2
+End of stochastic approximation algorithm, phase 3.
+---------------------------------------------------
+
+Total of 3141 iterations.
+Parameter estimates based on 2141 iterations,
+convergence diagnostics, covariance and derivative matrices based on 1000 iterations.
+
+Information for convergence diagnosis.
+Averages, standard deviations, and t-ratios for deviations from targets:
+  1.   0.2340  10.1336   0.0231 
+  2.  -0.7290   8.9306  -0.0816 
+  3.  -0.5170  22.7678  -0.0227 
+  4.  -0.0560  20.4875  -0.0027 
+  5.  -1.3465  38.6459  -0.0348 
+  6.   0.6676  15.9864   0.0418 
+  7.   0.5246  15.7692   0.0333 
+  8.  -0.2900  19.3017  -0.0150 
+  9.  -0.0700   2.8729  -0.0244 
+ 10.  -0.0940   4.7463  -0.0198 
+ 11.  -0.0760   6.5542  -0.0116 
+ 12.  -0.0578   8.4627  -0.0068 
+ 13.   0.0873   4.2972   0.0203 
+
+Good convergence is indicated by the t-ratios being close to zero.
+
+Overall maximum convergence ratio =  0.1229 .
+
+
+
+@2
+Estimation Results.
+-------------------
+
+Regular end of estimation algorithm.
+Total of 3141 iteration steps.
+
+
+@3
+Estimates and standard errors
+                             
+Network Dynamics
+ 1. rate:  constant friendship rate (period 1)                     6.7419  (   1.2624)
+ 2. rate:  constant friendship rate (period 2)                     5.3156  (   1.1201)
+ 3. eval:  outdegree (density)                                    -3.1052  (   0.2059)
+ 4. eval:  reciprocity                                             2.4331  (   0.1906)
+ 5. eval:  GWESP I -> K -> J (69)                                  1.5133  (   0.1701)
+ 6. eval:  drugbeh alter                                           0.0721  (   0.1368)
+ 7. eval:  drugbeh ego                                             0.1149  (   0.1573)
+ 8. eval:  same drugbeh                                            0.5879  (   0.2581)
+
+Behavior Dynamics
+ 9. rate:  rate drugbeh (period 1)                                 0.5309  (   0.2338)
+10. rate:  rate drugbeh (period 2)                                 1.5698  (   0.6885)
+11. eval:  drugbeh linear shape                                    1.5242  (   2.7399)
+12. eval:  drugbeh quadratic shape                                -0.1767  (   0.6459)
+13. eval:  drugbeh total similarity                                6.0974  (   8.1633)
+
+
+@3
+Covariance matrices
+                   
+Covariance matrix of estimates (correlations below diagonal):
+     1.594      0.042      0.049      0.040     -0.044      0.033     -0.050     -0.053      0.014      0.106      0.526     -0.106      1.894
+     0.030      1.255      0.073      0.007     -0.049     -0.013     -0.023     -0.084     -0.034      0.057      1.135     -0.283      3.191
+     0.189      0.318      0.042     -0.010     -0.013     -0.006     -0.004     -0.041     -0.009      0.012      0.179     -0.032      0.554
+     0.165      0.032     -0.254      0.036      0.003      0.000      0.001     -0.007      0.000      0.009      0.053     -0.014      0.164
+    -0.204     -0.256     -0.375      0.097      0.029     -0.003      0.006     -0.001      0.001     -0.021     -0.085      0.025     -0.288
+     0.191     -0.083     -0.211     -0.005     -0.132      0.019     -0.012      0.011      0.003      0.001     -0.028     -0.002     -0.031
+    -0.251     -0.131     -0.136      0.024      0.214     -0.570      0.025      0.005      0.001      0.007     -0.004      0.011     -0.020
+    -0.164     -0.290     -0.779     -0.141     -0.031      0.313      0.127      0.067      0.012      0.002     -0.218      0.038     -0.625
+     0.048     -0.131     -0.177     -0.010      0.017      0.100      0.028      0.204      0.055      0.036     -0.183      0.036     -0.298
+     0.123      0.074      0.082      0.069     -0.177      0.007      0.067      0.010      0.221      0.474      0.397     -0.128      2.084
+     0.152      0.370      0.316      0.101     -0.182     -0.074     -0.010     -0.309     -0.286      0.211      7.507     -1.577     21.479
+    -0.130     -0.391     -0.240     -0.111      0.230     -0.019      0.110      0.225      0.241     -0.287     -0.891      0.417     -4.446
+     0.184      0.349      0.330      0.105     -0.207     -0.027     -0.016     -0.297     -0.156      0.371      0.960     -0.843     66.639
+
+Derivative matrix of expected statistics X by parameters and
+covariance/correlation matrix of X can be found using
+summary(ans) within R, or by using the 'verbose' option in Siena07.
+ 
+Total computation time 45.09 seconds.
+
+
+-----------------------------------
+New Analysis started.
+Date and time: 26/02/2022 18:03:56
+New results follow.
+-----------------------------------
+
+RSiena version 1.2-23 (12 1月 20)
+
+
+@1
+Estimation by stochastic approximation algorithm.
+=================================================
+
+Random initialization of random number stream.
+Current random number seed is 545170.
+Effects object used: myeff 
+Model Type:
+ 
+Behavioral Model Type:
+ 
+Estimation method: unconditional moment estimation.
+
+Time duration for simulations in each period is 1.0.
+Standard errors are estimated with the likelihood ratio method.
+Dolby method (regression on scores) is used.
+Initial value of gain parameter is  0.2000000.
+Reduction factor for gain parameter is  0.5000000.
+Number of subphases in Phase 2 is 4.
+
+Initial parameter values are 
+  1. rate:  constant friendship rate (period 1)             6.7419
+  2. rate:  constant friendship rate (period 2)             5.3156
+  3. eval:  outdegree (density)                            -3.1052
+  4. eval:  reciprocity                                     2.4331
+  5. eval:  GWESP I -> K -> J (69)                          1.5133
+  6. eval:  drugbeh alter                                   0.0721
+  7. eval:  drugbeh ego                                     0.1149
+  8. eval:  same drugbeh                                    0.5879
+  9. rate:  rate drugbeh (period 1)                         0.5309
+ 10. rate:  rate drugbeh (period 2)                         1.5698
+ 11. eval:  drugbeh linear shape                            1.5242
+ 12. eval:  drugbeh quadratic shape                        -0.1767
+ 13. eval:  drugbeh total similarity                        6.0974
+
+
+Observed values of target statistics are
+  1. Amount of network change in period 1                               115.0000
+  2. Amount of network change in period 2                               106.0000
+  3. Number of ties                                                     238.0000
+  4. Number of reciprocated ties                                        160.0000
+  5. Numb. edgew. shrd prtns.by two path (69)                           187.6381
+  6. Sum indegrees x drugbeh                                            -41.3867
+  7. Sum outdegrees x drugbeh                                           -39.3867
+  8. Same values on drugbeh                                             177.0000
+  9. Amount of behavioral change in period 1 on drugbeh                   8.0000
+ 10. Amount of behavioral change in period 2 on drugbeh                  20.0000
+ 11. drugbeh centered sum                                                 7.3333
+ 12. drugbeh sum of cent. squares                                        76.2978
+ 13. drugbeh total similarity                                            26.9728
+
+ 13 parameters, 13 statistics
+
+Estimation of derivatives by the LR method (type 1).
+
+
+@2
+End of stochastic approximation algorithm, phase 3.
+---------------------------------------------------
+
+Total of 2905 iterations.
+Parameter estimates based on 1905 iterations,
+convergence diagnostics, covariance and derivative matrices based on 1000 iterations.
+
+Information for convergence diagnosis.
+Averages, standard deviations, and t-ratios for deviations from targets:
+  1.   0.1810  10.7582   0.0168 
+  2.   0.1770   8.5561   0.0207 
+  3.   0.8200  23.0065   0.0356 
+  4.   0.4000  20.6755   0.0193 
+  5.   0.3068  38.5709   0.0080 
+  6.   0.8555  16.2922   0.0525 
+  7.   0.3945  16.0874   0.0245 
+  8.   0.3220  19.6183   0.0164 
+  9.   0.0160   2.8910   0.0055 
+ 10.  -0.0880   4.8201  -0.0183 
+ 11.   0.0480   6.7361   0.0071 
+ 12.   0.3738   8.8158   0.0424 
+ 13.  -0.1743   4.3810  -0.0398 
+
+Good convergence is indicated by the t-ratios being close to zero.
+
+Overall maximum convergence ratio =  0.1259 .
+
+
+
+@2
+Estimation Results.
+-------------------
+
+Regular end of estimation algorithm.
+Total of 2905 iteration steps.
+
+
+@3
+Estimates and standard errors
+                             
+Network Dynamics
+ 1. rate:  constant friendship rate (period 1)                     6.6955  (   1.1573)
+ 2. rate:  constant friendship rate (period 2)                     5.3601  (   0.9342)
+ 3. eval:  outdegree (density)                                    -3.0845  (   0.1905)
+ 4. eval:  reciprocity                                             2.4337  (   0.1829)
+ 5. eval:  GWESP I -> K -> J (69)                                  1.5131  (   0.1643)
+ 6. eval:  drugbeh alter                                           0.0757  (   0.1274)
+ 7. eval:  drugbeh ego                                             0.1104  (   0.1418)
+ 8. eval:  same drugbeh                                            0.5661  (   0.2512)
+
+Behavior Dynamics
+ 9. rate:  rate drugbeh (period 1)                                 0.5201  (   0.2271)
+10. rate:  rate drugbeh (period 2)                                 1.5193  (   0.4879)
+11. eval:  drugbeh linear shape                                    1.5326  (   2.6916)
+12. eval:  drugbeh quadratic shape                                -0.1693  (   0.5539)
+13. eval:  drugbeh total similarity                                5.9885  (   7.9127)
+
+
+@3
+Covariance matrices
+                   
+Covariance matrix of estimates (correlations below diagonal):
+     1.339     -0.071      0.061     -0.022     -0.036     -0.002     -0.019     -0.048     -0.043      0.002     -0.333      0.063     -1.146
+    -0.066      0.873      0.010      0.005     -0.008     -0.013      0.008     -0.002      0.014     -0.027     -0.484      0.112     -1.378
+     0.278      0.056      0.036     -0.010     -0.010     -0.005     -0.004     -0.036     -0.001     -0.015      0.022      0.006      0.077
+    -0.102      0.029     -0.275      0.033      0.003     -0.001      0.000     -0.008     -0.003     -0.004      0.003     -0.004     -0.029
+    -0.189     -0.052     -0.332      0.108      0.027      0.001      0.000     -0.004      0.000      0.007     -0.013      0.003      0.002
+    -0.014     -0.107     -0.211     -0.026      0.028      0.016     -0.009      0.008     -0.002      0.005      0.018     -0.006      0.084
+    -0.118      0.062     -0.139     -0.012      0.017     -0.480      0.020      0.008      0.003     -0.003     -0.012      0.005     -0.061
+    -0.165     -0.009     -0.752     -0.172     -0.089      0.259      0.221      0.063      0.003      0.014     -0.056     -0.001     -0.184
+    -0.163      0.066     -0.029     -0.073     -0.008     -0.053      0.085      0.054      0.052      0.021     -0.152      0.035     -0.270
+     0.003     -0.058     -0.161     -0.041      0.091      0.080     -0.040      0.114      0.187      0.238     -0.349      0.053     -0.606
+    -0.107     -0.192      0.044      0.006     -0.029      0.053     -0.030     -0.083     -0.249     -0.266      7.245     -1.287     20.554
+     0.099      0.217      0.053     -0.039      0.036     -0.092      0.063     -0.006      0.275      0.195     -0.863      0.307     -3.436
+    -0.125     -0.186      0.051     -0.020      0.002      0.083     -0.055     -0.093     -0.150     -0.157      0.965     -0.784     62.610
+
+Derivative matrix of expected statistics X by parameters and
+covariance/correlation matrix of X can be found using
+summary(ans) within R, or by using the 'verbose' option in Siena07.
+ 
+Total computation time 42.72 seconds.
