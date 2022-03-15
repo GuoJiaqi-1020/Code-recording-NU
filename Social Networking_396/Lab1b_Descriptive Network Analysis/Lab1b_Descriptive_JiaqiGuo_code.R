@@ -196,4 +196,4 @@ abline(v = giantGraph %>% average.path.length(), col = 'red', lty = 2)
 # this tests whether the observed value is statistically different from the simulated distribution
 t.test(apl.rg, mu=giantGraph %>% average.path.length(.),
        alternative = 'greater') 
-
+save.image('Lab1_Descriptive_JiaqiGuo_lab1b.RData')
