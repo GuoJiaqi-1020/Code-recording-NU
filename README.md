@@ -10,7 +10,7 @@ If you want to download specific any folder in my project, please use [**DownGit
 
 >**All course assignments and project codes will be uploaded here as proof of study at Northwestern University**
 
-## 2021 Fall Semester
+## 2021 Fall Quarter
 
 <font size=2>
 
@@ -22,7 +22,19 @@ If you want to download specific any folder in my project, please use [**DownGit
 
 </font>
 
-## 2021 Winter Semester
+## 2021 Winter Quarter
+
+<font size=2>
+
+**1. [COMP\_ENG 510-0: Social Media Mining](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Social%20Networking_396/Lab1a_Descriptive%20Network%20Analysis)**
+
+**2. [ELEC_ENG  495-0: Game Theory and Networked Systems](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Statistical%20Pattern%20Recognition_433)**
+
+**3. [ELEC_ENG 473-0: Deep Reinforcement Learning](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Deep%20Learning%20FFA_435)**
+
+</font>
+
+## 2022 Spring Quarter
 
 <font size=2>
 
@@ -32,11 +44,6 @@ If you want to download specific any folder in my project, please use [**DownGit
 
 **3. [ELEC_ENG 475-0-1: Deep Learning: FFA](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Deep%20Learning%20FFA_435)**
 
-</font>
-
-## 2021 Summer Semester
-
-<font size=2>
-
-waiting for update
+## 2022 Summer Quarter 
+waiting for update...
 </font>
