@@ -37,10 +37,10 @@ If you want to download specific any folder in my project, please use [**DownGit
  
 <font size=2> 
   
-**1. [COMP\_ENG 510-0: Social Media Mining](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Social%20Networking_396/Lab1a_Descriptive%20Network%20Analysis)**
+**1. [COMP\_ENG 510-0: Social Media Mining](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Social%20Media%20Mining_510)**
 
-**2. [ELEC_ENG  495-0: Game Theory and Networked Systems](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Statistical%20Pattern%20Recognition_433)**
+**2. [ELEC_ENG  495-0: Game Theory and Networked Systems](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Game%20Theory%20and%20Networked%20Systems_495)**
 
-**3. [ELEC_ENG 473-0: Deep Reinforcement Learning](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Deep%20Learning%20FFA_435)**
+**3. [ELEC_ENG 473-0: Deep Reinforcement Learning](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Deep%20Reinforcement%20Learning_495)**
 </font>
 
