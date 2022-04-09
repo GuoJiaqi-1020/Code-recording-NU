@@ -34,6 +34,7 @@ If you want to download specific any folder in my project, please use [**DownGit
 
 </font>
 
+  
 ## 2022 Spring Quarter
 
 <font size=2>
@@ -44,6 +45,14 @@ If you want to download specific any folder in my project, please use [**DownGit
 
 **3. [ELEC_ENG 475-0-1: Deep Learning: FFA](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Deep%20Learning%20FFA_435)**
 
-## 2022 Summer Quarter 
-waiting for update...
+## 2022 Spring Quarter 
+ 
+<font size=2> 
+  
+**1. [COMP\_ENG 510-0: Social Media Mining](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Social%20Networking_396/Lab1a_Descriptive%20Network%20Analysis)**
+
+**2. [ELEC_ENG  495-0: Game Theory and Networked Systems](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Statistical%20Pattern%20Recognition_433)**
+
+**3. [ELEC_ENG 473-0: Deep Reinforcement Learning](https://github.com/GuoJiaqi-1020/Code-recording-NU/tree/main/Deep%20Learning%20FFA_435)**
 </font>
+
